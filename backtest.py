@@ -18,6 +18,7 @@ from nautilus_trader.model.enums import OmsType
 from nautilus_trader.model.identifiers import Venue
 from nautilus_trader.model.objects import Money
 
+from strategy_practice import Practice_Strat_Config, Practice_Strat
 
 if __name__ == "__main__":
     # Configure backtest engine
