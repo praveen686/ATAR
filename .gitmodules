@@ -1,3 +1,6 @@
 [submodule "nautilus_trader"]
 	path = nautilus_trader
 	url = https://github.com/nautechsystems/nautilus_trader.git
+[submodule "vectorbtpro"]
+	path = vectorbtpro
+	url = https://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@github.com/polakowo/vectorbt.pro.git
