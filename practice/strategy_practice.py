@@ -291,7 +291,6 @@ class Practice_Strat(Strategy):
             )
             return  # Wait for indicators to warm up...
 
-
         if self.portfolio.is_flat(self.instrument_id):
             # BUY LOGIC
             if self.fast_ema.value >= self.slow_ema.value:
@@ -335,11 +334,6 @@ class Practice_Strat(Strategy):
                     self.log.info(f"event.client_order_id == self.trailing_stop.client_order_id")
                     self.trailing_stop = None
         elif isinstance(event, (PositionOpened, PositionChanged)):
-            # 2023 - 02 - 12
-            # T22: 06:00.857424921
-            # Z[INF]
-            # TESTER - 001.
-            # Practice_Strat - 000: < --[EVT]
             # PositionOpened(instrument_id=BTCUSDT - PERP.BINANCE, position_id=BTCUSDT - PERP.BINANCE - BOTH,
             #                account_id=BINANCE - futures - master, opening_order_id=O - 20230212 - 001 - 000 - 1,
             #                closing_order_id=None, entry=SELL, side=SHORT, net_qty=-0.001, quantity=0.001,
