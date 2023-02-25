@@ -253,12 +253,6 @@ class Practice_Strat(Strategy):
                     self.entry_sell()
                 self.hit = True
 
-        # message = self.pubsub.get_message(ignore_subscribe_messages=True)
-        #
-        # if message:
-        #     message= message.decode("utf-8")
-        # self.log.info(f"on_quote_tick Message Received {repr(message) = }")
-
     def on_trade_tick(self, tick: TradeTick):
         """
         Actions to be performed when the strategy is running and receives a trade tick.

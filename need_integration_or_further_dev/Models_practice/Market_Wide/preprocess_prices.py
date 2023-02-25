@@ -6,7 +6,7 @@ from Modules._Data_Manager import Data_Manager
 
 # Load the data
 prices_df = Data_Manager().fetch_csv_data_dask(
-    data_file_name="XAUUSD_GMT+0_NO-DST_M1.csv",
+    data_file_name="XAUUSD.csv",
     # n_rows=100,
     search_in=
     ["/home/ruben/Downloads", "."])

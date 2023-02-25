@@ -5,7 +5,7 @@ Logic regarding labeling from chapter 3. In particular the Triple Barrier Method
 import numpy as np
 import pandas as pd
 
-from Modules.Standard_Algorythms.util import mp_pandas_obj
+from need_integration_or_further_dev.Standard_Algorythms.util import mp_pandas_obj
 
 
 # Snippet 3.1, page 44, Daily Volatility Estimates
@@ -53,7 +53,8 @@ def apply_pt_sl_on_t1(close, events, pt_sl, molecule):  # pragma: no cover
     out['sl'] = pd.Series(dtype=events.index.dtype)
 
     # Get events
-    for loc, vertical_barrier in events_['t1'].fillna(close.index[-1]).iteritems():
+    # for loc, vertical_barrier in events_['t1'].fillna(close.index[-1]).iteritems():
+    for loc, vertical_barrier in events_['t1'].fillna(close.index[-1]).items():
         closing_prices = close[loc: vertical_barrier]  # Path prices for a given trade
         cum_returns = (closing_prices / close[loc] - 1) * events_.at[loc, 'side']  # Path returns
         out.at[loc, 'sl'] = cum_returns[cum_returns < stop_loss[loc]].index.min()  # Earliest stop loss date

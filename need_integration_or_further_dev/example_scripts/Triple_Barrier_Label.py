@@ -1,10 +1,14 @@
+import os.path
+
 import numpy as np
 import pandas as pd
 
-from Modules.Actors.genie_loader.genie_loader import Genie_Loader
-from Modules.Standard_Algorythms import util
-from Modules.Standard_Algorythms.labeling_algorythms import labeling
-from Modules.Standard_Algorythms.timeseries_algorythms import timeseries_filters
+from need_integration_or_further_dev.Standard_Algorythms import util
+from need_integration_or_further_dev.Standard_Algorythms.labeling_algorythms import labeling
+from need_integration_or_further_dev.Standard_Algorythms.timeseries_algorythms import timeseries_filters
+from need_integration_or_further_dev.example_scripts.tbl_help import train_model, load_primary_n_meta_model_pickles, \
+    save_primary_n_meta_model_pickles, live_execution_of_models
+from need_integration_or_further_dev.old_modules.genie_loader import Genie_Loader
 
 
 def sample_triple_barrier_strat_labeling(data, num_threads=1, dates=None):
@@ -33,12 +37,12 @@ def sample_triple_barrier_strat_labeling(data, num_threads=1, dates=None):
             }
         )
     elif isinstance(data, pd.DataFrame):
-        #make sure the data has the correct columns
+        # make sure the data has the correct columns
         try:
-            data = data[["close", "open", "high", "low", "volume"]]
+            # data = data[["close", "open", "high", "low", "volume"]]
+            data.columns = ["close", "open", "high", "low", "volume"]
         except:
             raise ValueError("Data is missing columns")
-
     else:
         raise ValueError("Data must be a DataFrame or vbt.Data")
 
@@ -51,18 +55,18 @@ def sample_triple_barrier_strat_labeling(data, num_threads=1, dates=None):
     slow_window = 50
 
     # STRATEGY!!!!
-    # fast_mavg = data["close"].rolling(window=fast_window, min_periods=fast_window, center=False).mean()
-    # slow_mavg = data["close"].rolling(window=slow_window, min_periods=slow_window, center=False).mean()
-    SUMCON_indicator = vbt.IF.from_techcon("SUMCON")
-    indicator_bs = SUMCON_indicator.run(
-        open=data["open"],
-        high=data["high"],
-        low=data["low"],
-        close=data["close"],
-        volume=data["volume"],
-        smooth=30
-    )
-    SUMCON_result = indicator_bs.buy - indicator_bs.sell
+    fast_mavg = data["close"].rolling(window=fast_window, min_periods=fast_window, center=False).mean()
+    slow_mavg = data["close"].rolling(window=slow_window, min_periods=slow_window, center=False).mean()
+    # SUMCON_indicator = vbt.IF.from_techcon("SUMCON")
+    # indicator_bs = SUMCON_indicator.run(
+    #     open=data["open"],
+    #     high=data["high"],
+    #     low=data["low"],
+    #     close=data["close"],
+    #     volume=data["volume"],
+    #     smooth=30
+    # )
+    # SUMCON_result = indicator_bs.buy - indicator_bs.sell
 
     '''Compile Structure and Run Master Indicator'''
     # Compute sides
@@ -70,10 +74,10 @@ def sample_triple_barrier_strat_labeling(data, num_threads=1, dates=None):
     # short_signals = Master_Indicator.short_entries.values & (SUMCON_result < -0.05)
     data['side'] = np.nan
 
-    # long_signals = fast_mavg >= slow_mavg
-    # short_signals = fast_mavg < slow_mavg
-    long_signals = (SUMCON_result > 0.05)
-    short_signals = (SUMCON_result < -0.05)
+    long_signals = fast_mavg >= slow_mavg
+    short_signals = fast_mavg < slow_mavg
+    # long_signals = (SUMCON_result > 0.05)
+    # short_signals = (SUMCON_result < -0.05)
     data['side'] = 0
     data.loc[long_signals, 'side'] = 1
     data.loc[short_signals, 'side'] = -1
@@ -85,7 +89,7 @@ def sample_triple_barrier_strat_labeling(data, num_threads=1, dates=None):
     raw_data = data.copy()
 
     # Drop the NaN values from our data set
-    data.dropna(axis=0, how='any', inplace=True)
+    data = data.dropna(axis=0, how='any', inplace=False)
 
     # Compute daily volatility
     daily_vol = util.get_daily_vol(close=data['close'], lookback=50)
@@ -113,7 +117,6 @@ def sample_triple_barrier_strat_labeling(data, num_threads=1, dates=None):
     raw_data['side'] = 0
     raw_data.loc[long_signals, 'side'] = 1
     raw_data.loc[short_signals, 'side'] = -1
-    print(labels.head(100))
     raw_data.dropna(axis=0, how='any', inplace=True)
     # Change raw_data side name to direction
     raw_data.rename(columns={'side': 'direction'}, inplace=True)
@@ -123,80 +126,73 @@ def sample_triple_barrier_strat_labeling(data, num_threads=1, dates=None):
     return pd.concat([raw_data, labels], axis=1).fillna(0)
 
 
-def true_binary_label(y_pred, y_test):
-    bin_label = np.zeros_like(y_pred)
-    for i in range(y_pred.shape[0]):
-        if y_pred[i] != 0 and y_pred[i] * y_test[i] > 0:
-            bin_label[i] = 1  # true positive
-    return bin_label
-
-
-def live_execution_of_models(open, low, high, close, primary_model, secondary_model):
-    X = np.array([open, low, high, close])
-    y_pred = primary_model.predict(X)
-    X_meta = np.hstack([y_pred[:, None], X])
-    y_pred_meta = secondary_model.predict(X_meta)
-    return y_pred * y_pred_meta
-
-
 if __name__ == '__main__':
-    import vectorbtpro as vbt
+    '''BEGINNING OF CONFIGURATIONS'''
+    # DATA-RELATED CONFIGURATIONS
+    DATES = ['2015-01-01', '2022-10-31']
+    DATA_FILE_NAME = "XAUUSD.csv"
+    DATA_FILE_DIR = "../../Data"
+    TBL_DATA_OUTPUT = "XAUUSD_Triple_Barrier_Labeled_Data.csv"
 
-    symbols_data = vbt.Data.load("XAUUSD.pickle")
-    pd.set_option('display.max_columns', None)
-    pd.set_option('display.max_rows', None)
-    retults = sample_triple_barrier_strat_labeling(symbols_data, num_threads=28,
-                                                   dates=['2019-01-01', '2019-05-01']
-                                                   )
+    # Model Related Configurations
+    MODEL_NAME = "XAUUSD_Model"
+    MODEL_META_NAME = "XAUUSD_Model_Meta"
 
-    # display all columns and rows
-
-    original_length = len(retults)
-    train_length = int(original_length * 0.8)
-
-    from imblearn.over_sampling import SMOTE
-
-    X = retults[['open', 'close', 'high', 'low']].values
-    bins = np.squeeze(retults[['bin']].values)
-    y = np.squeeze(retults[['label_side']].values) * bins
-
-    X_train, y_train = X[:train_length], y[:train_length]
-    X_test, y_test = X[train_length:], y[train_length:]
-    bins_train, bins_test = bins[:train_length], bins[train_length:]
-
-
-    sm = SMOTE()
-    X_train_res, y_train_res = sm.fit_resample(X_train, y_train)
-
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.metrics import confusion_matrix
-
-    # First Model
-    clf = LogisticRegression().fit(X_train_res, y_train_res)
-    y_pred = clf.predict(X_test)  # Predicted labels for test data to be used in meta labeling
-    cm = confusion_matrix(true_binary_label(y_pred, y_test), y_pred != 0)
-    print(cm)
-
-    # Prep for meta labeling training
-    # generate predictions for training set
-    y_train_pred = clf.predict(X_train)
-    # add the predictions to features
-    X_train_meta = np.hstack([y_train_pred[:, None], X_train])
-    X_test_meta = np.hstack([y_pred[:, None], X_test])
-
-    # Meta Model Training
-    # generate true meta-labels
-    y_train_meta = true_binary_label(y_train_pred, y_train)
-    # rebalance classes again
-    sm = SMOTE()
-    X_train_meta_res, y_train_meta_res = sm.fit_resample(X_train_meta, y_train_meta)
-    model_secondary = LogisticRegression().fit(X_train_meta_res, y_train_meta_res)
+    # Boolean Flags
+    PREPARE_TRIPLE_LABEL_STRATEGY = True  # If True, it will prepare the data for the triple barrier labeling strategy
+    TRAIN_MODEL = True  # Requires PREPARE_TRIPLE_LABEL_STRATEGY to be True unless retraining
+    SAVE_MODEL_AFTER_TRAINING = True  # Requires TRAIN_MODEL to be True unless retraining
     #
-    # Meta Model Testing
-    y_pred_meta = model_secondary.predict(X_test_meta)
-    # use meta-predictions to filter primary predictions
-    cm = confusion_matrix(true_binary_label(y_pred, y_test), (y_pred * y_pred_meta) != 0)
-    print(cm)
+    LIVE_EXECUTION_TEST = False
+    DISPLAY_ALL_COLUMNS_N_ROWS = True
 
-    # for i in zip(retults['open'].values, retults['low'].values, retults['high'].values, retults['close'].values):
-    #     print(live_execution_of_models(i[0], i[1], i[2], i[3], clf, model_secondary))
+    # Multi-Processing Configurations
+    NUM_THREADS_FOR_TBL = 28  # Number of threads to use for the triple barrier labeling strategy
+
+    '''END OF CONFIGURATIONS'''
+
+    # Configuring Aux Settings
+    if DISPLAY_ALL_COLUMNS_N_ROWS:
+        # display all columns and rows
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.max_rows', None)
+
+    # Prepare Triple Barrier Labeled Data
+    if PREPARE_TRIPLE_LABEL_STRATEGY:
+        symbols_data = Genie_Loader().fetch_csv_data_dask(data_file_name=DATA_FILE_NAME, data_file_dir=DATA_FILE_DIR,
+                                                          scheduler='threads', n_rows=None, first_or_last='first')
+
+        triple_barrier_labeled_data = sample_triple_barrier_strat_labeling(symbols_data,
+                                                                           num_threads=NUM_THREADS_FOR_TBL, dates=DATES)
+
+        # Save triple_barrier_labeled_data
+        triple_barrier_labeled_data.to_csv(TBL_DATA_OUTPUT)
+
+    else:
+        # Load the model
+        primary_model, meta_model = load_primary_n_meta_model_pickles(primary_model_path=f'{MODEL_NAME}.pkl',
+                                                                      meta_model_path=f'{MODEL_META_NAME}.pkl')
+        # Load Results
+        triple_barrier_labeled_data = pd.read_csv(TBL_DATA_OUTPUT)
+
+    if TRAIN_MODEL:
+        # Train the model
+        primary_model, meta_model = train_model(
+            triple_barrier_labeled_data=triple_barrier_labeled_data,
+        )
+
+        if SAVE_MODEL_AFTER_TRAINING:
+            # Save the model
+            save_primary_n_meta_model_pickles(primary_model_path=f'{MODEL_NAME}.pkl',
+                                              meta_model_path=f'{MODEL_META_NAME}.pkl')
+
+    if LIVE_EXECUTION_TEST:
+        assert primary_model and meta_model, "Models not loaded or trained"
+        for i in zip(triple_barrier_labeled_data['open'].values,
+                     triple_barrier_labeled_data['low'].values,
+                     triple_barrier_labeled_data['high'].values,
+                     triple_barrier_labeled_data['close'].values,
+                     triple_barrier_labeled_data['volume'].values):
+            print(live_execution_of_models(i[0], i[1], i[2], i[3], i[4],
+                                           primary_model=primary_model, meta_model=meta_model
+                                           ))

@@ -2,9 +2,9 @@ import glob
 
 import vectorbtpro as vbt
 from Modules.Actors.genie_loader.genie_loader import Genie_Loader
-from Modules.Standard_Algorythms import util
-from Modules.Standard_Algorythms.labeling_algorythms import labeling
-from Modules.Standard_Algorythms.timeseries_algorythms import timeseries_tilters
+from need_integration_or_further_dev.Standard_Algorythms import util
+from need_integration_or_further_dev.Standard_Algorythms.labeling_algorythms import labeling
+from need_integration_or_further_dev.Standard_Algorythms.timeseries_algorythms import timeseries_tilters
 
 import numpy as np
 import pandas as pd

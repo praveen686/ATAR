@@ -1,7 +1,8 @@
 class Genie_Loader():
 
-    def __init__(self, data_file_names, data_file_dirs, **kwargs):
-        self.data = self.fetch(data_file_names, data_file_dirs, **kwargs)
+    def __init__(self, data_file_names=None, data_file_dirs=None, **kwargs):
+        if data_file_names:
+            self.data = self.fetch(data_file_names, data_file_dirs, **kwargs)
 
     def find_file(self, file_name, *data_file_dirs):
         import os

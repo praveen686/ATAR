@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     try:
         # Start the node
-        node.start()
+        node.run()
     finally:
         # Stop and dispose of the node with SIGINT/CTRL+C
         node.dispose()

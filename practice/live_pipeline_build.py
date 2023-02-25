@@ -33,8 +33,12 @@ def live_pipeline_build():
             reconciliation=True,
             reconciliation_lookback_mins=1440,
         ),
-        cache_database=CacheDatabaseConfig(type="in-memory"),
+        # cache_database=CacheDatabaseConfig(type="in-memory"),
         # cache_database=CacheDatabaseConfig(type="redis"),
+        cache_database=CacheDatabaseConfig(type="redis", host="redis-16090.c114.us-east-1-4.ec2.cloud.redislabs.com",
+                                           port=16090,
+                                           username="default", password="OlRtlXKrSkGzmvhiLgxjDgS4cp2PkIJl",
+                                           ssl=False, flush=True),
         data_clients={
             "BINANCE": BinanceDataClientConfig(
                 api_key="316ee06e009b0ec07b92d15328bed7f0a92c7e1ddb2ce8a755273a6d4f91c802",
@@ -48,8 +52,8 @@ def live_pipeline_build():
                 testnet=True,  # If client uses the testnet
                 # instrument_provider=InstrumentProviderConfig(load_all=True),
                 instrument_provider=InstrumentProviderConfig(
-                    "BTCUSDT-PERP.BINANCE",
-                    "ETHUSDT-PERP.BINANCE"
+                    load_ids=("BTCUSDT-PERP.BINANCE", "ETHUSDT-PERP.BINANCE")
+                    # load_all=True
                 )
             ),
         },
@@ -66,8 +70,9 @@ def live_pipeline_build():
                 testnet=True,  # If client uses the testnet
                 # instrument_provider=InstrumentProviderConfig(load_all=True),
                 instrument_provider=InstrumentProviderConfig(
-                    "BTCUSDT-PERP.BINANCE",
-                    "ETHUSDT-PERP.BINANCE"
+                    load_ids=("BTCUSDT-PERP.BINANCE", "ETHUSDT-PERP.BINANCE")
+                    # load_all=True
+
                 )
             ),
         },
@@ -104,33 +109,29 @@ def live_pipeline_build():
     # Add your strategies and modules
     node.trader.add_strategy(strategy)
 
-    #############
-    # Configure your strategy
-    strat_config = Practice_Strat_Config(
-        instrument_id="ETHUSDT-PERP.BINANCE",
-        bar_type="ETHUSDT-PERP.BINANCE-1-MINUTE-LAST-EXTERNAL",
-        trade_size=Decimal("0.007"),
-
-        fast_ema_period=3,
-        slow_ema_period=14,
-        atr_period=5,
-        trailing_atr_multiple=1.5,
-        trailing_offset_type="BASIS_POINTS",
-        trigger_type="LAST_TRADE",
-        order_id_tag="002",
-        activation_percentage=0.001,
-    )
-
-    # Instantiate your strategy
-    strategy = Practice_Strat(config=strat_config)
-
-    # Add your strategies and modules
-    node.trader.add_strategy(strategy)
-    #############
-
-
-
-
+    # #############
+    # # Configure your strategy
+    # strat_config = Practice_Strat_Config(
+    #     instrument_id="ETHUSDT-PERP.BINANCE",
+    #     bar_type="ETHUSDT-PERP.BINANCE-1-MINUTE-LAST-EXTERNAL",
+    #     trade_size=Decimal("0.007"),
+    #
+    #     fast_ema_period=3,
+    #     slow_ema_period=14,
+    #     atr_period=5,
+    #     trailing_atr_multiple=1.5,
+    #     trailing_offset_type="BASIS_POINTS",
+    #     trigger_type="LAST_TRADE",
+    #     order_id_tag="002",
+    #     activation_percentage=0.001,
+    # )
+    #
+    # # Instantiate your strategy
+    # strategy = Practice_Strat(config=strat_config)
+    #
+    # # Add your strategies and modules
+    # node.trader.add_strategy(strategy)
+    # #############
 
     # Register your client factories with the node (can take user defined factories)
     node.add_data_client_factory("BINANCE", BinanceLiveDataClientFactory)
@@ -145,6 +146,6 @@ if __name__ == "__main__":
     node = live_pipeline_build()
 
     try:
-        node.start()
+        node.run()
     finally:
         node.dispose()
