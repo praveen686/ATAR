@@ -4,14 +4,11 @@ from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
 
 def prepare_autogluon_data(
         X_df, y_df,
-        id_column, # e.g.
+        id_column,  # e.g.
         timestamp_column="Datetime",
         static_features=None,  # e.g. [{"id": "XAUUSD", "type": "commodity", "currency": "USD"}]
-        prediction_length=1,
-   ):  # todo generalize this function
+):  # todo generalize this function
     # add id column and target column
-
-
 
     raw_data_frame = X_df.copy()
     raw_data_frame['id'] = id_column
@@ -19,7 +16,6 @@ def prepare_autogluon_data(
 
     # drop NaNs
     clean_data_frame = raw_data_frame.dropna()
-
 
     # create TimeSeriesDataFrame
     ts_dataframe = TimeSeriesDataFrame.from_data_frame(
@@ -50,17 +46,22 @@ def split_data(ts_dataframe, train_test_data_split):
 def get_timeseries_predictor(
         load_model,
         prediction_length,
+
+        eval_metric="MASE",
+        ignore_time_index=False,
+        num_gpus=0,
+        # known_covariates_names=["weekend"],
+
 ):
     if load_model:
         predictor = TimeSeriesPredictor.load("model")
     else:
         predictor = TimeSeriesPredictor(
             prediction_length=prediction_length,
-            eval_metric="MASE",
+            eval_metric=eval_metric,
             # known_covariates_names=["weekend"],
-            freq="1 min",
-            ignore_time_index=True,
-            num_gpus=1,
+            ignore_time_index=ignore_time_index,
+            num_gpus=num_gpus,
 
         )
 
