@@ -16,6 +16,7 @@ class Genie_Loader():
         import dask.dataframe as dd
         data_file_path = f'{data_file_dir}/{data_file_name}'
         bar_data = dd.read_csv(data_file_path, parse_dates=False)
+
         datetime_col = bar_data.columns[0]
         # parse the datetime column
 

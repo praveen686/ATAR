@@ -129,19 +129,27 @@ def sample_triple_barrier_strat_labeling(data, num_threads=1, dates=None):
 if __name__ == '__main__':
     '''BEGINNING OF CONFIGURATIONS'''
     # DATA-RELATED CONFIGURATIONS
-    DATES = ['2015-01-01', '2022-10-31']
+    DATES = ['2015-01-01', '2015-10-31']
     DATA_FILE_NAME = "XAUUSD.csv"
     DATA_FILE_DIR = "../../Data"
     TBL_DATA_OUTPUT = "XAUUSD_Triple_Barrier_Labeled_Data.csv"
+    FEATURE_COLUMNS = ["open", "low", "high", "close", "volume"]
 
     # Model Related Configurations
     MODEL_NAME = "XAUUSD_Model"
     MODEL_META_NAME = "XAUUSD_Model_Meta"
+    TRAIN_TEST_DATA_SPLIT = 0.8
+    PREDICTION_LENGTH = 1
+    TIME_LIMIT = 2
+    STATIC_FEATURES = None#[{"id": "XAUUSD", "type": "commodity", "currency": "USD"}]
+    TIMESTAMP_COLUMN = "Datetime"
+    ID_COLUMN = "XAUUSD"
+    NUM_GPU = 1
 
     # Boolean Flags
-    PREPARE_TRIPLE_LABEL_STRATEGY = True  # If True, it will prepare the data for the triple barrier labeling strategy
-    TRAIN_MODEL = True  # Requires PREPARE_TRIPLE_LABEL_STRATEGY to be True unless retraining
-    SAVE_MODEL_AFTER_TRAINING = True  # Requires TRAIN_MODEL to be True unless retraining
+    PREPARE_TRIPLE_LABEL_STRATEGY = False  # If True, it will prepare the data for the triple barrier labeling strategy
+    FRESH_TRAIN_MODEL = True  # Requires PREPARE_TRIPLE_LABEL_STRATEGY to be True unless retraining
+    SAVE_MODEL_AFTER_TRAINING = True  # Requires FRESH_TRAIN_MODEL to be True unless retraining
     #
     LIVE_EXECUTION_TEST = False
     DISPLAY_ALL_COLUMNS_N_ROWS = True
@@ -166,25 +174,35 @@ if __name__ == '__main__':
                                                                            num_threads=NUM_THREADS_FOR_TBL, dates=DATES)
 
         # Save triple_barrier_labeled_data
-        triple_barrier_labeled_data.to_csv(TBL_DATA_OUTPUT)
-
+        triple_barrier_labeled_data.to_csv(os.path.join(DATA_FILE_DIR, TBL_DATA_OUTPUT))
     else:
-        # Load the model
-        primary_model, meta_model = load_primary_n_meta_model_pickles(primary_model_path=f'{MODEL_NAME}.pkl',
-                                                                      meta_model_path=f'{MODEL_META_NAME}.pkl')
         # Load Results
-        triple_barrier_labeled_data = pd.read_csv(TBL_DATA_OUTPUT)
+        triple_barrier_labeled_data = Genie_Loader().fetch_csv_data_dask(data_file_name=TBL_DATA_OUTPUT, data_file_dir=DATA_FILE_DIR,
+                                                          scheduler='threads', n_rows=None, first_or_last='first')
 
-    if TRAIN_MODEL:
+    if FRESH_TRAIN_MODEL:
         # Train the model
         primary_model, meta_model = train_model(
             triple_barrier_labeled_data=triple_barrier_labeled_data,
+            #
+            train_test_data_split=TRAIN_TEST_DATA_SPLIT,
+            prediction_length=PREDICTION_LENGTH,
+            time_limit=TIME_LIMIT,
+            static_features=STATIC_FEATURES,
+            timestamp_column=TIMESTAMP_COLUMN,
+            id_column=ID_COLUMN,
+            num_gpu=NUM_GPU,
+            feature_columns=FEATURE_COLUMNS,
         )
 
         if SAVE_MODEL_AFTER_TRAINING:
             # Save the model
             save_primary_n_meta_model_pickles(primary_model_path=f'{MODEL_NAME}.pkl',
                                               meta_model_path=f'{MODEL_META_NAME}.pkl')
+    else:
+        # Load the model
+        primary_model, meta_model = load_primary_n_meta_model_pickles(primary_model_path=f'{MODEL_NAME}.pkl',
+                                                                      meta_model_path=f'{MODEL_META_NAME}.pkl')
 
     if LIVE_EXECUTION_TEST:
         assert primary_model and meta_model, "Models not loaded or trained"
