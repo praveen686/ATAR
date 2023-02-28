@@ -7,7 +7,7 @@ from need_integration_or_further_dev.Models_practice.AutoGluon.autogluon_help im
 if __name__ == "__main__":
     LOAD_MODEL = False
     PREDICTION_LENGTH = 1
-    TRAINING_TIME_LIMIT = 10
+    TRAINING_TIME_LIMIT = 120
     TRAIN_TEST_DATA_SPLIT = 0.8
 
     X_COLUMN_NAMES = ["Open", "Low", "High"]
@@ -15,21 +15,19 @@ if __name__ == "__main__":
     TIMESTAMP_COLUMN_NAME = "Datetime"
     TARGET_COLUMN_NAME = "Close"
     STATIC_FEATURES = None
+    WINDOW_SIZE = 100
+
 
     raw_data_frame = pd.read_csv("../../../Data/XAUUSD.csv", index_col=None, parse_dates=["Datetime"])
 
     # change "Tick volume" to Volume not inplace
     raw_data_frame = raw_data_frame.rename(columns={"Tick volume": "Volume"})
 
-    # Break ID column into multiple windows of data
-    raw_data_frame[ID_COLUMN_NAME] = raw_data_frame[ID_COLUMN_NAME].apply(lambda x: x.split("_")[0])
-    print(raw_data_frame.head())
-    exit() # todo left heres
-
     # todo: the preprocess_data function below can be broken down into smaller functions for more flexibility and functionality
     ts_dataframe = prepare_autogluon_data(df=raw_data_frame, X_column_names=X_COLUMN_NAMES,
                                           target_column_name=TARGET_COLUMN_NAME, id_column_name=ID_COLUMN_NAME,
-                                          timestamp_column_name=TIMESTAMP_COLUMN_NAME, static_features=STATIC_FEATURES)
+                                          timestamp_column_name=TIMESTAMP_COLUMN_NAME, static_features=STATIC_FEATURES,
+                                          window_size=WINDOW_SIZE,)
 
     from autogluon.timeseries.splitter import MultiWindowSplitter
 

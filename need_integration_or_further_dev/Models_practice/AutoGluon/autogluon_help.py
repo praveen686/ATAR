@@ -9,16 +9,26 @@ def prepare_autogluon_data(
         X_column_names,
         target_column_name,
         static_features=None,
+        window_size=100,
 ):  # todo generalize this function
     # add id column and target column
     # raw_data_frame = X_df.copy()
     # raw_data_frame['id'] = id_column
     # raw_data_frame['target'] = y_df
 
-    raw_data_frame = df[[id_column_name, timestamp_column_name] + X_column_names + [target_column_name]]
+    # raw_data_frame = df[[id_column_name, timestamp_column_name] + X_column_names + [target_column_name]]
+    raw_data_frame = df[[timestamp_column_name] + X_column_names + [target_column_name]]
 
     # drop NaNs
     clean_data_frame = raw_data_frame.dropna()
+
+
+    if id_column_name not in clean_data_frame.columns:
+        # Add an id column to the data frame to split the data into multiple time series of size window_size
+        # e.g. if window_size=100, then the first 100 rows will be one time series, the next 100 rows will be another time series, etc.
+        clean_data_frame[id_column_name] = clean_data_frame.index // window_size
+        print(clean_data_frame.head())
+        print(clean_data_frame.tail())
 
     # create TimeSeriesDataFrame
     ts_dataframe = TimeSeriesDataFrame.from_data_frame(
