@@ -13,7 +13,7 @@ if __name__ == "__main__":
     X_COLUMN_NAMES = ["Open", "Low", "High"]
     ID_COLUMN_NAME = "id"
     TIMESTAMP_COLUMN_NAME = "Datetime"
-    TARGET_COLUMN_NAME = "Close"
+    TARGET_COLUMN_NAME = "Close" # this is not a real target, just arbitrarily used here. Instead, use TBL for example
     STATIC_FEATURES = None
     WINDOW_SIZE = 100
 
