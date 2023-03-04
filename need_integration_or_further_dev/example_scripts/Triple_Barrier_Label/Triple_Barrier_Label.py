@@ -6,19 +6,15 @@ import pandas as pd
 from need_integration_or_further_dev.Standard_Algorythms import util
 from need_integration_or_further_dev.Standard_Algorythms.labeling_algorythms import labeling
 from need_integration_or_further_dev.Standard_Algorythms.timeseries_algorythms import timeseries_filters
-from need_integration_or_further_dev.example_scripts.tbl_help import train_model, load_primary_n_meta_model_pickles, \
+from need_integration_or_further_dev.example_scripts.Triple_Barrier_Label.tbl_help import train_model, \
+    load_primary_n_meta_model_pickles, \
     save_primary_n_meta_model_pickles, live_execution_of_models
 from need_integration_or_further_dev.old_modules.genie_loader import Genie_Loader
 
 
-def sample_triple_barrier_strat_labeling(data, num_threads=1, dates=None):
+def deprecated_sample_triple_barrier_strat_labeling(data, num_threads=1, dates=None):
     """
-    This function is a sample of how to use the triple barrier labeling algorythm
-    Step 1: Create a Genie_Loader object
-    Step 2: Use the fetch_data method to get the data
-    Step 3: Use the triple_barrier_labeling method to get the labels
-    Step 4: Use the timeseries_tilters method to get the filtered data
-    Step 5: Use the labeling method to get the labels
+
     """
     # Import packages
     import numpy as np
@@ -55,32 +51,35 @@ def sample_triple_barrier_strat_labeling(data, num_threads=1, dates=None):
     slow_window = 50
 
     # STRATEGY!!!!
-    fast_mavg = data["close"].rolling(window=fast_window, min_periods=fast_window, center=False).mean()
-    slow_mavg = data["close"].rolling(window=slow_window, min_periods=slow_window, center=False).mean()
-    # SUMCON_indicator = vbt.IF.from_techcon("SUMCON")
-    # indicator_bs = SUMCON_indicator.run(
-    #     open=data["open"],
-    #     high=data["high"],
-    #     low=data["low"],
-    #     close=data["close"],
-    #     volume=data["volume"],
-    #     smooth=30
-    # )
-    # SUMCON_result = indicator_bs.buy - indicator_bs.sell
+    # fast_mavg = data["close"].rolling(window=fast_window, min_periods=fast_window, center=False).mean()
+    # slow_mavg = data["close"].rolling(window=slow_window, min_periods=slow_window, center=False).mean()
+    # # SUMCON_indicator = vbt.IF.from_techcon("SUMCON")
+    # # indicator_bs = SUMCON_indicator.run(
+    # #     open=data["open"],
+    # #     high=data["high"],
+    # #     low=data["low"],
+    # #     close=data["close"],
+    # #     volume=data["volume"],
+    # #     smooth=30
+    # # )
+    # # SUMCON_result = indicator_bs.buy - indicator_bs.sell
+    #
+    # '''Compile Structure and Run Master Indicator'''
+    # # Compute sides
+    # # long_signals = Master_Indicator.long_entries.values & (SUMCON_result > 0.05)
+    # # short_signals = Master_Indicator.short_entries.values & (SUMCON_result < -0.05)
+    # data['side'] = np.nan
+    #
+    # long_signals = fast_mavg >= slow_mavg
+    # short_signals = fast_mavg < slow_mavg
+    # # long_signals = (SUMCON_result > 0.05)
+    # # short_signals = (SUMCON_result < -0.05)
+    # data['side'] = 0
+    # data.loc[long_signals, 'side'] = 1
+    # data.loc[short_signals, 'side'] = -1
 
-    '''Compile Structure and Run Master Indicator'''
-    # Compute sides
-    # long_signals = Master_Indicator.long_entries.values & (SUMCON_result > 0.05)
-    # short_signals = Master_Indicator.short_entries.values & (SUMCON_result < -0.05)
-    data['side'] = np.nan
-
-    long_signals = fast_mavg >= slow_mavg
-    short_signals = fast_mavg < slow_mavg
-    # long_signals = (SUMCON_result > 0.05)
-    # short_signals = (SUMCON_result < -0.05)
-    data['side'] = 0
-    data.loc[long_signals, 'side'] = 1
-    data.loc[short_signals, 'side'] = -1
+    from need_integration_or_further_dev.Labeling_Strategies.Simple_MA_Cross import sample_arb_strategy
+    sample_arb_strategy(data["close"], log=False)
 
     # Remove Look ahead biase by lagging the signal
     data['side'] = data['side'].shift(1)
@@ -126,6 +125,87 @@ def sample_triple_barrier_strat_labeling(data, num_threads=1, dates=None):
     return pd.concat([raw_data, labels], axis=1).fillna(0)
 
 
+def triple_barrier_label_example(close_series, side_series, **tbl_kwargs):  # todo add more inputs used in the func
+    """
+    This function is a sample of how to use the triple barrier labeling algorythm
+
+    Primary Model is used to generate the side series
+
+    """
+    # Import packages
+
+    # Check inputs todo
+    assert isinstance(close_series, pd.Series)
+    assert isinstance(side_series, pd.Series)
+    assert close_series.index.equals(side_series.index)
+
+    '''Primary Model'''
+    # Combine the side series with the close series
+    side_labeled_ohlcv_data = pd.concat([close_series, side_series], axis=1, keys=['close', 'side'])
+
+    # Remove Look ahead biase by lagging the signal
+    side_labeled_ohlcv_data['side'] = side_labeled_ohlcv_data['side'].shift(1)  # Needed for the labeling algorythm
+
+    # hotfix
+    test_n_elements = tbl_kwargs.get('test_n_elements', None)
+    if test_n_elements:
+        side_labeled_ohlcv_data = side_labeled_ohlcv_data[:test_n_elements]
+
+    # Save the raw data
+    raw_data = side_labeled_ohlcv_data.copy()
+
+    # Drop the NaN values from our data set
+    side_labeled_ohlcv_data = side_labeled_ohlcv_data.dropna(axis=0, how='any', inplace=False)
+
+    # Make sure side is an integer
+    side_labeled_ohlcv_data['side'] = side_labeled_ohlcv_data['side'].astype(int)
+
+    # Compute daily volatility
+    daily_vol = util.get_daily_vol(close=side_labeled_ohlcv_data['close'], lookback=50)
+
+    # Apply Symmetric CUSUM Filter and get timestamps for events
+    # Note: Only the CUSUM filter needs a point estimate for volatility
+    cusum_events = timeseries_filters.cusum_filter(side_labeled_ohlcv_data['close'], threshold=daily_vol.mean() * 0.5)
+
+    # Compute vertical barrier
+    vertical_barriers = labeling.add_vertical_barrier(t_events=cusum_events, close=side_labeled_ohlcv_data['close'],
+                                                      # num_days=1, num_hours=0, num_minutes=0, num_seconds=0
+                                                      num_days=tbl_kwargs.get('vertical_barrier_num_days', 1),
+                                                      num_hours=tbl_kwargs.get('vertical_barrier_num_hours', 0),
+                                                      num_minutes=tbl_kwargs.get('vertical_barrier_num_minutes', 0),
+                                                      num_seconds=tbl_kwargs.get('vertical_barrier_num_seconds', 0)
+                                                      )
+
+    triple_barrier_events = labeling.get_events(close=side_labeled_ohlcv_data['close'],
+                                                t_events=cusum_events,
+                                                pt_sl=tbl_kwargs.get('pt_sl', [1, 1]),
+                                                target=daily_vol,
+                                                vertical_barrier_times=vertical_barriers,
+                                                min_ret=tbl_kwargs.get('min_ret', 0.001),
+                                                num_threads=tbl_kwargs.get('num_threads', 1),
+                                                side_prediction=side_labeled_ohlcv_data['side'])
+
+    labels = labeling.get_bins(triple_barrier_events, side_labeled_ohlcv_data['close'])
+
+    # Shift the side series back to the original position
+    raw_data.dropna(axis=0, how='any', inplace=True)
+    raw_data['side'] = raw_data['side'].astype(int)
+
+    # Change raw_data side name to direction
+    raw_data.rename(columns={'side': 'direction'}, inplace=True)
+
+    # labels.columns = ["ret", "trgt_ret", "bin", "label_side"]
+    labels.columns = ["ret", "target_ret", "meta_target", "prim_target"]
+
+    returning_df = pd.concat([raw_data, labels], axis=1).fillna(0)
+
+    # Change prim_target and meta_target to int
+    returning_df['prim_target'] = returning_df['prim_target'].astype(int)
+    returning_df['meta_target'] = returning_df['meta_target'].astype(int)
+
+    return returning_df
+
+
 if __name__ == '__main__':
     '''BEGINNING OF CONFIGURATIONS'''
     # DATA-RELATED CONFIGURATIONS
@@ -141,7 +221,7 @@ if __name__ == '__main__':
     TRAIN_TEST_DATA_SPLIT = 0.8
     PREDICTION_LENGTH = 1
     TIME_LIMIT = 2
-    STATIC_FEATURES = None#[{"id": "XAUUSD", "type": "commodity", "currency": "USD"}]
+    STATIC_FEATURES = None  # [{"id": "XAUUSD", "type": "commodity", "currency": "USD"}]
     TIMESTAMP_COLUMN = "Datetime"
     ID_COLUMN = "XAUUSD"
     NUM_GPU = 1
@@ -170,15 +250,17 @@ if __name__ == '__main__':
         symbols_data = Genie_Loader().fetch_csv_data_dask(data_file_name=DATA_FILE_NAME, data_file_dir=DATA_FILE_DIR,
                                                           scheduler='threads', n_rows=None, first_or_last='first')
 
-        triple_barrier_labeled_data = sample_triple_barrier_strat_labeling(symbols_data,
-                                                                           num_threads=NUM_THREADS_FOR_TBL, dates=DATES)
+        triple_barrier_labeled_data = triple_barrier_label_example(symbols_data, num_threads=NUM_THREADS_FOR_TBL,
+                                                                   dates=DATES)
 
         # Save triple_barrier_labeled_data
         triple_barrier_labeled_data.to_csv(os.path.join(DATA_FILE_DIR, TBL_DATA_OUTPUT))
     else:
         # Load Results
-        triple_barrier_labeled_data = Genie_Loader().fetch_csv_data_dask(data_file_name=TBL_DATA_OUTPUT, data_file_dir=DATA_FILE_DIR,
-                                                          scheduler='threads', n_rows=None, first_or_last='first')
+        triple_barrier_labeled_data = Genie_Loader().fetch_csv_data_dask(data_file_name=TBL_DATA_OUTPUT,
+                                                                         data_file_dir=DATA_FILE_DIR,
+                                                                         scheduler='threads', n_rows=None,
+                                                                         first_or_last='first')
 
     if FRESH_TRAIN_MODEL:
         # Train the model

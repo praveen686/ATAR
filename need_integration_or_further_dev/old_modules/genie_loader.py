@@ -1,9 +1,5 @@
 class Genie_Loader():
 
-    def __init__(self, data_file_names=None, data_file_dirs=None, **kwargs):
-        if data_file_names:
-            self.data = self.fetch(data_file_names, data_file_dirs, **kwargs)
-
     def find_file(self, file_name, *data_file_dirs):
         import os
         for directory in data_file_dirs:
@@ -66,6 +62,11 @@ class Genie_Loader():
                 data = dd.read_csv(data_file_path, parse_dates=False).compute(
                     scheduler=kwargs.get('scheduler', 'threads'))
 
+            # Rename columns
+            rename_columns = kwargs.get('rename_columns', None)
+            if rename_columns:
+                data = data.rename(columns=rename_columns)
+
             data_array.append(data)
 
         datas_dict = {}
@@ -81,3 +82,8 @@ class Genie_Loader():
 
     def fetch(self, data_file_names, data_file_dirs, **kwargs):
         return self.fetch_data(data_file_names, data_file_dirs, **kwargs)
+
+    @staticmethod
+    def load_pickle(pickle_path):
+        import vectorbtpro as vbt
+        return vbt.Data.load(pickle_path)

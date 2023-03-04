@@ -55,7 +55,12 @@ def train_model(  # todo generalize this to work with any model and any data set
                                             return_as_df=True)
 
     from need_integration_or_further_dev.Models_practice.AutoGluon.autogluon_help import prepare_autogluon_data
-    ts_dataframe = prepare_autogluon_data(,,
+    ts_dataframe = prepare_autogluon_data(X_df=X, y_df=y,
+                                          prediction_length=prediction_length,
+                                          id_column=id_column,
+                                          timestamp_column=timestamp_column,
+                                          static_features=static_features,
+                                          )
 
     # Split data into train and test
     from need_integration_or_further_dev.Models_practice.AutoGluon.autogluon_help import split_data
