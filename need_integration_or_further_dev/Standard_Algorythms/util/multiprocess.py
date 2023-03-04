@@ -133,8 +133,10 @@ def mp_pandas_obj(func, pd_obj, num_threads=24, mp_batches=1, lin_mols=True, ver
     else:
         return out
 
-    for i in out:
-        df0 = df0.append(i)
+    # Using pd.concat instead of append for better performance # todo review implications in other implementations
+    # for i in out:
+    #     df0 = df0.append(i)
+    df0 = pd.concat(out)
 
     df0 = df0.sort_index()
     return df0
