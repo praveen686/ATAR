@@ -6,7 +6,7 @@ import pandas as pd
 from need_integration_or_further_dev.Standard_Algorythms import util
 from need_integration_or_further_dev.Standard_Algorythms.labeling_algorythms import labeling
 from need_integration_or_further_dev.Standard_Algorythms.timeseries_algorythms import timeseries_filters
-from need_integration_or_further_dev.example_scripts.Triple_Barrier_Label.tbl_help import train_model, \
+from need_integration_or_further_dev.Dev_Modules.Triple_Barrier_Label.tbl_help import train_model, \
     load_primary_n_meta_model_pickles, \
     save_primary_n_meta_model_pickles, live_execution_of_models
 from need_integration_or_further_dev.old_modules.genie_loader import Genie_Loader
@@ -125,7 +125,8 @@ def deprecated_sample_triple_barrier_strat_labeling(data, num_threads=1, dates=N
     return pd.concat([raw_data, labels], axis=1).fillna(0)
 
 
-def triple_barrier_label_example(close_series, side_series, **tbl_kwargs):  # todo add more inputs used in the func
+def daily_vol_triple_barrier_label_example(close_series, side_series,
+                                           **tbl_kwargs):  # todo add more inputs used in the func
     """
     This function is a sample of how to use the triple barrier labeling algorythm
 
@@ -203,6 +204,13 @@ def triple_barrier_label_example(close_series, side_series, **tbl_kwargs):  # to
     returning_df['prim_target'] = returning_df['prim_target'].astype(int)
     returning_df['meta_target'] = returning_df['meta_target'].astype(int)
 
+    print("TBL-ML-Data")
+    print(returning_df[["direction", "prim_target", "meta_target"]].head(10))
+
+    # Print unique values
+    unique_values = returning_df[["direction", "prim_target", "meta_target"]].apply(lambda x: x.unique())
+    print(unique_values)
+
     return returning_df
 
 
@@ -250,8 +258,22 @@ if __name__ == '__main__':
         symbols_data = Genie_Loader().fetch_csv_data_dask(data_file_name=DATA_FILE_NAME, data_file_dir=DATA_FILE_DIR,
                                                           scheduler='threads', n_rows=None, first_or_last='first')
 
-        triple_barrier_labeled_data = triple_barrier_label_example(symbols_data, num_threads=NUM_THREADS_FOR_TBL,
-                                                                   dates=DATES)
+        # todo compute side with strategy, waiting for pipeline to be ready
+
+        triple_barrier_labeled_data = daily_vol_triple_barrier_label_example(close_series=close_series,
+                                                                             side_series=side_series, **{
+                "test_n_elements": 10_000,
+                "pt_sl": [0.5, 1],
+                "min_ret": 0.0005,
+                "num_threads": 28,
+                #
+                #  Number of D/H/m/s to add for vertical barrier
+                "vertical_barrier_num_days": 1,
+                "vertical_barrier_num_hours": 0,
+                "vertical_barrier_num_minutes": 0,
+                "vertical_barrier_num_seconds": 0,
+                #
+            })
 
         # Save triple_barrier_labeled_data
         triple_barrier_labeled_data.to_csv(os.path.join(DATA_FILE_DIR, TBL_DATA_OUTPUT))

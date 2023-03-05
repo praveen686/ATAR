@@ -1,4 +1,10 @@
 # Outputs from Genie __> [R parameters] * [Sim Metrics "Features"]
+# Currently this module assumes that only one asset
+# Wanted to have parameter sensitivity report and tbl trained model done here but will split and later on combine into
+#   another pipeline which makes better use of resources and the flow of operations like backtests
+#   Thus here the ag model is trained on what is believed to be the optimal parameter combinations (which are passed)
+#   For now only one parameter combination and asset are used (will be expanded on) and will not optimize
+
 """Summary:
     ag = autogluon
 ::
@@ -7,13 +13,13 @@ import numpy as np
 import pandas as pd
 
 from need_integration_or_further_dev.Labeling_Strategies.sample_arb_strategy import sample_arb_strategy
-from need_integration_or_further_dev.example_scripts.Triple_Barrier_Label.Triple_Barrier_Label import \
-    triple_barrier_label_example
+from need_integration_or_further_dev.Dev_Modules.Triple_Barrier_Label.Triple_Barrier_Label import \
+    daily_vol_triple_barrier_label_example
 
 
 # todo class or function ...
-def triple_barrier_meta_labeling(Strategy_Function, OHLCV_Data, R_parameters, MPortfolio_Features,
-                                 strategy_kwargs=None, **tbl_kwargs):
+def full_triple_barrier_meta_labeling_pipeline(Strategy_Function, OHLCV_Data, R_parameters, MPortfolio_Features,
+                                               strategy_kwargs=None, **tbl_kwargs):
     """
     Inputs:
         - ***
@@ -29,19 +35,16 @@ def triple_barrier_meta_labeling(Strategy_Function, OHLCV_Data, R_parameters, MP
     todo labeling of sides should be done with pf sim in mind
     """
 
-    # Study of Parameter Sensitivity and Optimal R Parameters
-
-    # Creation of "Tabular" Content Assistant for R Parameter Selection
-
     # Run AutoGluon on the optimal R parameters, generate the optimal ensemble model, and return model,
     #           metrics for Optimal Path Strategy Report and Model, [plots, tables]
     # todo currently only handles one asset but needs to handle multiple
-
-    ag_triple_barrier_meta_labeling(Strategy_Function=Strategy_Function, OHLCV_Data=OHLCV_Data,
-                                    R_parameters=R_parameters, MPortfolio_Features=MPortfolio_Features,
-                                    strategy_kwargs=strategy_kwargs, **tbl_kwargs)
+    ag_model, report = ag_triple_barrier_meta_labeling(Strategy_Function=Strategy_Function, OHLCV_Data=OHLCV_Data,
+                                                       R_parameters=R_parameters,
+                                                       MPortfolio_Features=MPortfolio_Features,
+                                                       strategy_kwargs=strategy_kwargs, **tbl_kwargs)
 
     # Creation of "Deployment" Content Assistant for easy deployment of the model [dashboard, endpoints, etc.]
+    # e.g. compile, ....
 
     ...
 
@@ -53,7 +56,7 @@ def ag_triple_barrier_meta_labeling(Strategy_Function, OHLCV_Data, R_parameters,
     schedules the microservices needed to:
         - Collect and prepare the data of returns for all R parameters
         - Label the data using the triple barrier labeling method
-        - Train the optimal ensembled model using AutoGluon
+        - Train the optimal ensemble model using AutoGluon
         - Evaluate the model's performance
         - Generate the metrics, plots, tables, and endpoints for the model's performance
         - Return [compiled] model for AWS deployment
@@ -69,7 +72,9 @@ def ag_triple_barrier_meta_labeling(Strategy_Function, OHLCV_Data, R_parameters,
                                 defaults to Genie default MPortfolio Features and labeling but also those separately as
                                     well as manual or automatic feature engineering/validation and importance ranking
                                     to be used during the hyperparameter optimization process
-        - strategy_args = e.g. {"min_periods": 10, "min_ret": 0.01, "num_threads": 1}
+        - strategy_kwargs = e.g. {"num_cores": 1}
+        - tbl_kwargs = e.g. {"pt_sl": [0.5, 1],"min_ret": 0.0005, "num_threads": 28,"vertical_barrier_num_days": 1}
+
 
 
     Outputs:
@@ -90,34 +95,18 @@ def ag_triple_barrier_meta_labeling(Strategy_Function, OHLCV_Data, R_parameters,
     # todo: add a check to make sure that the outputs are valid
 
     # Label using Triple Barrier Labeling # Expected output:  [TimeSeriesDataFrame of Labels] * [R parameters] + [MPortfolio Features] + [Target] # todo needs to handle multiple assets
-    # Since this function currently only handles one asset we will just use the first asset for now
-
+    # todo/fixme Since this function currently only handles one asset we will just use the first asset for now
     close_series = OHLCV_Data.close  # needs to be only one asset otherwise dimensionality error in multiindex
     side_series = side_df[side_df.keys()[0]]
 
-    triple_barrier_labeled_data = triple_barrier_label_example(
-        close_series=close_series,
-        side_series=side_series,
-        **tbl_kwargs
-    )
-    #
-    # print all rows and columns
-    pd.set_option('display.max_rows', None)
-    pd.set_option('display.max_columns', None)
-    print(triple_barrier_labeled_data[["direction", "prim_target", "meta_target"]].head(10))
+    triple_barrier_labeled_data = daily_vol_triple_barrier_label_example(close_series=close_series,
+                                                                         side_series=side_series, **tbl_kwargs)
 
-    # Get unique values for each column
-    unique_values = triple_barrier_labeled_data.apply(lambda x: x.unique())
-    print(unique_values)
-    exit()
-    # Train the optimal ensembled model using AutoGluon using
+    # Auto-Model Ensemble Optimization [Autogluon]
+    # Call autogluon functions
 
-
-"""Data Collection and Preparation of the Optimal Ensembled Model [Autogluon]"""
-
-"""Dash ..."""
-
-# Max
+    ag_model, report = None, None
+    return ag_model, report
 
 
 if __name__ == "__main__":
@@ -138,17 +127,13 @@ if __name__ == "__main__":
     else:
         symbols_data = genie_loader.load_pickle(pickle_file_name)
 
-    triple_barrier_meta_labeling(
-        Strategy_Function=sample_arb_strategy,
-        OHLCV_Data=symbols_data,
+    full_triple_barrier_meta_labeling_pipeline(
+        Strategy_Function=sample_arb_strategy, OHLCV_Data=symbols_data,
         R_parameters={
             "fast_windows": [10, 20, 30],
             "slow_windows": [20, 30, 40]
+        }, MPortfolio_Features=["defaults"], strategy_kwargs={
         },
-        MPortfolio_Features=["defaults"],
-        strategy_kwargs={
-        },
-        #
         **{
             "test_n_elements": 10_000,
             "pt_sl": [0.5, 1],
@@ -161,6 +146,4 @@ if __name__ == "__main__":
             "vertical_barrier_num_minutes": 0,
             "vertical_barrier_num_seconds": 0,
             #
-
-        }
-    )
+        })
