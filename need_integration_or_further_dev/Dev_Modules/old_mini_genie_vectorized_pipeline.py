@@ -112,4 +112,4 @@ api_handler.run()
 #         )
 #
 #         from Modules.Utils import range_split_ohlc
-#         prices_columns = range_split_ohlc(symbols_data, ['open', 'low', 'high', 'close'], 10, 10)
+#         prices_columns = range_split_ohlc(symbols_data_obj, ['open', 'low', 'high', 'close'], 10, 10)

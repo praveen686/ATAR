@@ -84,6 +84,12 @@ class Genie_Loader():
         return self.fetch_data(data_file_names, data_file_dirs, **kwargs)
 
     @staticmethod
-    def load_pickle(pickle_path):
+    def load_vbt_pickle(pickle_path):
         import vectorbtpro as vbt
         return vbt.Data.load(pickle_path)
+
+
+    @staticmethod
+    def from_pandas(data, **kwargs):
+        import vectorbtpro as vbt
+        return vbt.Data.from_pandas(data, **kwargs)

@@ -1,8 +1,46 @@
 import pandas as pd
 from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
 
-from need_integration_or_further_dev.Models_practice.AutoGluon.autogluon_help import get_timeseries_predictor, \
-    split_data
+def get_timeseries_predictor(
+        prediction_length,
+        target_column_name,
+        model_path,
+        load_model,
+        eval_metric="MASE",
+        ignore_time_index=False,
+        splitter="last_window",
+        known_covariates_names=None,
+        num_gpus=0,
+):
+    if load_model:
+        predictor = TimeSeriesPredictor.load(model_path)
+    else:
+
+        predictor = TimeSeriesPredictor(
+            target=target_column_name,
+            known_covariates_names=known_covariates_names,
+            prediction_length=prediction_length,
+            eval_metric=eval_metric,
+            path=model_path,
+            verbosity=2,
+            quantile_levels=None,
+            ignore_time_index=ignore_time_index,
+            validation_splitter=splitter,
+            num_gpus=num_gpus,
+
+
+        )
+
+    return predictor
+
+def split_data(ts_dataframe, train_test_data_split):
+    # train_data, test_data = ts_dataframe.split_before(train_test_data_split)
+    # return train_data, test_data
+    # Split the data into train and test 80 and 20
+    train_data = ts_dataframe.iloc[:int(len(ts_dataframe) * train_test_data_split)]
+    test_data = ts_dataframe.iloc[int(len(ts_dataframe) * train_test_data_split):]
+    return train_data, test_data
+
 
 if __name__ == "__main__":
     LOAD_MODEL = False
@@ -95,6 +133,3 @@ if __name__ == "__main__":
     print("predictions.head()")
     print(predictions.head())
 
-    # # Plot the predictions
-    # plot_predictions(predictions=predictions, ts_dataframe=ts_dataframe, raw_data_frame=raw_data_frame,
-    #                  train_test_data_split=TRAIN_TEST_DATA_SPLIT)
