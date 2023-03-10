@@ -175,7 +175,7 @@ if __name__ == "__main__":
 
     EQUIPMENT_PARAMS = dict(
         NUMBER_OF_CPUS=28,
-        NUMBER_OF_GPUS=120
+        NUMBER_OF_GPUS=1
     )
 
     LOAD_DATA_PARAMS = dict(
@@ -194,7 +194,7 @@ if __name__ == "__main__":
     SPLIT_DATA_PARAMS = dict(
         # train_test_data_split="2019-01-01 00:00:00",
         # train_test_data_split=(0, 1000),
-        train_test_data_split=0.8,
+        train_test_data_split=0.9,
     )
     PREDICTOR_PARAMS = dict(
         prediction_length=1,
@@ -207,9 +207,9 @@ if __name__ == "__main__":
         known_covariates_names=None,  # todo currently not used or implemented
     )
     FIT_PARAMS = dict(
-        time_limit=3,
-        presets="fast_training",
-        hyperparameters={"DeepAR": {"epochs": 10}},
+        time_limit=120,
+        presets="best_quality",
+
         feature_metadata='infer',
         infer_limit=None,
         infer_limit_batch_size=None,
@@ -220,7 +220,7 @@ if __name__ == "__main__":
     PREDICTION_PARAMS = dict(
         num_cpus=EQUIPMENT_PARAMS["NUMBER_OF_CPUS"],
         num_gpus=EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
-        random_seed=None,
+        random_seed=123,
         # known_covariates=None,  # todo include it in the input date if known_covariates_names was set
     )
 
