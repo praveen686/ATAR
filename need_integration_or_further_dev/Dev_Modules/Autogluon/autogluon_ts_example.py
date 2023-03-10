@@ -197,19 +197,18 @@ if __name__ == "__main__":
         train_test_data_split=0.9,
     )
     PREDICTOR_PARAMS = dict(
-        prediction_length=1,
+        prediction_length=1440 * 7,
         target_column_name="prim_target",
-        model_path="ag_model",
+        model_path="XAUUSD_Primary_Model_BBANDS_1min",
         load_model=False,
         eval_metric="sMAPE",
-        splitter="last_window",
+        splitter="multi_window",
         ignore_time_index=False,
         known_covariates_names=None,  # todo currently not used or implemented
     )
     FIT_PARAMS = dict(
-        time_limit=120,
+        time_limit=1800,
         presets="best_quality",
-
         feature_metadata='infer',
         infer_limit=None,
         infer_limit_batch_size=None,
@@ -241,7 +240,6 @@ if __name__ == "__main__":
     predictor.fit(train_data=train_data, tuning_data=None, show_plot=True, plot=True, verbosity=4, **FIT_PARAMS)
     predictor.fit_summary(verbosity=2)
     predictor.save()
-
 
     '''Predict'''
     model = predictor.get_model_best()
