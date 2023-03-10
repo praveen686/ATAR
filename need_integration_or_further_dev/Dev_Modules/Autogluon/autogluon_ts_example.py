@@ -36,7 +36,7 @@ def ag_ts_get_predictor(
             prediction_length=prediction_length,
             eval_metric=eval_metric,
             path=model_path,
-            verbosity=2,
+            verbosity=4,
             quantile_levels=None,
             ignore_time_index=ignore_time_index,
             validation_splitter=splitter,
@@ -175,7 +175,7 @@ if __name__ == "__main__":
 
     EQUIPMENT_PARAMS = dict(
         NUMBER_OF_CPUS=28,
-        NUMBER_OF_GPUS=1
+        NUMBER_OF_GPUS=120
     )
 
     LOAD_DATA_PARAMS = dict(
@@ -207,9 +207,9 @@ if __name__ == "__main__":
         known_covariates_names=None,  # todo currently not used or implemented
     )
     FIT_PARAMS = dict(
-        time_limit=120,
+        time_limit=3,
         presets="fast_training",
-        hyperparameters=None,
+        hyperparameters={"DeepAR": {"epochs": 10}},
         feature_metadata='infer',
         infer_limit=None,
         infer_limit_batch_size=None,
@@ -238,9 +238,10 @@ if __name__ == "__main__":
 
     '''Create Predictor and fit model'''
     predictor = ag_ts_get_predictor(**PREDICTOR_PARAMS)
-    predictor.fit(train_data=train_data, tuning_data=None, **FIT_PARAMS)
-    predictor.fit_summary()
+    predictor.fit(train_data=train_data, tuning_data=None, show_plot=True, plot=True, verbosity=4, **FIT_PARAMS)
+    predictor.fit_summary(verbosity=2)
     predictor.save()
+
 
     '''Predict'''
     model = predictor.get_model_best()

@@ -149,14 +149,14 @@ if __name__ == "__main__":
         rename_columns={"Open": "open", "High": "high", "Low": "low", "Close": "close", "Tick volume": "volume"},
         scheduler='threads',
         first_or_last='first',
-        n_rows=10000,
+        n_rows=None,
         #
         pickle_file_path=f"{DATA_DIR}/XAUUSD.pickle",
         reload_data=True,
     )
     TBL_PARAMS = dict(
-        pt_sl=[0.5, 1],
-        min_ret=0.0005,
+        pt_sl=[1, 1],
+        min_ret=0.001,
         num_threads=28,
         #
         #  Number of D/H/m/s to add for vertical barrier
