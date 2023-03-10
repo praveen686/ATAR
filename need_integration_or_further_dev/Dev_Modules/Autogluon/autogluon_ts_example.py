@@ -197,7 +197,7 @@ if __name__ == "__main__":
         train_test_data_split=0.9,
     )
     PREDICTOR_PARAMS = dict(
-        prediction_length=1,
+        prediction_length=1440 * 7,
         target_column_name="prim_target",
         model_path="XAUUSD_Primary_Model_BBANDS_1min",
         load_model=False,
