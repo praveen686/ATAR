@@ -183,7 +183,7 @@ if __name__ == "__main__":
     )
 
     PREPROCESS_PARAMS = dict(
-        df=pd.read_csv(LOAD_DATA_PARAMS["csv_file_path"]),
+        df=pd.read_csv(LOAD_DATA_PARAMS["csv_file_path"]).drop(columns=["meta_target"]),
         timestep_label="Datetime",
         id_label="id",
         static_features=None,
@@ -197,12 +197,14 @@ if __name__ == "__main__":
         train_test_data_split=0.9,
     )
     PREDICTOR_PARAMS = dict(
-        prediction_length=1440 * 7,
+        prediction_length=1,
         target_column_name="prim_target",
         model_path="XAUUSD_Primary_Model_BBANDS_1min",
         load_model=False,
         eval_metric="sMAPE",
-        splitter="multi_window",
+        # splitter="multi_window",
+        splitter="last_window",
+
         ignore_time_index=False,
         known_covariates_names=None,  # todo currently not used or implemented
     )
@@ -215,6 +217,7 @@ if __name__ == "__main__":
         fit_weighted_ensemble=True,
         num_cpus=EQUIPMENT_PARAMS["NUMBER_OF_CPUS"],
         num_gpus=EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+        # hyperparameters=None,
     )
     PREDICTION_PARAMS = dict(
         num_cpus=EQUIPMENT_PARAMS["NUMBER_OF_CPUS"],
