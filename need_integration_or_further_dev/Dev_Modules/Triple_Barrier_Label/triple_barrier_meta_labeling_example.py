@@ -149,7 +149,7 @@ if __name__ == "__main__":
         rename_columns={"Open": "open", "High": "high", "Low": "low", "Close": "close", "Tick volume": "volume"},
         scheduler='threads',
         first_or_last='first',
-        n_rows=None,
+        n_rows=10_000,
         #
         pickle_file_path=f"{DATA_DIR}/XAUUSD.pickle",
         reload_data=True,
@@ -160,8 +160,8 @@ if __name__ == "__main__":
         num_threads=28,
         #
         #  Number of D/H/m/s to add for vertical barrier
-        vertical_barrier_num_days=1,
-        vertical_barrier_num_hours=0,
+        vertical_barrier_num_days=0,
+        vertical_barrier_num_hours=4,
         vertical_barrier_num_minutes=0,
         vertical_barrier_num_seconds=0,
     )

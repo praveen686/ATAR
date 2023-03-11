@@ -1,4 +1,6 @@
 import pandas as pd
+from autogluon.core import space, TabularDataset
+from autogluon.tabular import TabularPredictor
 from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
 
 
@@ -11,6 +13,7 @@ def ag_ts_get_predictor(
         ignore_time_index=False,
         splitter="last_window",
         known_covariates_names=None,
+        quantile_levels=None,
         num_gpus=1
 ):
     """
@@ -37,10 +40,10 @@ def ag_ts_get_predictor(
             eval_metric=eval_metric,
             path=model_path,
             verbosity=4,
-            quantile_levels=None,
             ignore_time_index=ignore_time_index,
             validation_splitter=splitter,
             num_gpus=num_gpus,
+            quantile_levels=quantile_levels,
         )
 
     return predictor
@@ -173,13 +176,14 @@ if __name__ == "__main__":
     #  Hyperparameter Tuning:
     #       Needs to be implemented if we dont want to just run the default models or settings
 
+
     EQUIPMENT_PARAMS = dict(
         NUMBER_OF_CPUS=28,
         NUMBER_OF_GPUS=1
     )
 
     LOAD_DATA_PARAMS = dict(
-        csv_file_path="../../../Data/sample_triple_barrier_labeled_data.csv",
+        csv_file_path="../../../Data/sample_triple_barrier_labeled_data_1.csv",
     )
 
     PREPROCESS_PARAMS = dict(
@@ -194,29 +198,62 @@ if __name__ == "__main__":
     SPLIT_DATA_PARAMS = dict(
         # train_test_data_split="2019-01-01 00:00:00",
         # train_test_data_split=(0, 1000),
-        train_test_data_split=0.9,
+        train_test_data_split=0.8,
     )
     PREDICTOR_PARAMS = dict(
-        prediction_length=1440 * 7,
+        prediction_length=60 * 4,
         target_column_name="prim_target",
         model_path="XAUUSD_Primary_Model_BBANDS_1min",
         load_model=False,
-        eval_metric="sMAPE",
-        # splitter="multi_window",
-        splitter="last_window",
+        # eval_metric="sMAPE",
+        splitter="multi_window",
+        # splitter="last_window",
+        quantile_levels=[0.1, 0.5, 0.9],
 
         ignore_time_index=False,
         known_covariates_names=None,  # todo currently not used or implemented
     )
     FIT_PARAMS = dict(
         time_limit=1800,
-        presets="best_quality",
+        # presets="fast_training",
+        presets="medium_quality",
+        # presets="high_quality",
         feature_metadata='infer',
         infer_limit=None,
         infer_limit_batch_size=None,
         fit_weighted_ensemble=True,
+
+        # hyperparameters={
+        #        'Naive': {'ag_args_fit': {'num_gpus': 1}}, 'SeasonalNaive': {'ag_args_fit': {'num_gpus': 1}},
+        #     'ETS': {'ag_args_fit': {'num_gpus': 1}}, 'Theta': {'ag_args_fit': {'num_gpus': 1}},
+        #     'ARIMA': {'ag_args_fit': {'num_gpus': 1}}, 'AutoETS': {'ag_args_fit': {'num_gpus': 1}},
+        #     'AutoGluonTabular': {'ag_args_fit': {'num_gpus': 1}}, 'DeepAR': {'ag_args_fit': {'num_gpus': 1}}
+        # },
+        # hyperparameter_tune_kwargs={
+        #     'Naive': {'ag_args_fit': {'num_gpus': 1}}, 'SeasonalNaive': {'ag_args_fit': {'num_gpus': 1}},
+        #     'ETS': {'ag_args_fit': {'num_gpus': 1}}, 'Theta': {'ag_args_fit': {'num_gpus': 1}},
+        #     'ARIMA': {'ag_args_fit': {'num_gpus': 1}}, 'AutoETS': {'ag_args_fit': {'num_gpus': 1}},
+        #     'AutoGluonTabular': {'ag_args_fit': {'num_gpus': 1}}, 'DeepAR': {'ag_args_fit': {'num_gpus': 1}}
+        # },
+        hyperparameters={
+            "Naive": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
+            "SeasonalNaive": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
+            "ARIMA": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
+            # "ETS": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
+            "Theta": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
+            "AutoETS": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
+            "AutoARIMA": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
+            "AutoGluonTabular": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
+            # "DeepAR": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
+            # "SimpleFeedForward": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
+            # "TemporalFusionTransformer": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
+
+
+        },
+
         num_cpus=EQUIPMENT_PARAMS["NUMBER_OF_CPUS"],
         num_gpus=EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+
         # hyperparameters=None,
     )
     PREDICTION_PARAMS = dict(
@@ -240,7 +277,11 @@ if __name__ == "__main__":
 
     '''Create Predictor and fit model'''
     predictor = ag_ts_get_predictor(**PREDICTOR_PARAMS)
-    predictor.fit(train_data=train_data, tuning_data=None, show_plot=True, plot=True, verbosity=4, **FIT_PARAMS)
+    predictor.fit(train_data=train_data, tuning_data=test_data,
+
+                  # show_plot=True, plot=True,
+                  verbosity=4, **FIT_PARAMS)
+
     predictor.fit_summary(verbosity=2)
     predictor.save()
 
