@@ -1,6 +1,8 @@
 import nautilus_trader as genie_trader
 import pandas as pd
 
+from practice.strategy_practice import OrderBookImbalanceConfig, OrderBookImbalance
+
 
 def live_pipeline_build():
     from decimal import Decimal
@@ -33,12 +35,12 @@ def live_pipeline_build():
             reconciliation=True,
             reconciliation_lookback_mins=1440,
         ),
-        # cache_database=CacheDatabaseConfig(type="in-memory"),
+        cache_database=CacheDatabaseConfig(type="in-memory"),
         # cache_database=CacheDatabaseConfig(type="redis"),
-        cache_database=CacheDatabaseConfig(type="redis", host="redis-16090.c114.us-east-1-4.ec2.cloud.redislabs.com",
-                                           port=16090,
-                                           username="default", password="OlRtlXKrSkGzmvhiLgxjDgS4cp2PkIJl",
-                                           ssl=False, flush=True),
+        # cache_database=CacheDatabaseConfig(type="redis", host="redis-16090.c114.us-east-1-4.ec2.cloud.redislabs.com",
+        #                                    port=16090,
+        #                                    username="default", password="OlRtlXKrSkGzmvhiLgxjDgS4cp2PkIJl",
+        #                                    ssl=False, flush=True),
         data_clients={
             "BINANCE": BinanceDataClientConfig(
                 api_key="316ee06e009b0ec07b92d15328bed7f0a92c7e1ddb2ce8a755273a6d4f91c802",
@@ -85,26 +87,41 @@ def live_pipeline_build():
     # Instantiate the node with a configuration
     node = TradingNode(config=config_node)
 
+    # # Configure your strategy
+    # strat_config = Practice_Strat_Config(
+    #     instrument_id="BTCUSDT-PERP.BINANCE",
+    #     bar_type="BTCUSDT-PERP.BINANCE-1-MINUTE-LAST-EXTERNAL",
+    #     trade_size=Decimal("0.001"),
+    #
+    #     fast_ema_period=3,
+    #     slow_ema_period=14,
+    #     atr_period=5,
+    #     trailing_atr_multiple=1.5,
+    #     trailing_offset_type="BASIS_POINTS",
+    #     trigger_type="LAST_TRADE",
+    #
+    #     # bar_type="BTCUSDT-PERP.BINANCE-1000-TICK[LAST]-INTERNAL",
+    #     # trade_size=Decimal(0.001),
+    #     order_id_tag="001",
+    # )
+    #
+    # # Instantiate your strategy
+    # strategy = Practice_Strat(config=strat_config)
+
     # Configure your strategy
-    strat_config = Practice_Strat_Config(
+    strategy_config = OrderBookImbalanceConfig(
         instrument_id="BTCUSDT-PERP.BINANCE",
-        bar_type="BTCUSDT-PERP.BINANCE-1-MINUTE-LAST-EXTERNAL",
-        trade_size=Decimal("0.001"),
-
-        fast_ema_period=3,
-        slow_ema_period=14,
-        atr_period=5,
-        trailing_atr_multiple=1.5,
-        trailing_offset_type="BASIS_POINTS",
-        trigger_type="LAST_TRADE",
-
-        # bar_type="BTCUSDT-PERP.BINANCE-1000-TICK[LAST]-INTERNAL",
-        # trade_size=Decimal(0.001),
+        # bar_type="BTCUSDT-PERP.BINANCE-1-MINUTE-LAST-EXTERNAL",
+        use_quote_ticks=True,
+        book_type="L1_TBBO",
         order_id_tag="001",
-    )
+        max_trade_size=Decimal("0.01"),
+        trigger_min_size=10.0,
+        trigger_imbalance_ratio=0.20
 
+    )
     # Instantiate your strategy
-    strategy = Practice_Strat(config=strat_config)
+    strategy = OrderBookImbalance(config=strategy_config)
 
     # Add your strategies and modules
     node.trader.add_strategy(strategy)

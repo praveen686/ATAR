@@ -21,7 +21,11 @@ def sample_arb_strategy(OHLCV_Data):
         index=OHLCV_Data.index,
         columns=OHLCV_Data.columns
     )
-    return side
+    import vectorbtpro as vbt
+    features = OHLCV_Data.run("talib_all", periods=vbt.run_func_dict(talib_mavp=14),
+                              )
+
+    return side, features
 
 
 def daily_vol_triple_barrier_label_example(close_series, side_series,
@@ -141,7 +145,7 @@ if __name__ == "__main__":
     #       combination unlike how typically Genie is used
     #   This example also assumes working with OHLCV data, that data when passing to strategy function to label sides is
     #       prepared as a vbt.Data object, and that you want to save the output with all the columns plus the labels.
-
+    # Change to working with dask or vectorbt dataframes
     DATA_DIR = "../../../Data"
     INPUT_DATA_PARAMS = dict(
         data_file_dirs=[DATA_DIR],
@@ -149,7 +153,7 @@ if __name__ == "__main__":
         rename_columns={"Open": "open", "High": "high", "Low": "low", "Close": "close", "Tick volume": "volume"},
         scheduler='threads',
         first_or_last='first',
-        n_rows=10_000,
+        n_rows=None,
         #
         pickle_file_path=f"{DATA_DIR}/XAUUSD.pickle",
         reload_data=True,
@@ -185,7 +189,23 @@ if __name__ == "__main__":
 
     '''Label the sides of the entries when the decision is made, not when the trade is opened -1 0 1 labeled series'''
     # takes no parameter combinations since arbitrary strategy is only needed to handle one asset and one parameter combination
-    side_df = sample_arb_strategy(OHLCV_Data=symbols_data_obj)
+    side_df, features = sample_arb_strategy(
+        OHLCV_Data=symbols_data_obj)  # todo just added features, need to finish implementation
+
+    # If mostly empty (features are not used) then drop the features column
+    # Description describe() per column
+    description = features.describe()
+    print(description)
+
+    # Remove columns where mean is in [0, nan, inf, -inf] or count is 0
+    columns_to_remove = []
+    for column in description.columns:
+        if description[column]["mean"] in [0, np.nan, np.inf, -np.inf] or description[column]["count"] == 0 or \
+                description[column]["25%"] == description[column]["75%"]:
+            columns_to_remove.append(column)
+    features = features.drop(columns=columns_to_remove)
+    print(f"Removed columns: {columns_to_remove}")
+    print(features.head(10))
 
     '''todo: This is a hotfix due to only working with one asset at the moment'''
     close_series = symbols_data_obj.close  # needs to be only one asset otherwise dimensionality error in multiindex
@@ -198,13 +218,17 @@ if __name__ == "__main__":
     '''Combine the OHLCV data triple barrier labeled data'''
     # remember the close values are the same as the close values in the symbols_data_obj, so we can drop one
     input_ohlcv_df = symbols_data_obj.get()
-    triple_barrier_labeled_data = triple_barrier_labeled_data.drop(columns=["close"]).join(input_ohlcv_df)
+    triple_barrier_labeled_data = triple_barrier_labeled_data.drop(columns=["close"]).join(input_ohlcv_df).join(
+        features)
     triple_barrier_labeled_data.index.names = ["Datetime"]
+
     # reorder the columns
     triple_barrier_labeled_data = triple_barrier_labeled_data[
-        input_ohlcv_df.columns.tolist() + ["prim_target", "meta_target"]
+        input_ohlcv_df.columns.tolist() + features.columns.tolist() + ["prim_target", "meta_target"]
         ]
     print("triple_barrier_labeled_data")
+    # print all columns
+    pd.set_option('display.max_columns', None)
     print(triple_barrier_labeled_data)
 
     '''Save the triple barrier labeled data to be used in other processes'''

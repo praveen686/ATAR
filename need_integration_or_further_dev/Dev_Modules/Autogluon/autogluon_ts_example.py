@@ -3,6 +3,8 @@ from autogluon.core import space, TabularDataset
 from autogluon.tabular import TabularPredictor
 from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
 
+from need_integration_or_further_dev.Dev_Modules.genie_loader import Genie_Loader
+
 
 def ag_ts_get_predictor(
         prediction_length,
@@ -86,6 +88,30 @@ def ag_ts_preprocess(df: pd.DataFrame, timestep_label, id_label, static_features
     #       Need to check whether the known covariates are in the dataframe and if not then we will add them if they
     #           are implemented by ag, us or the user and if they are not then we will raise an error.
     #       We have not worked with known covariates yet so we will leave this for now
+
+    # todo Feature Engineering
+    #  Can use any Feature Generator:
+    #         AbstractFeatureGenerator
+    #         AutoMLPipelineFeatureGenerator
+    #         PipelineFeatureGenerator
+    #         BulkFeatureGenerator
+    #         AsTypeFeatureGenerator
+    #         BinnedFeatureGenerator
+    #         CategoryFeatureGenerator
+    #         DatetimeFeatureGenerator
+    #         DropDuplicatesFeatureGenerator
+    #         DropUniqueFeatureGenerator
+    #         DummyFeatureGenerator
+    #         FillNaFeatureGenerator
+    #         IdentityFeatureGenerator
+    #         LabelEncoderFeatureGenerator
+    #         CategoryMemoryMinimizeFeatureGenerator
+    #         NumericMemoryMinimizeFeatureGenerator
+    #         RenameFeatureGenerator
+    #         TextNgramFeatureGenerator
+    #         TextSpecialFeatureGenerator
+    #       We will need to add feature engineering here as well, but we will leave this for now
+
     return ts_ag_dataframe
 
 
@@ -176,18 +202,21 @@ if __name__ == "__main__":
     #  Hyperparameter Tuning:
     #       Needs to be implemented if we dont want to just run the default models or settings
 
-
+    LOAD_MODEL = True
     EQUIPMENT_PARAMS = dict(
         NUMBER_OF_CPUS=28,
         NUMBER_OF_GPUS=1
     )
 
     LOAD_DATA_PARAMS = dict(
-        csv_file_path="../../../Data/sample_triple_barrier_labeled_data_1.csv",
+        csv_file_path="../../../Data/sample_triple_barrier_labeled_data.csv",
     )
+    genie_loader = Genie_Loader()
 
     PREPROCESS_PARAMS = dict(
+        # df=pd.read_csv(LOAD_DATA_PARAMS["csv_file_path"]).drop(columns=["meta_target"]),
         df=pd.read_csv(LOAD_DATA_PARAMS["csv_file_path"]).drop(columns=["meta_target"]),
+        # df=pd.read_csv(LOAD_DATA_PARAMS["csv_file_path"]),
         timestep_label="Datetime",
         id_label="id",
         static_features=None,
@@ -201,14 +230,17 @@ if __name__ == "__main__":
         train_test_data_split=0.8,
     )
     PREDICTOR_PARAMS = dict(
-        prediction_length=60 * 4,
+        prediction_length=60,
         target_column_name="prim_target",
         model_path="XAUUSD_Primary_Model_BBANDS_1min",
-        load_model=False,
-        # eval_metric="sMAPE",
-        splitter="multi_window",
-        # splitter="last_window",
-        quantile_levels=[0.1, 0.5, 0.9],
+        # target_column_name="meta_target",
+        # model_path="XAUUSD_Meta_Model_BBANDS_1min",
+        #
+        load_model=LOAD_MODEL,
+        eval_metric="sMAPE",
+        # splitter="multi_window",
+        splitter="last_window",
+        quantile_levels=[0.1, 0.5, 0.75, 0.85, 0.95],
 
         ignore_time_index=False,
         known_covariates_names=None,  # todo currently not used or implemented
@@ -223,18 +255,6 @@ if __name__ == "__main__":
         infer_limit_batch_size=None,
         fit_weighted_ensemble=True,
 
-        # hyperparameters={
-        #        'Naive': {'ag_args_fit': {'num_gpus': 1}}, 'SeasonalNaive': {'ag_args_fit': {'num_gpus': 1}},
-        #     'ETS': {'ag_args_fit': {'num_gpus': 1}}, 'Theta': {'ag_args_fit': {'num_gpus': 1}},
-        #     'ARIMA': {'ag_args_fit': {'num_gpus': 1}}, 'AutoETS': {'ag_args_fit': {'num_gpus': 1}},
-        #     'AutoGluonTabular': {'ag_args_fit': {'num_gpus': 1}}, 'DeepAR': {'ag_args_fit': {'num_gpus': 1}}
-        # },
-        # hyperparameter_tune_kwargs={
-        #     'Naive': {'ag_args_fit': {'num_gpus': 1}}, 'SeasonalNaive': {'ag_args_fit': {'num_gpus': 1}},
-        #     'ETS': {'ag_args_fit': {'num_gpus': 1}}, 'Theta': {'ag_args_fit': {'num_gpus': 1}},
-        #     'ARIMA': {'ag_args_fit': {'num_gpus': 1}}, 'AutoETS': {'ag_args_fit': {'num_gpus': 1}},
-        #     'AutoGluonTabular': {'ag_args_fit': {'num_gpus': 1}}, 'DeepAR': {'ag_args_fit': {'num_gpus': 1}}
-        # },
         hyperparameters={
             "Naive": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
             "SeasonalNaive": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
@@ -243,12 +263,10 @@ if __name__ == "__main__":
             "Theta": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
             "AutoETS": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
             "AutoARIMA": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
-            "AutoGluonTabular": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
+            # "AutoGluonTabular": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
             # "DeepAR": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
             # "SimpleFeedForward": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
             # "TemporalFusionTransformer": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
-
-
         },
 
         num_cpus=EQUIPMENT_PARAMS["NUMBER_OF_CPUS"],
@@ -259,7 +277,7 @@ if __name__ == "__main__":
     PREDICTION_PARAMS = dict(
         num_cpus=EQUIPMENT_PARAMS["NUMBER_OF_CPUS"],
         num_gpus=EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
-        random_seed=123,
+        random_seed=None,
         # known_covariates=None,  # todo include it in the input date if known_covariates_names was set
     )
 
@@ -277,13 +295,14 @@ if __name__ == "__main__":
 
     '''Create Predictor and fit model'''
     predictor = ag_ts_get_predictor(**PREDICTOR_PARAMS)
-    predictor.fit(train_data=train_data, tuning_data=test_data,
 
-                  # show_plot=True, plot=True,
-                  verbosity=4, **FIT_PARAMS)
+    # if PREDICTION_PARAMS["load_model"]:
+    if not LOAD_MODEL:
+        predictor.fit(train_data=train_data, tuning_data=test_data, verbosity=4,
+                      **FIT_PARAMS)
+        predictor.save()
 
     predictor.fit_summary(verbosity=2)
-    predictor.save()
 
     '''Predict'''
     model = predictor.get_model_best()
@@ -291,3 +310,23 @@ if __name__ == "__main__":
 
     print("Predictions")
     print(predictions)
+
+    '''Plot predictions'''
+    import plotly.graph_objects as go
+    import plotly.express as px
+    import plotly.io as pio
+
+    pio.renderers.default = "browser"
+
+    print(f'{test_data.index.get_level_values(1)  = }')
+    print(f'{predictions.index.get_level_values(1)  = }')
+
+    fig = go.Figure()
+    # make sure to include the test data as well to see if the predictions are correct
+    fig.add_trace(go.Scatter(x=test_data.index.get_level_values(1), y=test_data["prim_target"], name="Test Data"))
+    fig.add_trace(go.Scatter(x=predictions.index.get_level_values(1), y=predictions["0.95"], name="Predictions 0.95"))
+    fig.add_trace(go.Scatter(x=predictions.index.get_level_values(1), y=predictions["0.85"], name="Predictions 0.85"))
+    fig.add_trace(go.Scatter(x=predictions.index.get_level_values(1), y=predictions["0.75"], name="Predictions 0.75"))
+    fig.add_trace(go.Scatter(x=predictions.index.get_level_values(1), y=predictions["0.5"], name="Predictions 0.5"))
+    fig.add_trace(go.Scatter(x=predictions.index.get_level_values(1), y=predictions["0.1"], name="Predictions 0.1"))
+    fig.show()
