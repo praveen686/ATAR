@@ -39,7 +39,6 @@ In summary, the triple-barrier method and meta-labeling provide a robust approac
 addressing the shortcomings of the fixed-time horizon method. The combination of these techniques results in more
 accurate predictions and improved decision-making in financial markets."""
 
-
 import numpy as np
 import pandas as pd
 
