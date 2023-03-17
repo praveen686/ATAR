@@ -6,7 +6,7 @@ from need_integration_or_further_dev.Models_practice.AutoGluon.autogluon_help im
 
 if __name__ == "__main__":
     LOAD_MODEL = False
-    pickle_file_name = "../../Dev_Modules/Triple_Barrier_Label/triple_barrier_labeled_data.csv"
+    pickle_file_name = "../../Dev_Modules/Triple_Barrier_Meta_Label/triple_barrier_labeled_data.csv"
     PREDICTION_LENGTH = 1
     TRAINING_TIME_LIMIT = 3
     TRAIN_TEST_DATA_SPLIT = 0.8
