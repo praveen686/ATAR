@@ -1,13 +1,14 @@
 """Triple-Barrier and Meta-Labeling: Simplified Explanation
 
 The fixed-time horizon method is a widely-used labeling technique in financial academia. However, it has several
-shortcomings, which are addressed by the triple-barrier method. The triple-barrier method can be combined with
+shortcomings, which are addressed by the triple-barrier method. The triple-barrier method can also be combined with
 meta-labeling to further enhance its effectiveness.
 
 Sources:
 
 Advances in Financial Machine Learning, Chapter 3 by Marcos Lopez de Prado
 Machine Learning for Asset Managers, Chapter 5 by Marcos Lopez de Prado
+
 Triple-Barrier Method:
 
 The triple-barrier method involves three barriers: an upper, a lower, and a vertical barrier. The upper barrier
