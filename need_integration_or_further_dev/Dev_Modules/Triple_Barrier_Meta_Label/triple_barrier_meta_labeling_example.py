@@ -299,3 +299,9 @@ if __name__ == "__main__":
             # "pickle"
         ],  # can be csv, pickle, vbt, or list of these
     )
+
+    TBM_labeling(
+        input_data_params=INPUT_DATA_PARAMS,
+        tbl_params=TBL_PARAMS,
+        output_data_params=OUTPUT_DATA_PARAMS,
+    )
