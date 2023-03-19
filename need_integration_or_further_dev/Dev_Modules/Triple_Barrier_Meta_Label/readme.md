@@ -42,7 +42,7 @@ In a nutshell, the triple-barrier method and meta-labeling work in concert to cr
 financial data, remedying the limitations of the fixed-time horizon method. This harmonious collaboration leads to more
 precise predictions and more informed decision-making in the realm of financial markets.
 
-# Short-Tutorial: Triple Barrier Meta Labeling Pipeline
+# Short-Tutorial: Triple Barrier Meta Labeling Pipeline ( *local not on aws endpoint* )
 
 In this tutorial, we will build a Triple Barrier Meta Labeling pipeline using the provided functions. This pipeline 
 will take in a dataframe of historical data and return a labeled dataframe with features, primary model labels, 
