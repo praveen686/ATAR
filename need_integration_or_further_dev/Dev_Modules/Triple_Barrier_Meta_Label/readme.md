@@ -1,45 +1,43 @@
-Triple-Barrier and Meta-Labeling: Simplified Explanation
+An Overview: Triple-Barrier & Meta-Labeling Techniques
 
 ![meta_labeling_architecture.png](meta_labeling_architecture.png)
 *note*: this image is from the original text, and is not my own work. also primary model can be adjusted to handle 
     long and short predictions.
 
-The fixed-time horizon method is a widely-used labeling technique in financial academia. However, it has several
-shortcomings, which are addressed by the triple-barrier method. The triple-barrier method can also be combined with
-meta-labeling to further enhance its effectiveness.
 
-Sources:
+The fixed-time horizon technique, a common strategy for labeling data in the world of financial research, isn't without
+its flaws. Enter the triple-barrier method—a more dynamic approach that, when paired with meta-labeling, can
+significantly boost efficacy.
 
-Advances in Financial Machine Learning, Chapter 3 by Marcos Lopez de Prado
-Machine Learning for Asset Managers, Chapter 5 by Marcos Lopez de Prado
+From the Writings of Marcos Lopez de Prado:
 
-Triple-Barrier Method:
+Advances in Financial Machine Learning, Chapter 3
+Machine Learning for Asset Managers, Chapter 5
+Breaking Down the Triple-Barrier Method:
 
-The triple-barrier method involves three barriers: an upper, a lower, and a vertical barrier. The upper barrier
-represents the return threshold for buying opportunities (label 1), the lower barrier represents the return threshold
-for selling opportunities (label -1), and the vertical barrier represents the time limit for an observation to reach
-either the upper or lower barrier before being labeled 0. This method dynamically adjusts the upper and lower barriers
-based on the volatility of each observation.
+Three barriers define this method: the upper, the lower, and the vertical. The upper barrier sets the stage for buying
+chances (label 1), while the lower barrier defines selling opportunities (label -1). Finally, the vertical barrier
+imposes a time limit on observations, with the upper or lower barriers needing to be reached before an observation is labeled 0. Importantly, this method adjusts the upper and lower barriers based on each observation's volatility.
 
-Meta-Labeling:
+The Essence of Meta-Labeling:
 
-Meta-labeling is a secondary machine learning (ML) model that helps determine the appropriate bet size without deciding
-the side (long or short) of the bet. The secondary ML model filters false positives from the primary model, increasing
-overall accuracy. It has several advantages, including transforming fundamental models into ML models, limiting
-overfitting effects, enabling sophisticated strategy structures, and improving decision-making for bet sizing.
+This secondary machine learning model focuses on determining the optimal bet size, without worrying about the side of
+the bet (long or short). As the secondary model filters false positives from the primary model, it bolsters overall
+accuracy. Key benefits include morphing fundamental models into machine learning models, curbing overfitting,
+developing sophisticated strategy structures, and refining decision-making regarding bet sizes.
 
-How to Use Meta-Labeling:
+Putting Meta-Labeling into Practice:
 
-Build a primary model with high recall, even if the precision is low.
-Correct for low precision by applying meta-labeling to the positive predictions of the primary model.
-Meta-labeling will improve the F1-score by filtering out false positives, while the primary model identifies most
+Develop a primary model with high recall, even if precision is low.
+Compensate for low precision by applying meta-labeling to the primary model's positive predictions.
+By filtering out false positives, meta-labeling enhances the F1-score while the primary model zeroes in on most
 positives.
-Implementation:
+Implementation in Action:
 
-Several functions are used for the triple-barrier method in conjunction with meta-labeling. These functions include
-add_vertical_barrier(), get_events(), get_bins(), and drop_labels(). Detailed descriptions of these functions can be
-found in the original text.
+A variety of functions are employed when using the triple-barrier method in tandem with meta-labeling, such as
+add_vertical_barrier(), get_events(), get_bins(), and drop_labels(). Comprehensive descriptions of these functions are
+available in the original texts.
 
-In summary, the triple-barrier method and meta-labeling provide a robust approach to labeling financial data by
-addressing the shortcomings of the fixed-time horizon method. The combination of these techniques results in more
-accurate predictions and improved decision-making in financial markets.
+In a nutshell, the triple-barrier method and meta-labeling work in concert to create a powerful approach to labeling
+financial data, remedying the limitations of the fixed-time horizon method. This harmonious collaboration leads to more
+precise predictions and more informed decision-making in the realm of financial markets.
