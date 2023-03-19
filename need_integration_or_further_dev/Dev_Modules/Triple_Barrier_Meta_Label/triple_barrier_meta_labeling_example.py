@@ -211,7 +211,7 @@ def TBM_labeling(
 
     '''Create Features using TA-Lib'''
     import vectorbtpro as vbt
-    features = symbols_data_obj.run("talib_all", periods=vbt.run_func_dict(talib_mavp=14))
+    features = symbols_data_obj.run("talib_all", periods=vbt.run_func_dict(talib_mavp=14) )
 
     # If mostly empty (features are not used) then drop the features column
     # Description describe() per column
