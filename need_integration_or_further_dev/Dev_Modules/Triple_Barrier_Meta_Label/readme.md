@@ -84,7 +84,7 @@ This will execute the main script that:
         daily_vol_triple_barrier_label_example function, which generates a meta-labeled DataFrame.
     4. Saves the meta-labeled DataFrame to an output file using the save_output_data function.
 
-    bonus: the dataframe will also contain all TA-LIB indicators to be used as features
+    bonus: the dataframe contains all TA-LIB indicators to be used as features
 
 The resulting labeled dataframe will contain the historical data along with the features, primary model labels, 
 and meta labels. This can be used as input for further analysis or machine learning models.
