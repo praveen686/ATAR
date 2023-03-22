@@ -4,6 +4,7 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/nautilus_trader" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/vectorbtpro" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/genietraderapi" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="Genie-Trader-VBT" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
