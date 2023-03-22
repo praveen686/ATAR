@@ -17,7 +17,12 @@ considered insignificant.  I am looking for any and all contributions.
 BE SURE TO DO A PULL BEFORE YOU START WORKING ON ANYTHING.  I HAVE BEEN MAKING CHANGES TO THE STRUCTURE AND CONTENTS OF 
 THE REPO ON A DAILY BASIS! ALTHOUGH BREAKING CHANGES TO YOUR OWN WORK IS UNLIKELY AT THIS POINT, IT IS STILL POSSIBLE, 
 SPECIALLY STANDARD ALGORITHMS AND MODULES IN DEV. IDEALLY DOCUMENTATION WILL BE AUTOMATICALLY MERGED TO THE CATALOG 
-ALONG WITH CHANGES
+ALONG WITH CHANGES.
+
+As a rule of thumb the main branch is the most stable and the dev branch is the most experimental. However currently 
+only the main branch is being updated given the current state of the repo.  I am working on a more stable version which
+will exclude Modules_in_Dev, TBD_Contributions_From_Community_in_Dev, need_integration_aka_scattered_work and any other.
+
 
 
 
@@ -29,6 +34,9 @@ ALONG WITH CHANGES
 
 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 
+We are working in transitioning the current codebase into a microservice architecture, thus keep modularity in mind even 
+if not directly contributing to the microservices.  The microservices maintenance will be the primary focus of the repo 
+in the future. The current codebase is a bit of a mess and will be cleaned up as the microservices are developed.
 
 Not Much here yet.  Just a plac
 
