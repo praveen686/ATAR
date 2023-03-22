@@ -62,5 +62,29 @@ Version 1.0, March 22, 2023
 
 8.8 The relationship between the Licensor and Collaborators under this Agreement is that of independent contractors. Nothing contained in this Agreement shall be construed as creating any agency, partnership, joint venture, or other form of joint enterprise, employment, or fiduciary relationship between the parties.
 
+# 9. Confidentiality
+9.1 Collaborators agree to keep any non-public information related to the Software confidential and not to disclose it to any third parties, except as required by law or with the express written consent of the Licensor.
+
+# 10. Indemnification
+10.1 Collaborators agree to indemnify, defend, and hold harmless the Licensor from and against any and all claims, damages, losses, liabilities, costs, and expenses (including reasonable attorneys' fees) arising from or related to their Contributions, breach of this Agreement, infringement of intellectual property rights, or any other actions related to their participation in the development or maintenance of the Software.
+
+# 11. Contribution Acceptance
+11.1 All Contributions submitted by Collaborators are subject to review and acceptance by the Licensor or designated Collaborators. The Licensor reserves the right to reject or request modifications to any Contribution at its sole discretion.
+
+# 12. Attribution
+12.1 Collaborators shall be credited for their Contributions in the documentation, source code, or any other appropriate manner, as determined by the Licensor.
+
+# 13. Code of Conduct
+13.1 Collaborators agree to adhere to a code of conduct, as established by the Licensor, fostering a positive, respectful, and inclusive environment for all participants in the development or maintenance of the Software.
+
+# 14. Support and Maintenance
+14.1 The Licensor or designated Collaborators may, at their discretion, provide support, maintenance, or updates for the Software. Collaborators are not obligated to provide support or maintenance unless otherwise agreed upon in writing with the Licensor.
+
+# 15. Export Compliance
+15.1 Collaborators agree to comply with all applicable export control laws and regulations in their respective jurisdictions, ensuring that the Software is not exported or re-exported in violation of such laws.
+
+# 16. No Implied Rights
+16.1 Nothing in this Agreement shall be construed as granting any rights, express or implied, in the Software, other than those specifically outlined in the Agreement.
+
 IN WITNESS WHEREOF, the parties have executed this Genie-Trader Exclusive License Agreement as of the date first written above.
 
