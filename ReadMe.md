@@ -40,6 +40,10 @@ We are working in transitioning the current codebase into a microservice archite
 if not directly contributing to the microservices.  The microservices maintenance will be the primary focus of the repo 
 in the future. The current codebase is a bit of a mess and will be cleaned up as the microservices are developed.
 
+## Data
+
+The data is currently stored in the data folder but will move towards database storage. 
+
 ## Genie-Trader Exclusive License Agreement: Overview for Incoming Contributors
 
 This overview summarizes the key points of the Genie-Trader Exclusive License Agreement for incoming contributors to better and more efficiently understand the license. Please note that this overview does not replace the full license, and you should read the entire license to ensure that you fully understand its terms and conditions.
