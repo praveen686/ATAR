@@ -46,25 +46,18 @@ The data is currently stored in the data folder but will move towards database s
 
 ## Genie-Trader Exclusive License Agreement: Overview for Incoming Contributors
 
+
 This overview summarizes the key points of the Genie-Trader Exclusive License Agreement for incoming contributors to better and more efficiently understand the license. Please note that this overview does not replace the full license, and you should read the entire license to ensure that you fully understand its terms and conditions.
 
-Purpose: The license aims to control access, usage, and contributions to the Genie-Trader repository by explicitly permitted Collaborators, while granting the Licensor (repository owner) complete control over the repository and its contents.
-
-Collaborators: Individuals or entities who have been explicitly granted permission by the Licensor to contribute to the development, maintenance, or distribution of the Software.
-
-License Grant: Collaborators are granted a non-exclusive, non-transferable, non-sublicensable, revocable, and limited license to access, use, and modify the Software solely for the purpose of making Contributions to the Software.
-
-Restrictions: Collaborators must not copy, distribute, sell, or otherwise transfer any portion of the Software or use it for commercial purposes without the express written consent of the Licensor. Modifications and derivative works are only allowed as explicitly described under the License Grant.
-
-Contributions: Collaborators grant the Licensor a perpetual, irrevocable, worldwide, non-exclusive, royalty-free, sublicensable, and transferable license to use, reproduce, modify, distribute, prepare derivative works of, display, and perform their Contributions in connection with the Software and the Licensor's business.
-
-Termination: The Licensor may terminate the Agreement at any time, with or without cause. Upon termination, Collaborators must cease all use of the Software and destroy all copies in their possession or control.
-
-Warranty and Liability: The Software is provided "as is," and the Licensor disclaims all warranties. The Licensor's liability is limited in the event of any damages arising from the use or inability to use the Software.
-
-Governing Law and Jurisdiction: The Agreement is governed by the laws of the jurisdiction in which the Licensor resides, and any disputes arising out of or in connection with the Agreement are subject to the exclusive jurisdiction of the courts of that jurisdiction.
+1. Purpose: The license aims to control access, usage, and contributions to the Genie-Trader repository by explicitly permitted Collaborators, while granting the Licensor (repository owner) complete control over the repository and its contents.
+2. Collaborators: Individuals or entities who have been explicitly granted permission by the Licensor to contribute to the development, maintenance, or distribution of the Software. 
+3. License Grant: Collaborators are granted a non-exclusive, non-transferable, non-sublicensable, revocable, and limited license to access, use, and modify the Software solely for the purpose of making Contributions to the Software. 
+4. Restrictions: Collaborators must not copy, distribute, sell, or otherwise transfer any portion of the Software or use it for commercial purposes without the express written consent of the Licensor. Modifications and derivative works are only allowed as explicitly described under the License Grant. 
+5. Contributions: Collaborators grant the Licensor a perpetual, irrevocable, worldwide, non-exclusive, royalty-free, sublicensable, and transferable license to use, reproduce, modify, distribute, prepare derivative works of, display, and perform their Contributions in connection with the Software and the Licensor's business. 
+6. Termination: The Licensor may terminate the Agreement at any time, with or without cause. Upon termination, Collaborators must cease all use of the Software and destroy all copies in their possession or control.
+7. Warranty and Liability: The Software is provided "as is," and the Licensor disclaims all warranties. The Licensor's liability is limited in the event of any damages arising from the use or inability to use the Software. 
+8. Governing Law and Jurisdiction: The Agreement is governed by the laws of the jurisdiction in which the Licensor resides, and any disputes arising out of or in connection with the Agreement are subject to the exclusive jurisdiction of the courts of that jurisdiction.
 
 It is important to read and understand the entire Genie-Trader Exclusive License Agreement before contributing to the repository. By contributing, you agree to the terms and conditions outlined in the full license.
-
 
 
