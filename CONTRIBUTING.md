@@ -1,9 +1,9 @@
 *FIXME - SEE [Temporary_Guide_to_Early_Stage_Contributions.md](Temporary_Guide_to_Early_Stage_Contributions.md) for 
 contributing this early in the project prior to the CI/CO pipeline being in place (below is just template/planning). 
-In generaladd contributing pipeline spoken below, just doc at the moment. Keep good common sense for now. Fork the repo 
-and do a pull request as needed. For now, we'll tend to work on independent sections of the codebase of new files only 
-to minimize merging issues. Add issues as needed but be precise about the error or recommended changes if the file 
-ownership is not yours*
+In general the contributing pipeline spoken below is just empty a promises doc at the moment. Keep good common sense 
+for now!. Fork the repo and do a pull requests as needed. For now, we'll tend to work on independent sections of the 
+codebase of new files only to minimize merging issues. Add issues as needed but be precise about the error or 
+recommended changes if the file ownership is not yours. Ask me questions :)*
 
 # Contributing to Genie-Trader
 
