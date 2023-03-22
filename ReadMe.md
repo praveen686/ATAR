@@ -3,8 +3,8 @@ Use conda environment to keep dependencies separated locally, e.g. while not uti
 tends to break vectorbt's dependencies and vice versa.  So, I have to keep them separate.  I have a conda environment
 for utilizing Nautilus_Trader, vectorbtpro, RAPIDS,and autogluon although the latter is more flexible if not utilzing 
 GPU version to pytorch. For example, at the moment the only actively examples being developed are the triple_barrier_meta_labeling_example.py and 
-autogluon_ts_example.py in Modules_in_Dev, one utilzes vectorbtpro and the standard_algorithms for the labeling process 
-without any issues (although watchout for dask, pandas and numpy versioning issues).  The other utilizes autogluon and 
+autogluon_ts_example.py in Modules_in_Dev, one utilizes vectorbtpro and the standard_algorithms for the labeling process 
+without any issues (although watch out for dask, pandas and numpy versioning issues).  The other utilizes autogluon and 
 dask and pandas.
 
 
