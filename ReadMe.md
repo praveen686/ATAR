@@ -1,5 +1,5 @@
 
-Use conda environment to keep dependencies separated while to utilizing the AWS microservices. Nautilus_Trader
+Use conda environment to keep dependencies separated locally, e.g. while not utilizing the AWS microservices. Nautilus_Trader
 tends to break vectorbt's dependencies and vice versa.  So, I have to keep them separate.  I have a conda environment
 for utilizing Nautilus_Trader, vectorbtpro, RAPIDS,and autogluon although the latter is more flexible if not utilzing 
 GPU version to pytorch. For example, at the moment the only actively examples being developed are the triple_barrier_meta_labeling_example.py and 
