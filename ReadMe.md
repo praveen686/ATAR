@@ -8,8 +8,11 @@ without any issues (although watch out for dask, pandas and numpy versioning iss
 dask and pandas.
 
 [CONTRIBUTING.md](CONTRIBUTING.md)
+
 [Temporary_Guide_to_Early_Stage_Contributions.md](Temporary_Guide_to_Early_Stage_Contributions.md)
+
 [RISK_AND_PERFORMANCE_DISCLAIMER.md](RISK_AND_PERFORMANCE_DISCLAIMER.md)
+
 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 
 
