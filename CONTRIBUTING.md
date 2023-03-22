@@ -1,4 +1,11 @@
-# Contributing to Genie Omnipresent
+*FIXME - SEE [Temporary_Guide_to_Early_Stage_Contributions.md](Temporary_Guide_to_Early_Stage_Contributions.md) for 
+contributing this early in the project prior to the CI/CO pipeline being in place (below is just template/planning). 
+In generaladd contributing pipeline spoken below, just doc at the moment. Keep good common sense for now. Fork the repo 
+and do a pull request as needed. For now, we'll tend to work on independent sections of the codebase of new files only 
+to minimize merging issues. Add issues as needed but be precise about the error or recommended changes if the file 
+ownership is not yours*
+
+# Contributing to Genie-Trader
 
 Involvement from the trading community is a goal for this project. All help is welcome!
 Developers can open issues on GitHub to discuss proposed enhancements/changes, or
@@ -36,8 +43,8 @@ To contribute, the following steps should be followed;
 ## Tips
 
 - Conform to the established coding practices, see _Coding Standards_ in the
-  [Developer Guide](https://docs.GenieOmnipresent.io/developer_guide/index.html).
+  [Developer Guide](https://docs.Genie-Trader.codes/developer_guide/index.html).
 - Keep PR's small and focused.
 - Reference the related GitHub issue(s) in the PR comment.
 
-Thank you for your interest in Genie Omnipresent!
+Thank you for your interest in Genie-Trader!
