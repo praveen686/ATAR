@@ -7,3 +7,6 @@
 [submodule "genietraderapi"]
 	path = genietraderapi
 	url = https://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@github.com/Bucanero06/Genie-Trader-API.git
+[submodule "contentadvisor"]
+	path = contentadvisor
+	url = https://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@github.com/Bucanero06/Content-Advisor.git
