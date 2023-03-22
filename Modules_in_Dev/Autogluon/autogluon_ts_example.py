@@ -3,7 +3,7 @@ from autogluon.core import space, TabularDataset
 from autogluon.tabular import TabularPredictor
 from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
 
-from need_integration_or_further_dev.Dev_Modules.genie_loader import Genie_Loader
+from need_integration_aka_scattered_work.Dev_Modules.genie_loader import Genie_Loader
 
 
 def ag_ts_get_predictor(

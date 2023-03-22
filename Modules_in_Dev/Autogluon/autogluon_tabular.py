@@ -3,7 +3,7 @@ from autogluon.core import space, TabularDataset
 from autogluon.features import AutoMLPipelineFeatureGenerator
 from autogluon.tabular import TabularPredictor, TabularDataset
 
-from need_integration_or_further_dev.Dev_Modules.genie_loader import Genie_Loader
+from need_integration_aka_scattered_work.Dev_Modules.genie_loader import Genie_Loader
 
 
 # todo This is still being changed from the original ts example

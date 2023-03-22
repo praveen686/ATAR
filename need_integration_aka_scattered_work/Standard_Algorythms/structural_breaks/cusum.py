@@ -4,7 +4,7 @@ Implementation of Chu-Stinchcombe-White test
 
 import pandas as pd
 import numpy as np
-from need_integration_or_further_dev.Standard_Algorythms.util import mp_pandas_obj
+from need_integration_aka_scattered_work.Standard_Algorythms.util import mp_pandas_obj
 
 
 def _get_values_diff(test_type, series, index, ind):

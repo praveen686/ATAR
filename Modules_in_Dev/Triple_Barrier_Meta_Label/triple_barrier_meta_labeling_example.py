@@ -42,10 +42,10 @@ precise predictions and more informed decision-making in the realm of financial 
 import numpy as np
 import pandas as pd
 
-from need_integration_or_further_dev.Dev_Modules.genie_loader import Genie_Loader
-from need_integration_or_further_dev.Standard_Algorythms import util
-from need_integration_or_further_dev.Standard_Algorythms.labeling_algorythms import labeling
-from need_integration_or_further_dev.Standard_Algorythms.timeseries_algorythms import timeseries_filters
+from need_integration_aka_scattered_work.Dev_Modules.genie_loader import Genie_Loader
+from need_integration_aka_scattered_work.Standard_Algorythms import util
+from need_integration_aka_scattered_work.Standard_Algorythms.labeling_algorythms import labeling
+from need_integration_aka_scattered_work.Standard_Algorythms.timeseries_algorythms import timeseries_filters
 
 
 def example_arb_strategy(OHLCV_Data):
@@ -303,7 +303,7 @@ if __name__ == "__main__":
     """
 
     # todo:
-    #   The biggest assumption this example makes is that your are only owkring with one asset and one parameter
+    #   The biggest assumption this example makes is that your are only working with one asset and one parameter
     #       combination unlike how typically Genie is used
     #   This example also assumes working with OHLCV data, that data when passing to strategy function to label sides is
     #       prepared as a vbt.Data object, and that you want to save the output with all the columns plus the labels.

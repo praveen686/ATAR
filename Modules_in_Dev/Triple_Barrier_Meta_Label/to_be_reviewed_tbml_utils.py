@@ -54,7 +54,7 @@ def train_model(  # todo generalize this to work with any model and any data set
                                             feature_columns=feature_columns,
                                             return_as_df=True)
 
-    from need_integration_or_further_dev.Models_practice.AutoGluon.autogluon_help import prepare_autogluon_data
+    from need_integration_aka_scattered_work.Models_practice.AutoGluon.autogluon_help import prepare_autogluon_data
     ts_dataframe = prepare_autogluon_data(X_df=X, y_df=y,
                                           prediction_length=prediction_length,
                                           id_column=id_column,
@@ -63,12 +63,12 @@ def train_model(  # todo generalize this to work with any model and any data set
                                           )
 
     # Split data into train and test
-    from need_integration_or_further_dev.Models_practice.AutoGluon.autogluon_help import split_data
+    from need_integration_aka_scattered_work.Models_practice.AutoGluon.autogluon_help import split_data
     # todo splitdata can use the autogluon splitter or sklearn splitter instead of this simple one below
     train_data, test_data = split_data(ts_dataframe=ts_dataframe, train_test_data_split=train_test_data_split)
 
     # First Model
-    from need_integration_or_further_dev.Models_practice.AutoGluon.autogluon_help import get_timeseries_predictor
+    from need_integration_aka_scattered_work.Models_practice.AutoGluon.autogluon_help import get_timeseries_predictor
     primary_predictor = get_timeseries_predictor(load_model=False, prediction_length=prediction_length)
     primary_predictor.fit(train_data, presets="medium_quality", time_limit=time_limit, num_gpus=num_gpu, )
     primary_predictor.save()

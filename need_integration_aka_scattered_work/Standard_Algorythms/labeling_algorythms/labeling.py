@@ -5,7 +5,7 @@ Logic regarding labeling from chapter 3. In particular the Triple Barrier Method
 import numpy as np
 import pandas as pd
 
-from need_integration_or_further_dev.Standard_Algorythms.util import mp_pandas_obj
+from need_integration_aka_scattered_work.Standard_Algorythms.util import mp_pandas_obj
 
 
 # Snippet 3.1, page 44, Daily Volatility Estimates
