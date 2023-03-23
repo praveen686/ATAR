@@ -1,6 +1,6 @@
 Title: Temporary Guide to Contributing to the Project
 
-Contributing Guidelines
+# SUMMARY - Contributing 
 We appreciate your interest in contributing to our project! Please read through the following guidelines before you begin to ensure a smooth and efficient collaboration process.
 
 Step 1: Fork the Repository

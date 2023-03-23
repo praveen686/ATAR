@@ -53,14 +53,20 @@ def ag_ts_get_predictor(
 
 def ag_ts_preprocess(df: pd.DataFrame, timestep_label, id_label, static_features=None,
                      regularize_to_freq="min",
+                     columns_to_drop=None
                      ):
     """Construct a TimeSeriesDataFrame from a DataFrame"""
+    if columns_to_drop is not None:
+        df = df.drop(columns=columns_to_drop)
 
     # If timestep label not in columns then we will reset the index and expect the index to be a DatetimeIndex with
     #       the same label as the timestep_label
     if timestep_label not in df.columns:
         # Reset the index column
         df = df.reset_index()
+
+
+
     # Convert Datetime column to datetime64[ns] type with no timezone
     df[timestep_label] = pd.to_datetime(df[timestep_label], utc=True).dt.tz_convert(None)
 
@@ -205,7 +211,7 @@ if __name__ == "__main__":
     LOAD_MODEL = False
     EQUIPMENT_PARAMS = dict(
         NUMBER_OF_CPUS=28,
-        NUMBER_OF_GPUS=1
+        NUMBER_OF_GPUS=None
     )
 
     LOAD_DATA_PARAMS = dict(
@@ -214,9 +220,14 @@ if __name__ == "__main__":
     )
     genie_loader = Genie_Loader()
 
+    df = pd.read_csv(LOAD_DATA_PARAMS["csv_file_path"])[:1000000]
+
     PREPROCESS_PARAMS = dict(
         # df=pd.read_csv(LOAD_DATA_PARAMS["csv_file_path"]).drop(columns=["meta_target"]),
-        df=pd.read_csv(LOAD_DATA_PARAMS["csv_file_path"]).drop(columns=["meta_target"]),
+        df=df,
+        # columns_to_drop=["meta_target"],
+        columns_to_drop=df.columns[df.columns.tolist().index("prim_target") + 1:],
+
         # df=pd.read_csv(LOAD_DATA_PARAMS["csv_file_path"]),
         timestep_label="Datetime",
         id_label="id",
@@ -257,34 +268,34 @@ if __name__ == "__main__":
         fit_weighted_ensemble=True,
 
         hyperparameters={
-            "Naive": {'ag_args_fit': {
-                'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
-                'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
-            },
-            "SeasonalNaive": {'ag_args_fit': {
-                'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
-                'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
-            },
-            "ARIMA": {'ag_args_fit': {
-                'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
-                'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
-            },
+            # "Naive": {'ag_args_fit': {
+            #     'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+            #     'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            # },
+            # "SeasonalNaive": {'ag_args_fit': {
+            #     'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+            #     'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            # },
+            # "ARIMA": {'ag_args_fit': {
+            #     'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+            #     'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            # },
             # "ETS": {'ag_args_fit': {
             #     'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
             #     'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
             # },
-            "Theta": {'ag_args_fit': {
-                'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
-                'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
-            },
+            # "Theta": {'ag_args_fit': {
+            #     'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+            #     'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            # },
             # "AutoETS": {'ag_args_fit': {
             #     'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
             #     'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
             # },
-            "AutoARIMA": {'ag_args_fit': {
-                'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
-                'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
-            },
+            # "AutoARIMA": {'ag_args_fit': {
+            #     'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+            #     'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            # },
             "AutoGluonTabular": {'ag_args_fit': {
                 'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
                 'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
