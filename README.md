@@ -3,43 +3,32 @@
 
 # Temporary Guide to Early Stage Contributions
 
-Nautilus Trader, VectorbtPRO, and Autogluon can all be installed via pip inside the conda environment however RAPIDS is
-recommended to be installed via conda. Install pip dependencies first, then conda dependencies since conda handles and 
-corrects examples better than pip.
+Welcome to the Genie-Trader GitHub repository! This repository is currently in its early development stage, and while a lot of code has been written, some modules lack proper documentation. The aim of this project is to optimize the codebase and convert it into microservices while incorporating good CI/CD practices and automating most tasks along the way.
 
-Use conda environment to keep dependencies separated locally, e.g. while not utilizing the AWS microservices. Nautilus_Trader
-tends to break vectorbt's dependencies and vice versa.  So, I have to keep them separate.  I have a conda environment
-for utilizing Nautilus_Trader, vectorbtpro, RAPIDS,and autogluon although the latter is more flexible if not utilzing 
-GPU version to pytorch. For example, at the moment the only actively examples being developed are the triple_barrier_meta_labeling_example.py and 
-autogluon_ts_example.py in Modules_in_Dev, one utilizes vectorbtpro and the standard_algorithms for the labeling process 
-without any issues (although watch out for dask, pandas and numpy versioning issues).  The other utilizes autogluon and 
-dask and pandas.
+To get started, you can install Nautilus Trader, VectorbtPRO, and Autogluon via pip inside the conda environment. However, it is recommended to install RAPIDS via conda. Be sure to install pip dependencies first and then conda dependencies, as conda handles and corrects examples better than pip.
 
-Standard yml files will be provided for more stable and experimental environments in the future as well as a 
-dockerfiles. Feel free to share your work with me and I will add it to the repo. No work is small enough to be
-considered insignificant.  I am looking for any and all contributions.
+To keep dependencies separated locally, it's recommended to use a conda environment. For instance, Nautilus_Trader tends to break vectorbt's dependencies and vice versa, so keeping them separate is crucial. At the moment, the only actively developed examples are the triple_barrier_meta_labeling_example.py and autogluon_ts_example.py in the Modules_in_Dev folder. One utilizes VectorbtPRO and the standard algorithms for the labeling process without any issues. However, watch out for Dask, Pandas, and NumPy versioning issues. The other utilizes Autogluon and Dask and Pandas.
 
-BE SURE TO DO A PULL BEFORE YOU START WORKING ON ANYTHING.  I HAVE BEEN MAKING CHANGES TO THE STRUCTURE AND CONTENTS OF 
-THE REPO ON A DAILY BASIS! ALTHOUGH BREAKING CHANGES TO YOUR OWN WORK IS UNLIKELY AT THIS POINT, IT IS STILL POSSIBLE, 
-SPECIALLY STANDARD ALGORITHMS AND MODULES IN DEV. IDEALLY DOCUMENTATION WILL BE AUTOMATICALLY MERGED TO THE CATALOG 
-ALONG WITH CHANGES.
+We will provide standard YAML files for more stable and experimental environments in the future, as well as Dockerfiles. Feel free to share your work with us, and we will add it to the repository. We are looking for any and all contributions.
 
-As a rule of thumb the main branch is the most stable and the dev branch is the most experimental. However, currently 
-only the main branch is being updated given the current state of the repo.  The repo is currently in a state of flux, 
-I am working on a more stable version which will exclude Modules_in_Dev, TBD_Contributions_From_Community_in_Dev, 
-need_integration_aka_scattered_work and any other.
+Please make sure to do a pull before you start working on anything, as we have been making changes to the structure and contents of the repo on a daily basis. While breaking changes to your own work are unlikely at this point, it is still possible, especially with standard algorithms and modules in dev. Ideally, documentation will be automatically merged to the catalog along with changes.
+
+As a rule of thumb, the main branch is the most stable, and the dev branch is the most experimental. However, currently, only the main branch is being updated given the current state of the repo. The repo is currently in a state of flux, and we are working on a more stable version that will exclude Modules_in_Dev, TBD_Contributions_From_Community_in_Dev, need_integration_aka_scattered_work, and any others.
+
+We welcome contributions from everyone, no matter how small. Thank you for taking the time to visit this repository, and we look forward to working with you!
 
 ## Useful Links
 
-[CONTRIBUTING.md](CONTRIBUTING.md)
+[TEMPORARY_GUIDE_TO_EARLY_STAGE_CONTRIBUTIONS.md](TEMPORARY_GUIDE_TO_EARLY_STAGE_CONTRIBUTIONS.md)
 
-[Temporary_Guide_to_Early_Stage_Contributions.md](Temporary_Guide_to_Early_Stage_Contributions.md)
+[MICROSERVICES_BEST_PRACTICES.md](MICROSERVICES_BEST_PRACTICES.md) (I like the explanation of the architecture following a biological viewpoint)
+
+[CONTRIBUTING.md](CONTRIBUTING.md) (In Progress)
 
 [RISK_AND_PERFORMANCE_DISCLAIMER.md](RISK_AND_PERFORMANCE_DISCLAIMER.md)
 
 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 
-[MICROSERVICES_BEST_PRACTICES.md](MICROSERVICES_BEST_PRACTICES.md) (I like the explination of the architecture following a biological viewpoint)
 
 
 We are working in transitioning the current codebase into a microservice architecture, thus keep modularity in mind even 
@@ -50,6 +39,7 @@ So watch this:
 
 1.
 https://youtu.be/otADkIyugzY
+
 and 
 
 2.
