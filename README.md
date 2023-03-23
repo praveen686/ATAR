@@ -1,3 +1,6 @@
+![RubenTheCuban_Genie-Trader_Algorythm_88b23a91-05f8-4a3f-bbfa-65e9681c87f8.png](RubenTheCuban_Genie-Trader_Algorythm_88b23a91-05f8-4a3f-bbfa-65e9681c87f8.png)
+
+
 # Temporary Guide to Early Stage Contributions
 
 Nautilus Trader, VectorbtPRO, and Autogluon can all be installed via pip inside the conda environment however RAPIDS is

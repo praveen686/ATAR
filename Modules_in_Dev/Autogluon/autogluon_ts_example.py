@@ -209,8 +209,8 @@ if __name__ == "__main__":
     )
 
     LOAD_DATA_PARAMS = dict(
-        # csv_file_path="../../Data/sample_triple_barrier_labeled_data.csv",
-        csv_file_path="../../Data/example_triple_barrier_labeled_data_short_duration.csv",
+        csv_file_path="../../Data/sample_triple_barrier_labeled_data.csv",
+        # csv_file_path="../../Data/example_triple_barrier_labeled_data_short_duration.csv",
     )
     genie_loader = Genie_Loader()
 
@@ -228,7 +228,7 @@ if __name__ == "__main__":
     SPLIT_DATA_PARAMS = dict(
         # train_test_data_split="2019-01-01 00:00:00",
         # train_test_data_split=(0, 1000),
-        train_test_data_split=0.8,
+        train_test_data_split=0.95,
     )
     PREDICTOR_PARAMS = dict(
         prediction_length=60,
@@ -247,29 +247,62 @@ if __name__ == "__main__":
         known_covariates_names=None,  # todo currently not used or implemented
     )
     FIT_PARAMS = dict(
-        time_limit=15,
+        time_limit=1800,
         # presets="fast_training",
-        presets="medium_quality",
-        # presets="high_quality",
+        # presets="medium_quality",
+        presets="high_quality",
         feature_metadata='infer',
         infer_limit=None,
         infer_limit_batch_size=None,
         fit_weighted_ensemble=True,
 
         hyperparameters={
-            "Naive": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
-            "SeasonalNaive": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
-            "ARIMA": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
-            # "ETS": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
-            "Theta": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
-            "AutoETS": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
-            "AutoARIMA": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
-            # "AutoGluonTabular": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
-            # "DeepAR": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
-            # "SimpleFeedForward": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
-            # "TemporalFusionTransformer": {'ag_args_fit': {'num_gpus': 1, 'num_cpus': 28}},
+            "Naive": {'ag_args_fit': {
+                'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+                'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            },
+            "SeasonalNaive": {'ag_args_fit': {
+                'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+                'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            },
+            "ARIMA": {'ag_args_fit': {
+                'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+                'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            },
+            # "ETS": {'ag_args_fit': {
+            #     'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+            #     'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            # },
+            "Theta": {'ag_args_fit': {
+                'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+                'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            },
+            # "AutoETS": {'ag_args_fit': {
+            #     'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+            #     'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            # },
+            "AutoARIMA": {'ag_args_fit': {
+                'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+                'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            },
+            "AutoGluonTabular": {'ag_args_fit': {
+                'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+                'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            },
+            # "DeepAR": {'ag_args_fit': {
+            #     'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+            #     'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            # },
+            # "SimpleFeedForward": {'ag_args_fit': {
+            #     'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+            #     'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            # },
+            # "TemporalFusionTransformer": {'ag_args_fit': {
+            #     'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+            #     'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            # },
         },
-
+        hyperparameter_tune_kwargs=None,
         num_cpus=EQUIPMENT_PARAMS["NUMBER_OF_CPUS"],
         num_gpus=EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
 
@@ -303,7 +336,7 @@ if __name__ == "__main__":
                       **FIT_PARAMS)
         predictor.save()
 
-    predictor.fit_summary(verbosity=2)
+    predictor.fit_summary(verbosity=4)
 
     '''Predict'''
     model = predictor.get_model_best()
