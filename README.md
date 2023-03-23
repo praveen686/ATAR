@@ -1,5 +1,4 @@
-![RubenTheCuban_Genie-Trader_Algorythm_88b23a91-05f8-4a3f-bbfa-65e9681c87f8.png](RubenTheCuban_Genie-Trader_Algorythm_88b23a91-05f8-4a3f-bbfa-65e9681c87f8.png)
-
+![RubenTheCuban_Genie-Trader_Algorythm_88b23a91-05f8-4a3f-bbfa-65e9681c87f8_50.png](RubenTheCuban_Genie-Trader_Algorythm_88b23a91-05f8-4a3f-bbfa-65e9681c87f8_50.png)
 
 # Temporary Guide to Early Stage Contributions
 
@@ -21,29 +20,18 @@ We welcome contributions from everyone, no matter how small. Thank you for takin
 
 [TEMPORARY_GUIDE_TO_EARLY_STAGE_CONTRIBUTIONS.md](TEMPORARY_GUIDE_TO_EARLY_STAGE_CONTRIBUTIONS.md)
 
-[MICROSERVICES_BEST_PRACTICES.md](MICROSERVICES_BEST_PRACTICES.md) (In Progress)
-
-[CONTRIBUTING.md](CONTRIBUTING.md) (In Progress)
-
-[RISK_AND_PERFORMANCE_DISCLAIMER.md](RISK_AND_PERFORMANCE_DISCLAIMER.md) 
-
-[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) 
-
-
-
+### Microservices
 We are working in transitioning the current codebase into a microservice architecture, thus keep modularity in mind even 
 if not directly contributing to the microservices.  The microservices maintenance will be the primary focus of the repo 
 in the future. The current codebase is a bit of a mess and will be cleaned up as the microservices are developed.
 
-So watch this:
+[MICROSERVICES_BEST_PRACTICES.md](MICROSERVICES_BEST_PRACTICES.md) (In Progress)
 
-1.
-https://youtu.be/otADkIyugzY
+1. https://youtu.be/otADkIyugzY
 
 and 
 
-2.
-Certainly, let's delve deeper into the scientific parallels between microservices architecture and biological systems, while maintaining a rigorous and scientifically grounded approach.
+2. https://youtu.be/CZ3wIuvmHeM
 
 Modular design principles: In both microservices and biological systems, modular design is crucial for maintaining organization and enabling adaptability. In software engineering, modularity refers to the practice of designing software components with well-defined interfaces that can be combined and reused to build complex applications. Similarly, in biology, modularity can be observed at various scales, from molecular networks and cellular pathways to the organization of tissues and organs. This modularity allows biological systems to evolve and adapt to environmental changes, just as modular software components can be updated or replaced without disrupting the entire application.
 
@@ -57,7 +45,13 @@ While the analogy between microservices architecture and biological systems is n
 
 https://www.youtube.com/watch?v=CZ3wIuvmHeM&t=1554s
 
-    
+[CONTRIBUTING.md](CONTRIBUTING.md) (In Progress)
+
+[RISK_AND_PERFORMANCE_DISCLAIMER.md](RISK_AND_PERFORMANCE_DISCLAIMER.md) 
+
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) 
+
+
 
 ## Data
 
