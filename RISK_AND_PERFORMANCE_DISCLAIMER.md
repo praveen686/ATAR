@@ -15,15 +15,15 @@ Accordingly, you should always consult your own registered investment advisor or
 
 You, the VISITOR, take complete responsibility for your own trades and investments.
 
-Genie Omnipresent makes no representations or warranties regarding the correctness of any information contained in the WEBSITE.
+Genie Trader makes no representations or warranties regarding the correctness of any information contained in the WEBSITE.
 
-Genie Omnipresent takes no responsibility and assumes no liability for any content that the VISITOR receives or sends by the WEBSITE.
+Genie Trader takes no responsibility and assumes no liability for any content that the VISITOR receives or sends by the WEBSITE.
 
 The VISITOR understands and agrees that any loss or damage of any kind that occurs as a result of the use of the WEBSITE is solely the VISITOR responsibility.
 
 There are no guarantees of profit nor of avoiding losses when using our SOFTWARE and/or the services and information in the WEBSITE by text, video or any other format.
 
-VISITOR has received no such guarantees from Genie Omnipresent or from any of its representatives.
+VISITOR has received no such guarantees from Genie Trader or from any of its representatives.
 
 VISITOR is aware of the risks inherent in trading and is financially able to bear such risks and withstand any losses.
 
@@ -33,10 +33,10 @@ YOU should therefore carefully consider whether trading is suitable for you in l
 
 Trading can work against you as well as for you and can lead to large losses as well as gains.
 
-Genie Omnipresent and its managers, employees, shareholders and/or anyone on behalf Genie Omnipresent are NOT registered advisors by any state law and never presented themselves as such.
+Genie Trader and its managers, employees, shareholders and/or anyone on behalf Genie Trader are NOT registered advisors by any state law and never presented themselves as such.
 
-Under no circumstances shall Genie Omnipresent be liable for any loss or damage the VISITOR incurs as a result of any trading or investment based on any information or material receiving through the WEBSITE.
+Under no circumstances shall Genie Trader be liable for any loss or damage the VISITOR incurs as a result of any trading or investment based on any information or material receiving through the WEBSITE.
 
 THIS BRIEF STATEMENT CANNOT DISCLOSE ALL THE RISKS AND OTHER SIGNIFICANT ASPECTS OF TRADING THE MARKETS, YOU SHOULD THEREFORE CAREFULLY STUDY THIS TERMS AND CONDITIONS AND COMMODITY FUTURES, OPTIONS, STOCKS, FOREX, OR ANY OTHER FINANCIAL INSTRUMENT BEFORE YOU TRADE AS WELL AS CONSULT YOUR OWN REGISTERED INVESTMENT ADVISOR OR BROKER BEFORE INITIATING ANY TRADE.
 
-Genie Omnipresent does not pretend to advise anyone about any kind of trading or investment and therefore as stated above the use of this WEBSITE is for educational and entertainment purposes only.
+Genie Trader does not pretend to advise anyone about any kind of trading or investment and therefore as stated above the use of this WEBSITE is for educational and entertainment purposes only.
