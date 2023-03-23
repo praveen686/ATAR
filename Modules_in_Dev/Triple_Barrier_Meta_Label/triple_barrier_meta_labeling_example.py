@@ -42,7 +42,7 @@ precise predictions and more informed decision-making in the realm of financial 
 import numpy as np
 import pandas as pd
 
-from need_integration_aka_scattered_work.Dev_Modules.genie_loader import Genie_Loader
+from Modules_in_Dev.genie_loader import Genie_Loader
 from need_integration_aka_scattered_work.Standard_Algorythms import util
 from need_integration_aka_scattered_work.Standard_Algorythms.labeling_algorythms import labeling
 from need_integration_aka_scattered_work.Standard_Algorythms.timeseries_algorythms import timeseries_filters
@@ -308,7 +308,7 @@ if __name__ == "__main__":
     #   This example also assumes working with OHLCV data, that data when passing to strategy function to label sides is
     #       prepared as a vbt.Data object, and that you want to save the output with all the columns plus the labels.
     #   Change to working with dask or vectorbt dataframes for better execution with larger datasets and more assets
-    DATA_DIR = "../../../Data"
+    DATA_DIR = "../../Data"
 
     INPUT_DATA_PARAMS = dict(
         # todo this will be changed as needed for the endpoint to save the data e.g. S3-bucket

@@ -3,7 +3,7 @@ from autogluon.core import space, TabularDataset
 from autogluon.tabular import TabularPredictor
 from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
 
-from need_integration_aka_scattered_work.Dev_Modules.genie_loader import Genie_Loader
+from Modules_in_Dev.genie_loader import Genie_Loader
 
 
 def ag_ts_get_predictor(
@@ -202,14 +202,15 @@ if __name__ == "__main__":
     #  Hyperparameter Tuning:
     #       Needs to be implemented if we dont want to just run the default models or settings
 
-    LOAD_MODEL = True
+    LOAD_MODEL = False
     EQUIPMENT_PARAMS = dict(
         NUMBER_OF_CPUS=28,
         NUMBER_OF_GPUS=1
     )
 
     LOAD_DATA_PARAMS = dict(
-        csv_file_path="../../../Data/sample_triple_barrier_labeled_data.csv",
+        # csv_file_path="../../Data/sample_triple_barrier_labeled_data.csv",
+        csv_file_path="../../Data/example_triple_barrier_labeled_data_short_duration.csv",
     )
     genie_loader = Genie_Loader()
 
@@ -246,7 +247,7 @@ if __name__ == "__main__":
         known_covariates_names=None,  # todo currently not used or implemented
     )
     FIT_PARAMS = dict(
-        time_limit=1800,
+        time_limit=15,
         # presets="fast_training",
         presets="medium_quality",
         # presets="high_quality",
