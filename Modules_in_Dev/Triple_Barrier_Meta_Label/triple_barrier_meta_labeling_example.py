@@ -47,6 +47,11 @@ from need_integration_aka_scattered_work.Standard_Algorythms import util
 from need_integration_aka_scattered_work.Standard_Algorythms.labeling_algorythms import labeling
 from need_integration_aka_scattered_work.Standard_Algorythms.timeseries_algorythms import timeseries_filters
 
+# Logging
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def example_arb_strategy(OHLCV_Data):
     """This function takes in OHLCV (Open-High-Low-Close-Volume) data as input and uses it to generate signals for
@@ -68,7 +73,9 @@ def example_arb_strategy(OHLCV_Data):
         index=OHLCV_Data.index,
         columns=OHLCV_Data.columns
     )
+    print(f"side:\n{side.head()}")
 
+    exit()
     return side
 
 
@@ -313,13 +320,15 @@ if __name__ == "__main__":
     INPUT_DATA_PARAMS = dict(
         # todo this will be changed as needed for the endpoint to save the data e.g. S3-bucket
         data_file_dirs=[DATA_DIR],
-        data_file_names=["XAUUSD.csv"],
+        data_file_names=["XAUUSD.csv",
+                         "US_Brent_Crude_Oil_GMT+0_NO-DST_M1.csv",
+                         ],
         rename_columns={"Open": "open", "High": "high", "Low": "low", "Close": "close", "Tick volume": "volume"},
         scheduler='threads',
         first_or_last='first',
         n_rows=None,
         #
-        pickle_file_path=f"{DATA_DIR}/XAUUSD.pickle",
+        pickle_file_path=f"{DATA_DIR}/data_temp.pickle",
         reload_data=True,
     )
     TBL_PARAMS = dict(
@@ -416,5 +425,3 @@ if __name__ == "__main__":
     main(input_data_params, tbl_params, output_data_params)
     
     '''
-
-

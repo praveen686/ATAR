@@ -296,10 +296,10 @@ if __name__ == "__main__":
             #     'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
             #     'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
             # },
-            "AutoGluonTabular": {'ag_args_fit': {
-                'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
-                'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
-            },
+            # "AutoGluonTabular": {'ag_args_fit': {
+            #     'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
+            #     'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}
+            # },
             # "DeepAR": {'ag_args_fit': {
             #     'num_gpus': EQUIPMENT_PARAMS["NUMBER_OF_GPUS"],
             #     'num_cpus': EQUIPMENT_PARAMS["NUMBER_OF_CPUS"]}

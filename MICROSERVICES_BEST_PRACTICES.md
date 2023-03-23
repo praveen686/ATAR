@@ -1,3 +1,6 @@
+# Microservices Architecture the Right Way *https://youtu.be/j6ow-UemzBc*
+Highlights specific key decisions that very directly impact the quality and maintainability of a microservice architecture, covering infrastructure, continuous deployment, communication, event streaming, language choice and more, all to ensure that teams and systems remain productive and scale.
+
 # AWS Microservices Best Practices: A Guide for Developers *https://youtu.be/otADkIyugzY*
 
 Microservices is an approach to building software applications by breaking them down into small, independent services that work together to deliver the desired functionality. Each service is responsible for a specific function and communicates with other services through APIs. This approach offers several benefits, including improved scalability, flexibility, and resilience.
