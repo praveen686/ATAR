@@ -40,6 +40,10 @@ in the future. The current codebase is a bit of a mess and will be cleaned up as
 
 The data is currently stored in the data folder but will move towards database storage. 
 
+https://drive.google.com/drive/folders/1ygWAEfmfqn2sWLKxw7ahPg0XzTZXVtVK?usp=share_link
+
+The data outside the subdirectories contain example data with 1 minute periods to get you started. However, the subdirectories contain typically tick data, which is the most accurate data for backtesting; whether it will serve you during your training process will depend heavily on your target labeled feature and resources available. The data is stored in the following format:
+
 ## Project Focus: Code Integration, Review, and Optimization with Microservices Architecture
 
 ### Integration and Review
