@@ -73,23 +73,43 @@ Our optimization efforts will focus on:
 
 We encourage active collaboration among team members through:
 
-1. Shared communication channels, such as Slack or Discord.
+1. Shared communication channels, such as Slack or Discord. (In Progress)
 2. Regular virtual meetings to discuss progress, challenges, and opportunities for improvement.
 3. Utilizing a project management tool, like Trello or Jira, for task tracking and prioritization.
 4. Creating and maintaining comprehensive documentation to support onboarding and knowledge sharing, including documentation for each microservice.
 
-### Platform Features
+### Platform Features (In Progress - duh)
 
-Our platform aims to provide a comprehensive and user-friendly solution using a microservices' architecture, including:
+#### Advanced Order Types: 
 
-1. Advanced order types, such as limit orders, stop orders, and trailing stops, implemented as independent services.
-2. Backtesting capabilities to evaluate the performance of trading strategies against historical data, provided by a dedicated backtesting service.
-3. AI agent training to support the development of sophisticated machine learning models for trading, enabled by a separate machine learning service.
-4. Risk management functionality to help users monitor and manage their exposure to market risks, managed by a dedicated risk management service.
+Our platform offers advanced order types, including limit orders, stop orders, and trailing stops. These order types are implemented as independent services to ensure optimal functionality and ease of use.
 
+#### Backtesting Capabilities: 
+
+We understand the importance of evaluating the performance of trading strategies against historical data. To support this, we offer a dedicated backtesting service that enables users to assess their strategies with ease.
+
+#### Historic and Live Data Transformation and Labeling: 
+
+We understand the importance of having high-quality data for effective trading. Our platform offers custom and automatic data pipelines that can be accessed from inside Nautilus Trader, allowing users to transform and label historic and live data to suit their needs.
+
+#### Custom and Premade Model Inference of Machine Learning: 
+
+We are dedicated to staying on the cutting-edge of technology, which is why we offer custom and premade model inference of machine learning. Our platform provides GPU-accelerated modules to enhance performance, giving our users access to the latest and most powerful ML solutions available.
+
+#### Custom Python Strategy Deployment: 
+
+Our platform is designed to offer flexibility to our users. We provide custom Python strategy deployment, allowing users to deploy their trading strategies into Metatrader, Freqtrade, and other popular trading platforms with ease.
+
+#### AI Agent Training: 
+
+Our platform is designed to support the development of sophisticated machine learning models for trading. We provide a separate machine learning service that allows users to train their AI agents and develop powerful models.
+
+#### Risk Management Functionality: 
+
+Managing exposure to market risks is crucial for successful trading. To help users monitor and manage their risk exposure, we offer a dedicated risk management service that provides valuable insights and functionality.
 ### Genie-Trader Exclusive License Agreement: Overview for Incoming Contributors
 
-This overview summarizes the key points of the Genie-Trader Exclusive License Agreement for incoming contributors to better and more efficiently understand the license. Please note that this overview does not replace the full license, and you should read the entire license to ensure that you fully understand its terms and conditions.
+This overview summarizes the key points of the Genie-Trader Exclusive License Agreement for contributors to better and more efficiently understand the license. Please note that this overview does not replace the full license, and you should read the entire license to ensure that you fully understand its terms and conditions.
 
 1. Purpose: The license aims to control access, usage, and contributions to the Genie-Trader repository by explicitly permitted Collaborators, while granting the Licensor (repository owner) complete control over the repository and its contents.
 2. Collaborators: Individuals or entities who have been explicitly granted permission by the Licensor to contribute to the development, maintenance, or distribution of the Software. 
