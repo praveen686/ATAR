@@ -21,7 +21,7 @@ Scale the microservices: Use AWS Auto Scaling to automatically scale the service
 
 By following these steps, you can build and deploy microservices on AWS and deliver a highly scalable and resilient application. Keep in mind that microservices architecture requires careful planning and coordination between different services, so it's important to have a solid understanding of your application's requirements before getting started.
 
-# Project Architecture through the Evolution Model *https://youtu.be/CZ3wIuvmHeM*
+# Project Architecture through the Evolution Model to Put it All Together  *https://youtu.be/CZ3wIuvmHeM*
 
 ## Modular design principles: 
 
