@@ -67,7 +67,7 @@ Our optimization efforts will focus on:
 1. Identifying and eliminating performance bottlenecks within each service.
 2. Streamlining data processing and storage to minimize latency and optimize resource utilization.
 3. Ensuring that the platform can scale to handle increasing workloads and user demands by adding or removing service instances as needed.
-4. Implementing best practices for code optimization and performance tuning in a microservices context.
+4. Implementing best practices for code optimization and performance tuning in a microservices' context.
 
 ### Collaboration and Communication
 
@@ -80,7 +80,7 @@ We encourage active collaboration among team members through:
 
 ### Platform Features
 
-Our platform aims to provide a comprehensive and user-friendly solution using a microservices architecture, including:
+Our platform aims to provide a comprehensive and user-friendly solution using a microservices' architecture, including:
 
 1. Advanced order types, such as limit orders, stop orders, and trailing stops, implemented as independent services.
 2. Backtesting capabilities to evaluate the performance of trading strategies against historical data, provided by a dedicated backtesting service.
