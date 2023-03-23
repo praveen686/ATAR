@@ -27,6 +27,8 @@ We are working in transitioning the current codebase into a microservice archite
 if not directly contributing to the microservices.  The microservices maintenance will be the primary focus of the repo 
 in the future. The current codebase is a bit of a mess and will be cleaned up as the microservices are developed.
 
+![ezgif.com-video-to-gif.gif](static%2Fezgif.com-video-to-gif.gif)
+
 [MICROSERVICES_BEST_PRACTICES.md](MICROSERVICES_BEST_PRACTICES.md) (In Progress)
 
 ### MISCELLANEOUS
