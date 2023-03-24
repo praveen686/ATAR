@@ -22,7 +22,7 @@ We welcome contributions from everyone, no matter how small. Thank you for takin
 
 [TEMPORARY_GUIDE_TO_EARLY_STAGE_CONTRIBUTIONS.md](TEMPORARY_GUIDE_TO_EARLY_STAGE_CONTRIBUTIONS.md)
 
-[DEPENDENCIES_EXPLAINED.md](DEPENDENCIES_EXPLAINED.md)
+[DEPENDENCIES_EXPLAINED.md](DEPENDENCIES_EXPLAINED.md) (In Progress)
 
 ### Microservices
 We are working in transitioning the current codebase into a microservice architecture, thus keep modularity in mind even 
