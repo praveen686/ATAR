@@ -1,12 +1,12 @@
 
-# Genie-Trader
+# Genie-Trader  ![RubenTheCuban_Genie-Trader_Algorythm_88b23a91-05f8-4a3f-bbfa-65e9681c87f8_2_20.png](static%2FRubenTheCuban_Genie-Trader_Algorythm_88b23a91-05f8-4a3f-bbfa-65e9681c87f8_2_20.png)
+
 Welcome to the Genie-Trader GitHub repository! The home to the ever evolving algorithmic microservice system that makes 
 Genie tick. Scalable (local&cloud) end-to-end endpoints for all of our API's, and more.
 
 We encourage contributions from everyone, no matter how small. Thank you for taking the time to visit this repository, 
 and we look forward to working with you!
 
-![RubenTheCuban_Genie-Trader_Algorythm_88b23a91-05f8-4a3f-bbfa-65e9681c87f8_50.png](static%2FRubenTheCuban_Genie-Trader_Algorythm_88b23a91-05f8-4a3f-bbfa-65e9681c87f8_50.png)
 
 ## Quick Start Guide to the codebase for New Contributors
 
