@@ -1,20 +1,25 @@
+
+# Genie-Trader
+Welcome to the Genie-Trader GitHub repository! The home to the ever evolving algorithmic microservice system that makes 
+Genie tick. Scalable (local&cloud) end-to-end endpoints for all of our API's, and more.
+
+We encourage contributions from everyone, no matter how small. Thank you for taking the time to visit this repository, 
+and we look forward to working with you!
+
 ![RubenTheCuban_Genie-Trader_Algorythm_88b23a91-05f8-4a3f-bbfa-65e9681c87f8_50.png](static%2FRubenTheCuban_Genie-Trader_Algorythm_88b23a91-05f8-4a3f-bbfa-65e9681c87f8_50.png)
 
-# Temporary Guide to Early Stage Contributions
+## Quick Start Guide to the codebase for New Contributors
 
-Welcome to the Genie-Trader GitHub repository! This repository is currently in its early development stage, and while a lot of code has been written, some modules lack proper documentation. The aim of this project is to optimize the codebase and convert it into microservices while incorporating good CI/CD practices and automating most tasks along the way.
-
-## Useful Links
-
-### Quick Start Guide to the codebase for New Contributors
-
-We welcome contributions from everyone, no matter how small. Thank you for taking the time to visit this repository, and we look forward to working with you!
+This repository is currently in its early development stage, and while a 
+lot of code has been written, some modules lack proper documentation. The aim of this project is to optimize the 
+codebase and convert it into microservices while incorporating good CI/CD practices and automating most tasks along 
+the way. We are creating a 
 
 [TEMPORARY_GUIDE_TO_EARLY_STAGE_CONTRIBUTIONS.md](TEMPORARY_GUIDE_TO_EARLY_STAGE_CONTRIBUTIONS.md)
 
 [DEPENDENCIES_EXPLAINED.md](DEPENDENCIES_EXPLAINED.md) (In Progress)
 
-### Microservices
+## Microservices
 We are working in transitioning the current codebase into a microservice architecture, thus keep modularity in mind even 
 if not directly contributing to the microservices.  The microservices maintenance will be the primary focus of the repo 
 in the future. The current codebase is a bit of a mess and will be cleaned up as the microservices are developed.
@@ -23,7 +28,7 @@ in the future. The current codebase is a bit of a mess and will be cleaned up as
 
 [MICROSERVICES_BEST_PRACTICES.md](MICROSERVICES_BEST_PRACTICES.md) (In Progress)
 
-### MISCELLANEOUS
+## MISCELLANEOUS
 [CONTRIBUTING.md](CONTRIBUTING.md) (In Progress)
 
 [RISK_AND_PERFORMANCE_DISCLAIMER.md](RISK_AND_PERFORMANCE_DISCLAIMER.md) 
