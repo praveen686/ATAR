@@ -1,4 +1,5 @@
 ![RubenTheCuban_Genie-Trader_Algorythm_88b23a91-05f8-4a3f-bbfa-65e9681c87f8_2_20.png](static%2FRubenTheCuban_Genie-Trader_Algorythm_88b23a91-05f8-4a3f-bbfa-65e9681c87f8_2_20.png)
+
 # Genie-Trader  
 
 Welcome to the Genie-Trader GitHub repository! The home to the ever evolving algorithmic microservice system that makes 
