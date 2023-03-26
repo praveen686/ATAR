@@ -24,7 +24,22 @@ dependencies
     |---[Content Advisor](contentadvisor)
 
 
-
+## OpenAPI
+    Dependency name: OpenAPI
+    Description: 
+    Purpose: 
+    Version:
+    Status: Up-to-date
+    License: MIT
+    Integration:
+    Usage:
+    Installation:
+    Best Practices:
+    Metrics:
+    Future Goals:
+    Risks:
+    Maintenance:
+    Conclusion:
 
 ## Nautilus Trader
     Dependency name: Nautilus Trader
@@ -45,6 +60,40 @@ dependencies
 
 ## VectorbtPRO
     Dependency name: VectorbtPRO
+    Description: 
+    Purpose: 
+    Version:
+    Status: Up-to-date
+    License: MIT
+    Integration:
+    Usage:
+    Installation:
+    Best Practices:
+    Metrics:
+    Future Goals:
+    Risks:
+    Maintenance:
+    Conclusion:
+
+## RAPIDS
+    Dependency name: RAPIDS
+    Description: 
+    Purpose: 
+    Version:
+    Status: Up-to-date
+    License: MIT
+    Integration:
+    Usage:
+    Installation:
+    Best Practices:
+    Metrics:
+    Future Goals:
+    Risks:
+    Maintenance:
+    Conclusion:
+
+## BOTO3
+    Dependency name: BOTO3
     Description: 
     Purpose: 
     Version:
