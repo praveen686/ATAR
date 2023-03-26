@@ -2,17 +2,26 @@
 
 Welcome to the Genie-Trader GitHub repository! This repository is currently in its early development stage, and while a lot of code has been written, some modules lack proper documentation. The aim of this project is to optimize the codebase and convert it into microservices while incorporating good CI/CD practices and automating most tasks along the way.
 
-To get started, you can install Nautilus Trader, VectorbtPRO, and Autogluon via pip inside the conda environment. However, it is recommended to install RAPIDS via conda. Be sure to install pip dependencies first and then conda dependencies, as conda handles and corrects examples better than pip.
+We will provide standard YAML files for more stable and experimental environments in the future, as well as Dockerfiles. Feel free to share your work with us, and we will add it to the repository. We are looking for any and all contributions.
+
+Please make sure to follow the guidelines below when contributing to the project. This will help ensure that your contributions are accepted quickly and efficiently.
+
+However, currently, only the main branch is being updated given the current state of the repo. The repo is currently in a state of flux, and we are working on a more stable version that will exclude Modules_in_Dev, TBD_Contributions_From_Community_in_Dev, need_integration_aka_scattered_work, and any others. 
+
+We welcome contributions from everyone, no matter how small. Thank you for taking the time to visit this repository, and we look forward to working with you!
+
+
+## Microservices Contributions:
+https://aws.amazon.com/serverless/sam/
+[MICROSERVICES_BEST_PRACTICES.md](MICROSERVICES_BEST_PRACTICES.md)
+
+## Financial Modeling and Backtesting Contributions:
+You can install Nautilus Trader, VectorbtPRO, and Autogluon via pip inside the conda environment. However, it is recommended to install RAPIDS via conda. Be sure to install pip dependencies first and then conda dependencies, as conda handles and corrects examples better than pip.
 
 To keep dependencies separated locally, it's recommended to use a conda environment. For instance, Nautilus_Trader tends to break vectorbt's dependencies and vice versa, so keeping them separate is crucial. At the moment, the only actively developed examples are the triple_barrier_meta_labeling_example.py and autogluon_ts_example.py in the Modules_in_Dev folder. One utilizes VectorbtPRO and the standard algorithms for the labeling process without any issues. However, watch out for Dask, Pandas, and NumPy versioning issues. The other utilizes Autogluon and Dask and Pandas.
 
-We will provide standard YAML files for more stable and experimental environments in the future, as well as Dockerfiles. Feel free to share your work with us, and we will add it to the repository. We are looking for any and all contributions.
+*~~~~~better guide on each coming soon*~~~~~
 
-Please make sure to do a pull before you start working on anything, as we have been making changes to the structure and contents of the repo on a daily basis. While breaking changes to your own work are unlikely at this point, it is still possible, especially with standard algorithms and modules in dev. Ideally, documentation will be automatically merged to the catalog along with changes.
-
-As a rule of thumb, the main branch is the most stable, and the dev branch is the most experimental. However, currently, only the main branch is being updated given the current state of the repo. The repo is currently in a state of flux, and we are working on a more stable version that will exclude Modules_in_Dev, TBD_Contributions_From_Community_in_Dev, need_integration_aka_scattered_work, and any others.
-
-We welcome contributions from everyone, no matter how small. Thank you for taking the time to visit this repository, and we look forward to working with you!
 
 # SUMMARY - Contributing 
 We appreciate your interest in contributing to our project! Please read through the following guidelines before you begin to ensure a smooth and efficient collaboration process.
@@ -40,4 +49,4 @@ Please note that we are currently working on a detailed contributing.md file tha
 
 Thank you for your interest in contributing to our project! We look forward to working with you and building something great together.
 
-
+coming soon: [CONTRIBUTING.md](CONTRIBUTING.md)
