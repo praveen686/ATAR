@@ -26,6 +26,7 @@ in the project.
 
 # Dependencies
 
+|---[Serverless Application Model (SAM)](sam)
 |---[Nautilus Trader](nautilus_trader)
 |---[VectorbtPRO](vectorbtpro)
 |---[Genie Trader API](genietraderapi)
@@ -33,10 +34,14 @@ in the project.
 |---[RAPIDS](rapids)
 |---[BOTO3](boto3)
 |---[OpenAPI](openapi)
+|---[Genie Trader API](genietraderapi)
+|---[Content Advisor](contentadvisor)
 
-## OpenAPI
 
-    Dependency name: OpenAPI
+
+## Serverless Application Model (SAM)
+
+    Dependency name: Serverless Application Model (SAM)
     Description: 
     Purpose: 
     Version:
@@ -51,6 +56,7 @@ in the project.
     Risks:
     Maintenance:
     Conclusion:
+
 
 ## Nautilus Trader
 
@@ -124,6 +130,24 @@ in the project.
     Maintenance:
     Conclusion:
 
+## OpenAPI
+
+    Dependency name: OpenAPI
+    Description: 
+    Purpose: 
+    Version:
+    Status: Up-to-date
+    License: MIT
+    Integration:
+    Usage:
+    Installation:
+    Best Practices:
+    Metrics:
+    Future Goals:
+    Risks:
+    Maintenance:
+    Conclusion:
+
 ## Genie Trader API
 
     Dependency name: Genie Trader API
@@ -160,3 +184,4 @@ in the project.
     Maintenance:
     Conclusion:    
     
+## 
