@@ -19,6 +19,8 @@ the way. We are creating a
 
 [DEPENDENCIES_EXPLAINED.md](DEPENDENCIES_EXPLAINED.md) (In Progress)
 
+*note: Links to submodules are currently being displayed in the DEPENDENCIES_EXPLAINED.md and will soon be included in the pip installation in [all] and [**DEP] format*
+
 ## Microservices
 
 We are working in transitioning the current codebase into a microservice architecture, thus keep modularity in mind even
