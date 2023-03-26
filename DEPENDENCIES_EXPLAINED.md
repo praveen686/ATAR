@@ -26,16 +26,14 @@ in the project.
 
 # Dependencies
 
-|---[Serverless Application Model (SAM)](sam)
-|---[Nautilus Trader](nautilus_trader)
-|---[VectorbtPRO](vectorbtpro)
-|---[Genie Trader API](genietraderapi)
-|---[Content Advisor](contentadvisor)
-|---[RAPIDS](rapids)
-|---[BOTO3](boto3)
-|---[OpenAPI](openapi)
-|---[Genie Trader API](genietraderapi)
-|---[Content Advisor](contentadvisor)
+|---[Serverless Application Model (SAM)](https://aws.amazon.com/serverless/sam/)
+|---[Nautilus Trader](https://nautilustrader.io/)
+|---[VectorbtPRO](https://vectorbt.pro/)
+|---[Genie Trader API](https://github.com/Bucanero06/Genie-Trader-API.git)
+|---[Content Advisor](https://github.com/Bucanero06/Content-Advisor.git)
+|---[RAPIDS](https://rapids.ai/)
+|---[BOTO3](https://aws.amazon.com/sdk-for-python/)
+|---[OpenAPI](https://github.com/OpenAPITools/openapi-generator)
 
 
 

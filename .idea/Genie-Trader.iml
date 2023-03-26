@@ -4,6 +4,7 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/nautilus_trader" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/vectorbtpro" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Genie-Trader-API" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/contentadvisor" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/genietraderapi" isTestSource="false" />
     </content>

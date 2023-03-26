@@ -13,7 +13,7 @@ and we look forward to working with you!
 This repository is currently in its early development stage, and while a
 lot of code has been written, some modules lack proper documentation. The aim of this project is to optimize the
 codebase and convert it into microservices while incorporating good CI/CD practices and automating most tasks along
-the way. We are creating a
+the way. 
 
 [TEMPORARY_GUIDE_TO_EARLY_STAGE_CONTRIBUTIONS.md](TEMPORARY_GUIDE_TO_EARLY_STAGE_CONTRIBUTIONS.md)
 
