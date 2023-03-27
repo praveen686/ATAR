@@ -12,7 +12,9 @@ We welcome contributions from everyone, no matter how small. Thank you for takin
 
 
 ## Microservices Contributions:
-https://aws.amazon.com/serverless/sam/
+![Screenshot from 2023-03-27 00-12-46.png](static%2FScreenshot%20from%202023-03-27%2000-12-46.png)
+e.g. https://aws.amazon.com/serverless/sam/ or https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html
+
 [MICROSERVICES_BEST_PRACTICES.md](MICROSERVICES_BEST_PRACTICES.md)
 
 ## Financial Modeling and Backtesting Contributions:
