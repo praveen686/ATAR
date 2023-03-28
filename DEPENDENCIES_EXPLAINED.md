@@ -34,7 +34,7 @@ in the project.
 |---[RAPIDS](https://rapids.ai/)
 |---[BOTO3](https://aws.amazon.com/sdk-for-python/)
 |---[OpenAPI](https://github.com/OpenAPITools/openapi-generator)
-
+|---[AutoGluon](https://auto.gluon.ai/stable/install.html)
 
 
 ## Serverless Application Model (SAM)
@@ -182,4 +182,26 @@ in the project.
     Maintenance:
     Conclusion:    
     
-## 
+## AutoGluon
+
+    Dependency name: AutoGluon
+### Description: 
+
+https://raw.githubusercontent.com/Innixma/autogluon-doc-utils/main/docs/cheatsheets/stable/autogluon-cheat-sheet.jpeg
+https://automl-mm-bench.s3-accelerate.amazonaws.com/cheatsheet/v0.7.0/AutoGluon_Multimodal_Cheatsheet_v0.7.0.png
+https://raw.githubusercontent.com/Innixma/autogluon-doc-utils/main/docs/cheatsheets/stable/timeseries/autogluon-cheat-sheet-ts.jpeg
+https://auto.gluon.ai/stable/tutorials/cloud_fit_deploy/index.html
+
+    Purpose: 
+    Version:
+    Status: Up-to-date
+    License: MIT
+    Integration:
+    Usage:
+    Installation:
+    Best Practices:
+    Metrics:
+    Future Goals:
+    Risks:
+    Maintenance:
+    Conclusion:

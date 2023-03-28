@@ -7,8 +7,9 @@
       <sourceFolder url="file://$MODULE_DIR$/Genie-Trader-API" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/contentadvisor" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/genietraderapi" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Pytorch_API" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="Genie-Trader-VBT" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="SAM" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyNamespacePackagesService">

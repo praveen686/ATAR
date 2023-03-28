@@ -17,10 +17,21 @@ e.g. https://aws.amazon.com/serverless/sam/ or https://docs.aws.amazon.com/toolk
 
 [MICROSERVICES_BEST_PRACTICES.md](MICROSERVICES_BEST_PRACTICES.md)
 
+[CloudFormationPythonExamples](CloudFormation_Test) - for arbitrary resource creation and updates
+
+
 ## Financial Modeling and Backtesting Contributions:
 You can install Nautilus Trader, VectorbtPRO, and Autogluon via pip inside the conda environment. However, it is recommended to install RAPIDS via conda. Be sure to install pip dependencies first and then conda dependencies, as conda handles and corrects examples better than pip.
 
 To keep dependencies separated locally, it's recommended to use a conda environment. For instance, Nautilus_Trader tends to break vectorbt's dependencies and vice versa, so keeping them separate is crucial. At the moment, the only actively developed examples are the triple_barrier_meta_labeling_example.py and autogluon_ts_example.py in the Modules_in_Dev folder. One utilizes VectorbtPRO and the standard algorithms for the labeling process without any issues. However, watch out for Dask, Pandas, and NumPy versioning issues. The other utilizes Autogluon and Dask and Pandas.
+
+
+TODO: to be arranged 
+https://raw.githubusercontent.com/Innixma/autogluon-doc-utils/main/docs/cheatsheets/stable/autogluon-cheat-sheet.jpeg
+https://automl-mm-bench.s3-accelerate.amazonaws.com/cheatsheet/v0.7.0/AutoGluon_Multimodal_Cheatsheet_v0.7.0.png
+https://raw.githubusercontent.com/Innixma/autogluon-doc-utils/main/docs/cheatsheets/stable/timeseries/autogluon-cheat-sheet-ts.jpeg
+https://auto.gluon.ai/stable/tutorials/cloud_fit_deploy/index.html
+
 
 *~~~~~better guide on each coming soon*~~~~~
 
