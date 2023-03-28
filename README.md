@@ -2,11 +2,11 @@
 
 # Genie-Trader
 
-Welcome to the Genie-Trader GitHub repository! The home to the ever evolving algorithmic microservice system that makes
-Genie tick. Scalable (local&cloud) end-to-end endpoints for all of our API's, and more.
+Welcome to the Genie Trader GitHub repository! Here you'll discover our innovative algorithmic and statistical modeling platform designed for traders. Genie Trader is a microservice system that expertly manages intricate processes, creating a seamless and self-consistent environment.
 
-We encourage contributions from everyone, no matter how small. Thank you for taking the time to visit this repository,
-and we look forward to working with you!
+In its early stages, our platform is currently focused on providing modular code that allows experienced developers and traders to create customized pipelines. As the project evolves, we plan to expand and incorporate scalable cloud-based solutions and end-to-end integration with various APIs.
+
+We invite and appreciate contributions from everyone, regardless of the scale or scope. Thank you for visiting our repository, and we're excited to collaborate with you on this groundbreaking project!
 
 ## Quick Start Guide to the codebase for New Contributors
 
