@@ -75,14 +75,6 @@ GraphQL, JMeter, Ktorm, MySQL Schema, Protocol Buffer, WSDL
 
 https://github.com/OpenAPITools/openapi-generator.git
 
-## MISCELLANEOUS
-
-[CONTRIBUTING.md](CONTRIBUTING.md) (In Progress)
-
-[RISK_AND_PERFORMANCE_DISCLAIMER.md](RISK_AND_PERFORMANCE_DISCLAIMER.md)
-
-[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
-
 ## Data
 
 The data is currently stored in the data folder but will move towards database storage.
@@ -93,6 +85,15 @@ The data outside the subdirectories contain example data with 1 minute periods t
 subdirectories contain typically tick data, which is the most accurate data for backtesting; whether it will serve you
 during your training process will depend heavily on your target labeled feature and resources available. The data is
 stored in the following format:
+
+## MISCELLANEOUS
+
+[CONTRIBUTING.md](CONTRIBUTING.md) (In Progress)
+
+[RISK_AND_PERFORMANCE_DISCLAIMER.md](RISK_AND_PERFORMANCE_DISCLAIMER.md)
+
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+
 
 ## Project Focus: Code Integration, Review, and Optimization with Microservices Architecture
 
@@ -111,26 +112,31 @@ cutting-edge algorithmic trading platform using a microservices architecture. We
 Identify the different functionalities and services provided by your code.
 Group related functionalities into separate microservices, keeping in mind the principles of loose coupling and high
 cohesion.
-Design your microservices:
+
+#### Design your microservices:
 
 Define clear interfaces and APgenI contracts for each service.
 Determine the data storage requirements for each service and decide whether to use a shared database or a separate
 database per service.
-Choose AWS services for deployment and management:
 
-Use AWS Elastic Container Service (ECS) or Elastic Kubernetes Service (EKS) for container orchestration.
-Use AWS Lambda for serverless, event-driven functions.
-Use API Gateway to manage and expose your APIs securely.
-Use Amazon RDS, DynamoDB, or other AWS database services for data storage.
-Set up CI/CD pipelines:
+#### Choose AWS services for deployment and management:
 
-Use AWS CodePipeline, CodeBuild, and CodeDeploy to automate the build, test, and deployment process for each
+AWS Elastic Container Service (ECS) or Elastic Kubernetes Service (EKS) for container orchestration.
+AWS Lambda for serverless, event-driven functions.
+API Gateway to manage and expose your APIs securely.
+Amazon RDS, DynamoDB, or other AWS database services for data storage.
+
+#### Set up CI/CD pipelines:
+
+AWS CodePipeline, CodeBuild, and CodeDeploy to automate the build, test, and deployment process for each
 microservice.
-Implement monitoring and logging:
 
-Use Amazon CloudWatch for monitoring and logging.
+#### Implement monitoring and logging:
+
+Amazon CloudWatch for monitoring and logging.
 Set up alarms and notifications to alert you when there are issues with your services.
-Implement security best practices:
+
+#### Implement security best practices:
 
 Secure your microservices with proper authentication and authorization using Amazon Cognito or a custom solution.
 Use AWS Identity and Access Management (IAM)
