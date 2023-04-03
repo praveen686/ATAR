@@ -1,4 +1,4 @@
-# Dependencies Explained
+# Used Libraries Explained
 
 Dependency name: Name of the dependency used in the project.
 Description: Brief description of what the dependency does.
@@ -39,169 +39,169 @@ in the project.
 
 ## Serverless Application Model (SAM)
 
-    Dependency name: Serverless Application Model (SAM)
-    Description: 
-    Purpose: 
-    Version:
-    Status: Up-to-date
-    License: MIT
-    Integration:
-    Usage:
-    Installation:
-    Best Practices:
-    Metrics:
-    Future Goals:
-    Risks:
-    Maintenance:
-    Conclusion:
+Dependency name: Serverless Application Model (SAM)
+Description: 
+Purpose: 
+Version:
+Status: Up-to-date
+License: MIT
+Integration:
+Usage:
+Installation:
+Best Practices:
+Metrics:
+Future Goals:
+Risks:
+Maintenance:
+Conclusion:
 
 
 ## Nautilus Trader
 
-    Dependency name: Nautilus Trader
-    Description: 
-    Purpose: 
-    Version:
-    Status: Up-to-date
-    License: MIT
-    Integration:
-    Usage:
-    Installation:
-    Best Practices:
-    Metrics:
-    Future Goals:
-    Risks:
-    Maintenance:
-    Conclusion:
+Dependency name: Nautilus Trader
+Description: 
+Purpose: 
+Version:
+Status: Up-to-date
+License: MIT
+Integration:
+Usage:
+Installation:
+Best Practices:
+Metrics:
+Future Goals:
+Risks:
+Maintenance:
+Conclusion:
 
 ## VectorbtPRO
 
-    Dependency name: VectorbtPRO
-    Description: 
-    Purpose: 
-    Version:
-    Status: Up-to-date
-    License: MIT
-    Integration:
-    Usage:
-    Installation:
-    Best Practices:
-    Metrics:
-    Future Goals:
-    Risks:
-    Maintenance:
-    Conclusion:
+Dependency name: VectorbtPRO
+Description: 
+Purpose: 
+Version:
+Status: Up-to-date
+License: MIT
+Integration:
+Usage:
+Installation:
+Best Practices:
+Metrics:
+Future Goals:
+Risks:
+Maintenance:
+Conclusion:
 
 ## RAPIDS
 
-    Dependency name: RAPIDS
-    Description: 
-    Purpose: 
-    Version:
-    Status: Up-to-date
-    License: MIT
-    Integration:
-    Usage:
-    Installation:
-    Best Practices:
-    Metrics:
-    Future Goals:
-    Risks:
-    Maintenance:
-    Conclusion:
+Dependency name: RAPIDS
+Description: 
+Purpose: 
+Version:
+Status: Up-to-date
+License: MIT
+Integration:
+Usage:
+Installation:
+Best Practices:
+Metrics:
+Future Goals:
+Risks:
+Maintenance:
+Conclusion:
 
 ## BOTO3
 
-    Dependency name: BOTO3
-    Description: 
-    Purpose: 
-    Version:
-    Status: Up-to-date
-    License: MIT
-    Integration:
-    Usage:
-    Installation:
-    Best Practices:
-    Metrics:
-    Future Goals:
-    Risks:
-    Maintenance:
-    Conclusion:
+Dependency name: BOTO3
+Description: 
+Purpose: 
+Version:
+Status: Up-to-date
+License: MIT
+Integration:
+Usage:
+Installation:
+Best Practices:
+Metrics:
+Future Goals:
+Risks:
+Maintenance:
+Conclusion:
 
 ## OpenAPI
 
-    Dependency name: OpenAPI
-    Description: 
-    Purpose: 
-    Version:
-    Status: Up-to-date
-    License: MIT
-    Integration:
-    Usage:
-    Installation:
-    Best Practices:
-    Metrics:
-    Future Goals:
-    Risks:
-    Maintenance:
-    Conclusion:
+Dependency name: OpenAPI
+Description: 
+Purpose: 
+Version:
+Status: Up-to-date
+License: MIT
+Integration:
+Usage:
+Installation:
+Best Practices:
+Metrics:
+Future Goals:
+Risks:
+Maintenance:
+Conclusion:
 
 ## Genie Trader API
 
-    Dependency name: Genie Trader API
-    Description: 
-    Purpose: 
-    Version:
-    Status: Up-to-date
-    License: MIT
-    Integration:
-    Usage:
-    Installation:
-    Best Practices:
-    Metrics:
-    Future Goals:
-    Risks:
-    Maintenance:
-    Conclusion:
+Dependency name: Genie Trader API
+Description: 
+Purpose: 
+Version:
+Status: Up-to-date
+License: MIT
+Integration:
+Usage:
+Installation:
+Best Practices:
+Metrics:
+Future Goals:
+Risks:
+Maintenance:
+Conclusion:
 
 ## Content Advisor
 
-    Dependency name: Content Advisor
-    Description: 
-    Purpose: 
-    Version:
-    Status: Up-to-date
-    License: MIT
-    Integration:
-    Usage:
-    Installation:
-    Best Practices:
-    Metrics:
-    Future Goals:
-    Risks:
-    Maintenance:
-    Conclusion:    
+Dependency name: Content Advisor
+Description: 
+Purpose: 
+Version:
+Status: Up-to-date
+License: MIT
+Integration:
+Usage:
+Installation:
+Best Practices:
+Metrics:
+Future Goals:
+Risks:
+Maintenance:
+Conclusion:    
     
 ## AutoGluon
 
-    Dependency name: AutoGluon
-### Description: 
+Dependency name: AutoGluon
+Description: 
 
 https://raw.githubusercontent.com/Innixma/autogluon-doc-utils/main/docs/cheatsheets/stable/autogluon-cheat-sheet.jpeg
 https://automl-mm-bench.s3-accelerate.amazonaws.com/cheatsheet/v0.7.0/AutoGluon_Multimodal_Cheatsheet_v0.7.0.png
 https://raw.githubusercontent.com/Innixma/autogluon-doc-utils/main/docs/cheatsheets/stable/timeseries/autogluon-cheat-sheet-ts.jpeg
 https://auto.gluon.ai/stable/tutorials/cloud_fit_deploy/index.html
 
-    Purpose: 
-    Version:
-    Status: Up-to-date
-    License: MIT
-    Integration:
-    Usage:
-    Installation:
-    Best Practices:
-    Metrics:
-    Future Goals:
-    Risks:
-    Maintenance:
-    Conclusion:
+Purpose: 
+Version:
+Status: Up-to-date
+License: MIT
+Integration:
+Usage:
+Installation:
+Best Practices:
+Metrics:
+Future Goals:
+Risks:
+Maintenance:
+Conclusion:

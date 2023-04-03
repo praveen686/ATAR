@@ -22,10 +22,10 @@ the way.
 
 [TEMPORARY_GUIDE_TO_EARLY_STAGE_CONTRIBUTIONS.md](TEMPORARY_GUIDE_TO_EARLY_STAGE_CONTRIBUTIONS.md)
 
-[DEPENDENCIES_EXPLAINED.md](DEPENDENCIES_EXPLAINED.md) (In Progress)
+[USED_LIBRARIES_EXPLAINED.md](USED_LIBRARIES_EXPLAINED.md) (In Progress)
 
-*note: Links to submodules are currently being displayed in the DEPENDENCIES_EXPLAINED.md and will soon be included in
-the pip installation in [all] and [**DEP] format*
+*note: Links to submodules are currently being displayed in the [USED_LIBRARIES_EXPLAINED.md](USED_LIBRARIES_EXPLAINED.md) and will soon be included in
+the pip installation in [all] and [**DEP] format* Some will not be directly used in this codebase and might be part of a submodule that is used e.g. OpenAI, HuggingFace, etc. are used in ContentAdvisor; and may be moved to their respective repos as the codebase is converted into microservices.
 
 ## [Microservices](MICROSERVICES_BEST_PRACTICES.md)
 

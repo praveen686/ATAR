@@ -44,7 +44,7 @@ To get started, fork the repository to create your own copy, where you can make 
 
 Step 2: Create a New Branch
 After forking the repository, create a new branch in your fork to work on your changes. This will help keep your work organized and make it easier to merge your changes with the original project later.
-d
+
 Step 3: Make Your Changes
 Feel free to work on any independent sections of the codebase or create new files as needed. Please ensure that your changes are in line with the project's objectives and maintain a high standard of quality. Keep in mind the importance of using common sense when making changes to the codebase.
 
