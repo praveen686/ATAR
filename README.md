@@ -39,6 +39,8 @@ in the future. The current codebase is a bit of a mess and will be cleaned up as
 
 [MICROSERVICES_BEST_PRACTICES.md](MICROSERVICES_BEST_PRACTICES.md) (In Progress)
 
+[Dockerize_and_Deploy_Python.md](..%2FAIOrg%2FPrompts%2FDockerize_and_Deploy_Python.md)
+
 ### CodeGens, Clients and API's Creation
 
 #### [SAM CLI](https://aws.amazon.com/serverless/sam/)
