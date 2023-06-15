@@ -5,8 +5,8 @@ from nautilus_trader.persistence.external.core import process_files, write_objec
 from nautilus_trader.persistence.external.readers import CSVReader
 from nautilus_trader.test_kit.providers import TestInstrumentProvider
 
-from Modules.Catalog.src.data_to_catalog import parser_csv
-catalog_path = "catalog"
+from Modules.Catalog.src.data_to_catalog import custom_parser_csv
+catalog_path = "/home/ruben/PycharmProjects/Genie-Trader/Data/catalog"  # todo change to dynamic and/or buckets
 catalog = ParquetDataCatalog(catalog_path)
 currencies = {
     "AUDUSD": {
@@ -48,8 +48,8 @@ currencies = {
 
 
 
-# for currency, data in currencies.items():
-#     instrument = TestInstrumentProvider.default_fx_ccy(currency)
+for currency, data in currencies.items():
+    instrument = TestInstrumentProvider.default_fx_ccy(currency)
 #     # todo check if there maybe?
 #     process_files(
 #         glob_path=data["file_path"],
@@ -63,5 +63,13 @@ currencies = {
 #         # block_size="10mb",
 #     )
 #
-#     write_objects(catalog, [instrument])
+    write_objects(catalog, [instrument])
 
+print(catalog.instruments())
+start_date = pd.to_datetime("2021-01-04")
+end_date = pd.to_datetime("2021-01-05")
+
+ticks = catalog.quote_ticks(start=start_date, end=end_date,
+                            # instrument_ids=[selected_instrument]
+                            )
+print(ticks)

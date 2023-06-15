@@ -7,7 +7,7 @@ from nautilus_trader.model.identifiers import InstrumentId
 from nautilus_trader.model.objects import Price, Quantity
 
 
-def parser_text_line(line, instrument_id: InstrumentId, datatime_format="%Y%m%d %H%M%S%f", header=None):
+def custom_parser_text_line(line, instrument_id: InstrumentId, datatime_format="%Y%m%d %H%M%S%f", header=None):
     ts, bid, ask, idx = line.split(b",")
     dt = pd.Timestamp(
         datetime.strptime(ts.decode(), datatime_format),
@@ -25,7 +25,7 @@ def parser_text_line(line, instrument_id: InstrumentId, datatime_format="%Y%m%d 
     )
 
 
-def parser_csv(data, instrument_id, datetime_format="%Y.%m.%d %H:%M:%S.%f"): # fixme not flexible for headers
+def custom_parser_csv(data, instrument_id, datetime_format="%Y.%m.%d %H:%M:%S.%f"): # fixme not flexible for headers
     """ Parser function for hist_data FX data, for use with CSV Reader """
 
     dt = pd.Timestamp(datetime.strptime(data['DateTime'].decode(), datetime_format), tz='UTC')
