@@ -71,8 +71,11 @@ def cusum_filter(raw_time_series, threshold, time_stamps=True):
 
     # Return DatetimeIndex or list
     if time_stamps:
-        event_timestamps = pd.DatetimeIndex(t_events)
-        return event_timestamps
+        t_events = pd.DatetimeIndex(t_events)
+        # If raw_time_series is timezone aware, make the output timezone aware as well
+        if t_events.tz is None:
+            t_events = t_events.tz_localize(raw_time_series.index.tz)
+        return t_events
 
     return t_events
 

@@ -83,8 +83,11 @@ def add_vertical_barrier(t_events, close, num_days=0, num_hours=0, num_minutes=0
     :param num_seconds: (int) Number of seconds to add for vertical barrier
     :return: (pd.Series) Timestamps of vertical barriers
     """
+
+
     timedelta = pd.Timedelta(
         '{} days, {} hours, {} minutes, {} seconds'.format(num_days, num_hours, num_minutes, num_seconds))
+
     # Find index to closest to vertical barrier
     nearest_index = close.index.searchsorted(t_events + timedelta)
 
@@ -96,6 +99,7 @@ def add_vertical_barrier(t_events, close, num_days=0, num_hours=0, num_minutes=0
     filtered_events = t_events[:nearest_index.shape[0]]
 
     vertical_barriers = pd.Series(data=nearest_timestamp, index=filtered_events)
+
     return vertical_barriers
 
 

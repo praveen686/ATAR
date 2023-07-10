@@ -1,0 +1,65 @@
+version: '3.10'
+
+#volumes: # Define the volume for Redis data
+#  redis_data:
+
+services:
+  # Communications
+  redis:
+    image: redis:latest
+    ports:
+      - 6380:6379
+    #    volumes: # Add a volume for data persistence
+    #      - redis_data:/data
+    networks:
+      - my_network
+
+  # FastAPI Microservice for Vectorized Data Analysis Module in a Conda Environment
+  vectorized:
+    build:
+      context: ${VECTORIZED_CONTEXT}
+      dockerfile: ${VECTORIZED_DOCKERFILE}
+      args:
+        YML_ENV_NAME: ${VECTORIZED_ENV_NAME}
+        GITHUB_KEY: ${GITHUB_KEY}
+    depends_on:
+      - redis
+    ports:
+      - ${VECTORIZED_PORT}:${VECTORIZED_PORT}
+    volumes:
+      - ./Modules:/app/Modules  # Mount the Modules directory todo this can be done through a rest api or simply pip
+      - ./Data:/app/Data
+    networks:
+      - my_network
+    environment: # Add environment variables if necessary
+      - REDIS_URL=redis://redis:6379
+      - PORT=${VECTORIZED_PORT} # entry point will overwrite this
+    entrypoint: [ "/bin/bash", "-c", "conda run --no-capture-output -n vectorized uvicorn app:app --host ${VECTORIZED_HOST} --port ${VECTORIZED_PORT}" ]
+
+
+#  wave_server:
+#    build:
+#      context: Modules/Vectorized/H2O_AutoML
+#      dockerfile: Dockerfile
+#    ports:
+#      - ${WAVE_SERVER_PORT}:${WAVE_SERVER_PORT}  # Replace with the desired port for the Wave Server
+#    networks:
+#      - my_network
+#    environment: # Add environment variables if necessary
+#      - REDIS_URL=redis://redis:6379
+#      - PORT=${WAVE_SERVER_PORT} # entry point will overwrite this
+#    command: [ "wave", "run", "src.app.py","-listen ${WAVE_SERVER_PORT}" ]  # Command to start the Wave Server
+
+
+
+
+networks:
+  my_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
+
+
+
