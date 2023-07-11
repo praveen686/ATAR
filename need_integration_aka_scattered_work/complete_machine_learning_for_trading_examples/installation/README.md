@@ -233,7 +233,7 @@ Enable WSL 2 as described [here](https://docs.microsoft.com/en-us/windows/wsl/in
 Once we have enabled WSL 2 for Windows Home, the remaining steps to install Docker Desktop are the same for Windows 10 [Home](https://docs.docker.com/docker-for-windows/install-windows-home/) and [Pro, Enterprise or Education](https://docs.docker.com/docker-for-windows/install-windows-home/). Refer to the linked guides for each OS version for system requirements.
 
 1. Download and run (double-click) the installer from [Docker Hub](https://hub.docker.com/editions/community/docker-ce-desktop-windows/).
-2. When prompted, ensure the Enable Hyper-V Windows Features option is selected on the Configuration page.
+2. When prompted, ensure the Enable Hyper-V Windows Features option is selected on the App_Configuration page.
 3. Follow the instructions on the installation wizard to authorize the installer and proceed with the install.
 4. When the installation is successful, click Close to complete the installation process.
 5. If your admin account is different to your user account, you must add the user to the docker-users group. Run Computer Management as an administrator and navigate to Local Users and Groups > Groups > docker-users. Right-click to add the user to the group. Log out and log back in for the changes to take effect.

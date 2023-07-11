@@ -14,7 +14,7 @@ There are two configurable writers for logging:
 
 Infrastructure such as [vector](https://github.com/vectordotdev/vector) can be configured to collect these log events.
 
-## Configuration
+## App_Configuration
 
 Logging can be configured by importing the `LoggingConfig` object.
 By default, log events with an 'INFO' `LogLevel` and higher are written to stdout/stderr.

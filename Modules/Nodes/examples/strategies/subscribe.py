@@ -36,7 +36,7 @@ from nautilus_trader.trading.strategy import Strategy
 
 class SubscribeStrategyConfig(StrategyConfig, frozen=True):
     """
-    Configuration for ``SubscribeStrategy`` instances.
+    App_Configuration for ``SubscribeStrategy`` instances.
     """
 
     instrument_id: str

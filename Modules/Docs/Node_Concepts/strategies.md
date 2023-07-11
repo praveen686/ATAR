@@ -29,7 +29,7 @@ class MyStrategy(Strategy):
         super().__init__()  # <-- the super class must be called to initialize the strategy
 ```
 
-## Configuration
+## App_Configuration
 The main purpose of a separate configuration class is to provide total flexibility
 over where and how a trading strategy can be instantiated. This includes being able
 to serialize strategies and their configurations over the wire, making distributed backtesting
@@ -64,7 +64,7 @@ class MyStrategy(Strategy):
     def __init__(self, config: MyStrategyConfig) -> None:
         super().__init__(config)
 
-        # Configuration
+        # App_Configuration
         self.instrument_id = InstrumentId.from_str(config.instrument_id)
 
 

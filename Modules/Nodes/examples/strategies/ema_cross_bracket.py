@@ -43,7 +43,7 @@ from nautilus_trader.trading.strategy import Strategy
 
 class EMACrossBracketConfig(StrategyConfig, frozen=True):
     """
-    Configuration for ``EMACrossBracket`` instances.
+    App_Configuration for ``EMACrossBracket`` instances.
 
     Parameters
     ----------
@@ -112,7 +112,7 @@ class EMACrossBracket(Strategy):
         )
         super().__init__(config)
 
-        # Configuration
+        # App_Configuration
         self.instrument_id = InstrumentId.from_str(config.instrument_id)
         self.bar_type = BarType.from_str(config.bar_type)
         self.bracket_distance_atr = config.bracket_distance_atr

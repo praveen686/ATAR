@@ -26,7 +26,7 @@ from nautilus_trader.trading.strategy import Strategy
 
 class MyStrategyConfig(StrategyConfig, frozen=True):
     """
-    Configuration for ``MyStrategy`` instances.
+    App_Configuration for ``MyStrategy`` instances.
 
     Parameters
     ----------
@@ -56,7 +56,7 @@ class MyStrategy(Strategy):
     def __init__(self, config: MyStrategyConfig) -> None:
         super().__init__(config)
 
-        # Configuration
+        # App_Configuration
         self.instrument_id = InstrumentId.from_str(config.instrument_id)
 
     def on_start(self) -> None:

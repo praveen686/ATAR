@@ -47,7 +47,7 @@ from nautilus_trader.trading.strategy import Strategy
 
 class EMACrossTWAPConfig(StrategyConfig, frozen=True):
     """
-    Configuration for ``EMACrossTWAP`` instances.
+    App_Configuration for ``EMACrossTWAP`` instances.
 
     Parameters
     ----------
@@ -118,7 +118,7 @@ class EMACrossTWAP(Strategy):
         )
         super().__init__(config)
 
-        # Configuration
+        # App_Configuration
         self.instrument_id = InstrumentId.from_str(config.instrument_id)
         self.bar_type = BarType.from_str(config.bar_type)
         self.trade_size = Decimal(config.trade_size)

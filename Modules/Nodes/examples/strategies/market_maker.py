@@ -55,7 +55,7 @@ class MarketMaker(Strategy):
     ) -> None:
         super().__init__()
 
-        # Configuration
+        # App_Configuration
         self.instrument_id = instrument_id
         self.trade_size = trade_size
         self.max_size = max_size

@@ -38,7 +38,7 @@ from nautilus_trader.trading.strategy import Strategy
 
 class MarketVolatilityCatcherConfig(StrategyConfig, frozen=True):
     """
-    Configuration for ``VolatilityMarketMaker`` instances.
+    App_Configuration for ``VolatilityMarketMaker`` instances.
 
     Parameters
     ----------
@@ -87,7 +87,7 @@ class MarketVolatilityCatcher(Strategy):
     def __init__(self, config: MarketVolatilityCatcherConfig) -> None:
         super().__init__(config)
 
-        # Configuration
+        # App_Configuration
         self.instrument_id = InstrumentId.from_str(config.instrument_id)
         self.bar_type = BarType.from_str(config.bar_type)
         self.atr_multiple = config.atr_multiple
@@ -392,7 +392,7 @@ class MarketVolatilityCatcher(Strategy):
 
 class TWAPExecAlgorithmConfig(ExecAlgorithmConfig, frozen=True):
     """
-    Configuration for ``TWAPExecAlgorithm`` instances.
+    App_Configuration for ``TWAPExecAlgorithm`` instances.
 
     This configuration class defines the necessary parameters for a Time-Weighted Average Price
     (TWAP) execution algorithm, which aims to execute orders evenly spread over a specified

@@ -46,7 +46,7 @@ class TripleBarrierParams(BaseModel):
     output_data_params: OutputDataParams
 
 
-@app.post("/triplebarrier")
+@app.post("/triplebarrier", tags=["Vectorized", "Pipeline"])
 async def triplebarrier(triple_barrier_params: TripleBarrierParams):
     from Modules.Vectorized.Pipelines.TripleBarrierMetaLabel import TBM_labeling
     TBM_labeling(

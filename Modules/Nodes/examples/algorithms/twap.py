@@ -34,7 +34,7 @@ from nautilus_trader.model.orders import Order
 
 class TWAPExecAlgorithmConfig(ExecAlgorithmConfig, frozen=True):
     """
-    Configuration for ``TWAPExecAlgorithm`` instances.
+    App_Configuration for ``TWAPExecAlgorithm`` instances.
 
     This configuration class defines the necessary parameters for a Time-Weighted Average Price
     (TWAP) execution algorithm, which aims to execute orders evenly spread over a specified

@@ -1,5 +1,6 @@
 import glob
 
+import uvicorn
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -14,10 +15,10 @@ DATA_FILE_NAMES = [
 
 @app.post("/nodetasker")
 async def nodepipeline():
-    ... #todo
+    ...  # todo
     # Just return something for now
     return {"status": "success"}
 
 
 if __name__ == "__main__":
-    app.run(host="localhost", port=8000)
+    uvicorn.run(app=app, host="localhost", port=8000)

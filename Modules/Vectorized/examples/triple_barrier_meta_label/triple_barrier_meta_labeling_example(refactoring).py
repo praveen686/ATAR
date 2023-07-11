@@ -456,7 +456,7 @@ if __name__ == "__main__":
         save_data(processed_data, output_data_params)
     
     if __name__ == "__main__":
-        # Configuration dictionaries
+        # App_Configuration dictionaries
         input_data_params = {...}
         tbl_params = {...}
         output_data_params = {...}

@@ -46,7 +46,7 @@ from nautilus_trader.trading.strategy cimport Strategy
 
 class EMACrossConfig(StrategyConfig, frozen=True):
     """
-    Configuration for ``EMACross`` instances.
+    App_Configuration for ``EMACross`` instances.
 
     Parameters
     ----------
@@ -108,7 +108,7 @@ cdef class EMACross(Strategy):
         )
         super().__init__(config)
 
-        # Configuration
+        # App_Configuration
         self.instrument_id = InstrumentId.from_str_c(config.instrument_id)
         self.bar_type = BarType.from_str_c(config.bar_type)
         self.trade_size = Decimal(config.trade_size)

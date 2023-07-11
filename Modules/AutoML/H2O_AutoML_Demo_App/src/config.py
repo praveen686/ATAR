@@ -20,7 +20,7 @@ uploaded_files_dict['wine_quality_test.csv'] = [f'{cur_dir}/data/wine_quality_te
 
 class Configuration:
     """
-    Configuration file Data Labeling
+    App_Configuration file Data Labeling
     """
     def __init__(self, env='prod'):
         self._env = env

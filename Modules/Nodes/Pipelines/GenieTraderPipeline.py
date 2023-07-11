@@ -2,9 +2,10 @@ import pandas as pd
 from nautilus_trader.adapters.binance.common.enums import BinanceAccountType
 from nautilus_trader.adapters.binance.config import BinanceDataClientConfig
 from nautilus_trader.adapters.binance.config import BinanceExecClientConfig
-from nautilus_trader.backtest.engine import BacktestEngine, Decimal
+from nautilus_trader.backtest.engine import BacktestEngine, Decimal, Environment, DataEngineConfig, RiskEngineConfig, \
+    ExecEngineConfig
 from nautilus_trader.backtest.engine import BacktestEngineConfig
-from nautilus_trader.config import CacheDatabaseConfig, BacktestDataConfig
+from nautilus_trader.config import CacheDatabaseConfig, BacktestDataConfig, LiveRiskEngineConfig, LiveDataEngineConfig
 from nautilus_trader.config import InstrumentProviderConfig
 from nautilus_trader.config import LiveExecEngineConfig
 from nautilus_trader.config import LoggingConfig
@@ -20,6 +21,8 @@ from nautilus_trader.model.objects import Money
 from Modules.Nodes.examples.strategies.volatility_market_maker import VolatilityMarketMaker, VolatilityMarketMakerConfig
 from Modules.Strategies.MarketVolatilityCatcher import MarketVolatilityCatcherConfig, MarketVolatilityCatcher, \
     TWAPExecAlgorithm
+
+
 
 
 def get_instruments_in_catalog(catalog_path, instrument_ids=None, as_nautilus=True, return_catalog=False):
@@ -104,11 +107,52 @@ class GenieBacktestNode(PipeLine):
         self.strategy_config = kwargs.get("strategy_config", None)
         self.exec_algorithm = kwargs.get("exec_algorithm", None)
 
-    def configure_node(self):
-        config_node = BacktestEngineConfig(trader_id="BACKTESTER-001")
+    def configure_node(self, backtest_engine_config=None):
+        if backtest_engine_config is None:
+            backtest_engine_config = BacktestEngineConfig(
+                environment=Environment.BACKTEST,
+                trader_id='BACKTESTER-001',
+                instance_id=None,
+                cache=None,
+                cache_database=None,
+                data_engine=DataEngineConfig(
+                    time_bars_build_with_no_updates=True,
+                    time_bars_timestamp_on_close=True,
+                    validate_data_sequence=False,
+                    debug=False
+                ),
+                risk_engine=RiskEngineConfig(
+                    bypass=False,
+                    max_order_submit_rate='100/00:00:01',
+                    max_order_modify_rate='100/00:00:01',
+                    max_notional_per_order={},
+                    debug=False
+                ),
+                exec_engine=ExecEngineConfig(
+                    load_cache=True,
+                    allow_cash_positions=True,
+                    filter_unclaimed_external_orders=False,
+                    debug=False
+                ),
+                streaming=None,
+                catalog=None,
+                actors=[],
+                strategies=[],
+                exec_algorithms=[],
+                load_state=False,
+                save_state=False,
+                loop_debug=False,
+                logging=None,
+                timeout_connection=10.0,
+                timeout_reconciliation=10.0,
+                timeout_portfolio=10.0,
+                timeout_disconnection=10.0,
+                timeout_post_stop=10.0,
+                run_analysis=True
+            )
 
         '''Build Node'''
-        self.node = BacktestEngine(config=config_node)
+        self.node = BacktestEngine(config=backtest_engine_config)
 
     def set_up_venue(self, **kwargs):
         assert self.node is not None, "Node must be built first"
@@ -163,6 +207,34 @@ class GenieBacktestNode(PipeLine):
             # use_random_ids ( bool , default False ) – If venue order and position IDs will be randomly generated UUID4s.
             use_random_ids=False,
         )
+
+        components = [
+            ui.dropdown(name='oms_type', label='OMS Type', value='hedging',
+                        choices=[
+                            ui.choice(name='hedging', label='Hedging'),
+                            ui.choice(name='netting', label='Netting', disabled=True),
+                        ]),
+            ui.dropdown(name='account_type', label='Account Type', value='margin',
+                        choices=[
+                            ui.choice(name='margin', label='Margin'),
+                            ui.choice(name='cash', label='Cash', disabled=True),
+                            ui.choice(name='betting', label='Betting', disabled=True),
+                        ]),
+            ui.dropdown(name='base_currency', label='Base Currency', value='usd',
+                        choices=[
+                            ui.choice(name='usd', label='USD'),
+                            ui.choice(name='eur', label='EUR', disabled=True),
+                            ui.choice(name='gbp', label='GBP', disabled=True),
+                        ]),
+            ui.dropdown(name='book_type', label='Book Type', value='l1',
+                        choices=[
+                            ui.choice(name='l1', label='L1-TBBO'),
+                            ui.choice(name='l2', label='L2-MBP', disabled=True),
+                            ui.choice(name='l3', label='L2-MBO', disabled=True),
+                        ]),
+
+
+        ]
 
     def set_up_data(self, **kwargs):
         catalog_path = self.get_value_from_kwargs(kwargs, "catalog_path")
@@ -290,9 +362,6 @@ class GenieLiveNode(PipeLine):
             Live - Real-time data with live venues (paper trading or real accounts)
         """
         '''Fill Component Configurations'''
-        # Logging and Caching
-        logging = LoggingConfig(log_level="INFO")
-        cache_database = CacheDatabaseConfig(type="in-memory")
         # Data
         data_clients = {
             "BINANCE": BinanceDataClientConfig(
@@ -307,7 +376,6 @@ class GenieLiveNode(PipeLine):
             ),
         }
         # Execution
-        exec_engine = LiveExecEngineConfig(reconciliation=True, reconciliation_lookback_mins=1440)
         exec_clients = {
             "BINANCE": BinanceExecClientConfig(
                 # api_key=None,  # "YOUR_BINANCE_TESTNET_API_KEY"
@@ -321,13 +389,54 @@ class GenieLiveNode(PipeLine):
             ),
         }
 
-        '''Configure Node'''
         config_node = TradingNodeConfig(
-            trader_id="TESTER-001", logging=logging, cache_database=cache_database,
+            environment=Environment.LIVE,
+            trader_id='TRADER-001',
+            instance_id=None,
+            cache=None,
+            cache_database=CacheDatabaseConfig(type="in-memory"),
+            data_engine=LiveDataEngineConfig(
+                time_bars_build_with_no_updates=True,
+                time_bars_timestamp_on_close=True,
+                validate_data_sequence=False,
+                debug=False,
+                qsize=10000
+            ),
+            risk_engine=LiveRiskEngineConfig(
+                bypass=False,
+                max_order_submit_rate='100/00:00:01',
+                max_order_modify_rate='100/00:00:01',
+                max_notional_per_order={},
+                debug=False,
+                qsize=10000
+            ),
+            exec_engine=LiveExecEngineConfig(
+                load_cache=True,
+                allow_cash_positions=True,
+                filter_unclaimed_external_orders=False,
+                debug=False,
+                reconciliation=True,
+                reconciliation_lookback_mins=None,
+                inflight_check_interval_ms=2000,
+                inflight_check_threshold_ms=5000,
+                qsize=10000
+            ),
+            streaming=None,
+            catalog=None,
+            actors=[],
+            strategies=[],
+            exec_algorithms=[],
+            load_state=False,
+            save_state=False,
+            loop_debug=False,
+            logging=LoggingConfig(log_level="INFO"),
+            timeout_connection=10.0,
+            timeout_reconciliation=10.0,
+            timeout_portfolio=10.0,
+            timeout_disconnection=10.0,
+            timeout_post_stop=10.0,
             data_clients=data_clients,
-            exec_engine=exec_engine, exec_clients=exec_clients,
-            timeout_connection=10.0, timeout_reconciliation=10.0, timeout_portfolio=10.0,
-            timeout_disconnection=10.0, timeout_post_stop=5.0,
+            exec_clients=exec_clients
         )
 
         '''Build Node'''
@@ -406,3 +515,102 @@ def GenieTraderPipeline(node_type, **kwargs):  # Use this instead of directly in
         return GenieBacktestNode(**kwargs)
     else:
         raise ValueError(f"Node type {node_type} is not supported")
+
+
+# todo this is specific to binance or just the forex data i have currently locally, overlooking this since is not a
+#  roadblock for anyone using this as an example to customumize
+
+
+if __name__ == "__main__":
+    # FIXME This is a very hard coded example, need to make it more flexible. The goal of this script is to work on the Genie Trader project
+    VENUE_NAME = "SIM"
+    INSTRUMENT_IDS = ["AUDUSD.SIM"]
+    START_TIME = pd.Timestamp("2021-01-07-00:00:00", tz="UTC")
+    END_TIME = pd.Timestamp("2021-01-07-08:00:00", tz="UTC")
+    CATALOG_PATH = "/home/ruben/PycharmProjects/Genie-Trader/Data/tick_data_catalog"
+    NODE_TYPE = "BACKTESTING"
+    # NODE_TYPE = "TRADING"
+    # Set Environment Variables
+    # read ../.env file and set environment variables
+    from Modules.Misc.misc import load_dot_env
+
+    load_dot_env(env_file="/home/ruben/PycharmProjects/Genie-Trader/.env")
+
+    # Kwargs can be passed to the pipeline at any point, they will be passed to the node that is being created
+    # Either at initiation or at the corresponding run method for the called method
+    pipe = GenieTraderPipeline(node_type=NODE_TYPE,
+                               **dict(
+                                   # TODO: '''Venue Settings'''
+                                   venue=VENUE_NAME,
+                                   oms_type=OmsType.HEDGING,
+                                   account_type=AccountType.MARGIN,
+                                   starting_balances=[Money(1_000_000, USD)],
+                                   base_currency=USD,
+                                   default_leverage=None,
+                                   leverages=None,
+                                   modules=None,
+                                   fill_model=None,
+                                   latency_model=None,
+                                   book_type=BookType.L1_TBBO,
+                                   routing=False,
+                                   frozen_account=False,
+                                   bar_execution=True,
+                                   reject_stop_orders=True,
+                                   support_gtd_orders=True,
+                                   use_random_ids=False,
+
+                                   # TODO: '''Data Settings'''
+                                   catalog_path=CATALOG_PATH,
+                                   instrument_ids=INSTRUMENT_IDS,
+                                   start_time=START_TIME,
+                                   end_time=END_TIME,
+
+                               ))
+
+    ui.dropdown(name='venue_name', label='Venue Name', value='custom_venue',
+                choices=[  #
+                    # ui.choice(name='binance_com', label='Binance-COM'),
+                    # ui.choice(name='binance_us', label='Binance-US'),
+                    # ui.choice(name='binance_testnet', label='Binance-TestNet'),
+                    ui.choice(name='custom_venue', label='SIM'),
+                ]),
+    ui.dropdown(name='instrument_ids', label='Instrument ID\'s', value='audusd.sim',
+                choices=[
+                    ui.choice(name='audusd.sim', label='AUDUSD'),
+                ]),
+
+    # FIXME this might return a node or an engine, need to check and make nessesary changes throughout the script to handle both cases for Live and Backtesting
+
+    '''Create Node or Engine'''
+    pipe.configure_node()
+    '''Venue Config'''
+    pipe.set_up_venue()
+    '''Instruments and Data Selection '''
+    # TODO: should be able to use live data in paper trading, should be able to download data or use the catalog
+    #  data or of course download and insert data
+    #  in catalog
+    pipe.set_up_data()
+    "Configure your execution algorithm"
+    # pipe.set_up_execution_engine()
+
+    """Run Node"""  # TODO: please remember we still need to figure out the node vs engine handling and abilities
+    pipe.run()
+
+    #######################################################################################################################
+    ## Everything below this line is scratch or no place in the script right now
+    #######################################################################################################################
+    # TODO: Implement Backtesting using backtest node rather than just engine  (see below)
+    #   elif node_type == "GRID_BACKTESTING":
+    #   Implement grid backtesting
+    #   "Engine Config"
+    #   from nautilus_trader.config import BacktestRunConfig
+    #   engine_config = BacktestRunConfig(
+    #     engine=BacktestEngineConfig(strategies=strategies), #idk if only accepts config or can accept engine
+    #     data=data_config,
+    #     venues=venues_config,
+    #   )
+    #  engine = BacktestEngine(config=BacktestEngineConfig(strategies=strategies))
+    #  engine.add_data(data_config)
+    #  engine.add_venue(venues_config)
+    #  "Set up Node"
+    #  node = BacktestNode(configs=[engine_config])

@@ -38,7 +38,7 @@ from nautilus_trader.trading.strategy import Strategy
 
 class OrderBookImbalanceConfig(StrategyConfig, frozen=True):
     """
-    Configuration for ``OrderBookImbalance`` instances.
+    App_Configuration for ``OrderBookImbalance`` instances.
 
     Parameters
     ----------
@@ -87,7 +87,7 @@ class OrderBookImbalance(Strategy):
         assert 0 < config.trigger_imbalance_ratio < 1
         super().__init__(config)
 
-        # Configuration
+        # App_Configuration
         self.instrument_id = InstrumentId.from_str(config.instrument_id)
         self.max_trade_size = Decimal(config.max_trade_size)
         self.trigger_min_size = config.trigger_min_size

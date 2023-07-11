@@ -28,7 +28,7 @@ from nautilus_trader.trading.strategy import Strategy
 
 class SignalStrategyConfig(StrategyConfig, frozen=True):
     """
-    Configuration for ``SignalStrategy`` instances.
+    App_Configuration for ``SignalStrategy`` instances.
     """
 
     instrument_id: str
