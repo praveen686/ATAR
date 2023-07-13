@@ -23,8 +23,6 @@ from Modules.Strategies.MarketVolatilityCatcher import MarketVolatilityCatcherCo
     TWAPExecAlgorithm
 
 
-
-
 def get_instruments_in_catalog(catalog_path, instrument_ids=None, as_nautilus=True, return_catalog=False):
     from nautilus_trader.data.engine import ParquetDataCatalog
     catalog = ParquetDataCatalog(catalog_path)
@@ -207,34 +205,6 @@ class GenieBacktestNode(PipeLine):
             # use_random_ids ( bool , default False ) – If venue order and position IDs will be randomly generated UUID4s.
             use_random_ids=False,
         )
-
-        components = [
-            ui.dropdown(name='oms_type', label='OMS Type', value='hedging',
-                        choices=[
-                            ui.choice(name='hedging', label='Hedging'),
-                            ui.choice(name='netting', label='Netting', disabled=True),
-                        ]),
-            ui.dropdown(name='account_type', label='Account Type', value='margin',
-                        choices=[
-                            ui.choice(name='margin', label='Margin'),
-                            ui.choice(name='cash', label='Cash', disabled=True),
-                            ui.choice(name='betting', label='Betting', disabled=True),
-                        ]),
-            ui.dropdown(name='base_currency', label='Base Currency', value='usd',
-                        choices=[
-                            ui.choice(name='usd', label='USD'),
-                            ui.choice(name='eur', label='EUR', disabled=True),
-                            ui.choice(name='gbp', label='GBP', disabled=True),
-                        ]),
-            ui.dropdown(name='book_type', label='Book Type', value='l1',
-                        choices=[
-                            ui.choice(name='l1', label='L1-TBBO'),
-                            ui.choice(name='l2', label='L2-MBP', disabled=True),
-                            ui.choice(name='l3', label='L2-MBO', disabled=True),
-                        ]),
-
-
-        ]
 
     def set_up_data(self, **kwargs):
         catalog_path = self.get_value_from_kwargs(kwargs, "catalog_path")
@@ -522,18 +492,19 @@ def GenieTraderPipeline(node_type, **kwargs):  # Use this instead of directly in
 
 
 if __name__ == "__main__":
+    from Modules.Misc.misc import load_dot_env
+
     # FIXME This is a very hard coded example, need to make it more flexible. The goal of this script is to work on the Genie Trader project
     VENUE_NAME = "SIM"
     INSTRUMENT_IDS = ["AUDUSD.SIM"]
     START_TIME = pd.Timestamp("2021-01-07-00:00:00", tz="UTC")
-    END_TIME = pd.Timestamp("2021-01-07-08:00:00", tz="UTC")
+    END_TIME = pd.Timestamp("2021-01-07-09:00:00", tz="UTC")
     CATALOG_PATH = "/home/ruben/PycharmProjects/Genie-Trader/Data/tick_data_catalog"
     NODE_TYPE = "BACKTESTING"
     # NODE_TYPE = "TRADING"
-    # Set Environment Variables
-    # read ../.env file and set environment variables
-    from Modules.Misc.misc import load_dot_env
 
+    # Set Environment Variables
+    # Loads BINANCE_FUTURES_TESTNET_API_SECRET and BINANCE_FUTURES_TESTNET_API_KEY among other values
     load_dot_env(env_file="/home/ruben/PycharmProjects/Genie-Trader/.env")
 
     # Kwargs can be passed to the pipeline at any point, they will be passed to the node that is being created
@@ -566,18 +537,6 @@ if __name__ == "__main__":
                                    end_time=END_TIME,
 
                                ))
-
-    ui.dropdown(name='venue_name', label='Venue Name', value='custom_venue',
-                choices=[  #
-                    # ui.choice(name='binance_com', label='Binance-COM'),
-                    # ui.choice(name='binance_us', label='Binance-US'),
-                    # ui.choice(name='binance_testnet', label='Binance-TestNet'),
-                    ui.choice(name='custom_venue', label='SIM'),
-                ]),
-    ui.dropdown(name='instrument_ids', label='Instrument ID\'s', value='audusd.sim',
-                choices=[
-                    ui.choice(name='audusd.sim', label='AUDUSD'),
-                ]),
 
     # FIXME this might return a node or an engine, need to check and make nessesary changes throughout the script to handle both cases for Live and Backtesting
 
