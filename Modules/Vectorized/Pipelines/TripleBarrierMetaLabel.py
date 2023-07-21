@@ -232,15 +232,14 @@ def compute_features_from_vbt_data(vbt_data):
 def flexible_tbm_labeling(close_series: pd.Series or vbt.Param,
                           # side_series: pd.Series or vbt.Param,
                           instrument_name: str or vbt.Param, **tbl_kwargs: dict):
-    # assert close_series.index.equals(side_series.index), "close_series and side_series must have the same index"
-
-    print(f'{close_series = }')
 
     side_series = trend_scanning_labels(price_series=close_series, t_events=close_series.index,
                                         look_forward_window=20,
                                         min_sample_length=5, step=1)["bin"]
 
-    print(f'{side_series = }')
+    assert close_series.index.equals(side_series.index), "close_series and side_series must have the same index"
+
+
     triple_barrier_labeled_data = daily_vol_triple_barrier_label_example(close_series=close_series,
                                                                          side_series=side_series,
                                                                          **tbl_kwargs)
@@ -417,7 +416,7 @@ if __name__ == "__main__":
     DATA_FILE_DIRS = glob.glob(f"{ROOT_DATA_DIR}/**", recursive=True)
     DATA_FILE_NAMES = [
         "XAUUSD_GMT+0_NO-DST_M1.csv",
-        "US_Brent_Crude_Oil_GMT+0_NO-DST_M1.csv",
+        # "US_Brent_Crude_Oil_GMT+0_NO-DST_M1.csv",
     ]
     OUTPUT_FILE_DIR = "/home/ruben/PycharmProjects/Genie-Trader/dev_studies_workdir"
     OUTPUT_FILE_NAME = "tbml_data"
@@ -431,22 +430,22 @@ if __name__ == "__main__":
         # rename_columns={"Open": "open", "High": "high", "Low": "low", "Close": "close"},
         scheduler='threads',
         first_or_last='first',
-        n_rows=10000,
+        # n_rows=10000,
         #
         # pickle_file_path=f"data_temp_brent.pkl",  # if exists, then load from pickle file instead, else will create it
         # pickle_file_path=f"data_temp_xau.pkl",  # if exists, then load from pickle file instead, else will create it
-        pickle_file_path=f"data_temp.pkl",  # if exists, then load from pickle file instead, else will create it
+        # pickle_file_path=f"data_temp.pkl",  # if exists, then load from pickle file instead, else will create it
 
     )
     TBL_PARAMS = dict(
         pt_sl=[1, 1],
-        min_ret=0.001,  # todo allow user to pass a str of a function to be applied to the data to calculate this
+        min_ret=0.01,  # todo allow user to pass a str of a function to be applied to the data to calculate this
         num_threads=28,
         #
         #  Number of D/H/m/s to add for vertical barrier
         vertical_barrier_num_days=0,
-        vertical_barrier_num_hours=0,
-        vertical_barrier_num_minutes=30,
+        vertical_barrier_num_hours=1,
+        vertical_barrier_num_minutes=0,
         vertical_barrier_num_seconds=0,
     )
     OUTPUT_DATA_PARAMS = dict(

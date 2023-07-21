@@ -133,10 +133,10 @@ def mp_pandas_obj(func, pd_obj, num_threads=24, mp_batches=1, lin_mols=True, ver
     else:
         return out
 
-    # Using pd.concat instead of append for better performance # todo review implications in other implementations
-    # for i in out:
-    #     df0 = df0.append(i)
-    df0 = pd.concat(out)
+
+    for i in out:
+        df0 = df0.append(i)
+    # df0 = pd.concat(out) # todo could us pd.concat instead of append for better performance # todo review implications in other implementations
 
     df0 = df0.sort_index()
     return df0
@@ -240,3 +240,8 @@ def process_jobs(jobs, task=None, num_threads=24, verbose=True):
     pool.close()
     pool.join()  # This is needed to prevent memory leaks
     return out
+
+
+
+
+

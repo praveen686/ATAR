@@ -166,7 +166,8 @@ def get_events(close, t_events, pt_sl, target, min_ret, num_threads, vertical_ba
         raise ValueError("All side predictions are NaN. Try changing the side_prediction.")
 
     # Apply Triple Barrier
-    first_touch_dates = mp_pandas_obj(func=apply_pt_sl_on_t1,
+    from Modules.FinLab_Algorythms.util.multiprocess import mp_pandas_obj_dask
+    first_touch_dates = mp_pandas_obj_dask(func=apply_pt_sl_on_t1,
                                       pd_obj=('molecule', events.index),
                                       num_threads=num_threads,
                                       close=close,
