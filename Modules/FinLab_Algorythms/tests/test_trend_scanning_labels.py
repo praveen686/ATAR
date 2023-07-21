@@ -6,7 +6,7 @@ import os
 import unittest
 import pandas as pd
 
-from Modules.labeling_algorythms import trend_scanning_labels
+from Modules.FinLab_Algorythms.labeling_algorythms import trend_scanning_labels
 
 
 class TestTrendScanningLabels(unittest.TestCase):
@@ -57,5 +57,4 @@ class TestTrendScanningLabels(unittest.TestCase):
 
         tr_scan_labels_none = trend_scanning_labels(self.eem_close, t_events=None, look_forward_window=20)
         tr_scan_labels_none.dropna(inplace=True)
-
         self.assertTrue((tr_scan_labels == tr_scan_labels_none).all().all())

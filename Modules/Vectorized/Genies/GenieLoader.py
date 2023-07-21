@@ -3,6 +3,40 @@ import os
 
 class GenieLoader():
 
+    @staticmethod
+    def estimate_optimal_npartitions(data, partition_size_limit=1e6):
+        """
+        Estimate the optimal number of partitions for a dask DataFrame based on dataset size,
+        available memory and number of cores.
+
+        :param data: pandas DataFrame or Series
+        :param partition_size_limit: Maximum number of rows for each partition. Default is 1e6.
+        :return: Estimated optimal number of partitions
+        """
+        import psutil
+        # Calculate total memory (RAM) in bytes
+        total_mem = psutil.virtual_memory().total
+
+        # Calculate the size of the dataset in bytes
+        data_size = data.memory_usage(index=True, deep=True).sum()
+
+        # Get the number of cores
+        num_cores = os.cpu_count()
+
+        # Estimate the number of partitions based on data size
+        npartitions_data_size = int(data_size / partition_size_limit)
+
+        # Estimate the number of partitions based on total memory and data size
+        npartitions_mem = int(total_mem / data_size) if data_size != 0 else num_cores
+
+        # Choose the minimum value among the three estimates
+        npartitions = min(num_cores, npartitions_data_size, npartitions_mem)
+
+        # Ensure npartitions is at least 1
+        npartitions = max(1, npartitions)
+
+        return npartitions
+
     def find_file(self, file_name, data_file_dirs: list or tuple):
 
         for directory in data_file_dirs:

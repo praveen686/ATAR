@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import concurrent.futures
 import concurrent.futures
 import os

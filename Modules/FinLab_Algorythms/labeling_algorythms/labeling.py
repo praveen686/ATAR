@@ -157,6 +157,14 @@ def get_events(close, t_events, pt_sl, target, min_ret, num_threads, vertical_ba
     events = pd.concat({'t1': vertical_barrier_times, 'trgt': target, 'side': side_}, axis=1)
     events = events.dropna(subset=['trgt'])
 
+    # Conduct Sanity Check
+    if events['t1'].size == 0:
+        raise ValueError("All vertical barrier times are NaT. Try increasing the time window.")
+    if events['trgt'].size == 0:
+        raise ValueError("All target returns are NaN. Try changing the min_ret.")
+    if events['side'].size == 0:
+        raise ValueError("All side predictions are NaN. Try changing the side_prediction.")
+
     # Apply Triple Barrier
     first_touch_dates = mp_pandas_obj(func=apply_pt_sl_on_t1,
                                       pd_obj=('molecule', events.index),

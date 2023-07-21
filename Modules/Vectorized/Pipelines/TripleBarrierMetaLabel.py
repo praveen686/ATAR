@@ -47,7 +47,7 @@ import pandas as pd
 import vectorbtpro as vbt
 
 from Modules.FinLab_Algorythms import util
-from Modules.FinLab_Algorythms.labeling_algorythms import labeling
+from Modules.FinLab_Algorythms.labeling_algorythms import labeling, trend_scanning_labels
 from Modules.FinLab_Algorythms.timeseries_algorythms import timeseries_filters
 from Modules.Vectorized.Genies.GenieLoader import GenieLoader
 
@@ -69,7 +69,7 @@ def example_arb_strategy(VBT_OHLCV_Data):
     exits = VBT_OHLCV_Data.hlc3.vbt.crossed_below(bb.upper) & (bb.bandwidth > 0.5)
     short_entries = VBT_OHLCV_Data.hlc3.vbt.crossed_below(bb.lower) & (bb.bandwidth < 0.1)
     short_exits = VBT_OHLCV_Data.hlc3.vbt.crossed_above(bb.lower) & (bb.bandwidth > 0.5)
-    # pf = vbt.PF.from_signals(OHLCV_Data, entries, exits, short_entries, short_exits)
+    # pf = vbt.PF.from_signals(OHLCV_Data, entries, exits, short_entries, short_exits) # todo we should do checks after training or at least with the cleaned labeled data
     # pf.plot_trade_signals().show()
 
     # Get a df of exits/short_exits = 0 while entries = 1 and short_entries = -1 else 0
@@ -81,6 +81,7 @@ def example_arb_strategy(VBT_OHLCV_Data):
     return side
 
 
+# todo daily_vol_triple_barrier_label_example, generalize , allow to pass in OHLCV data and the name of the volatility function to be used
 def daily_vol_triple_barrier_label_example(close_series: pd.Series, side_series: pd.Series, **tbl_kwargs):
     """
     This function is an example of how to use the triple barrier labeling algorythm
@@ -114,11 +115,12 @@ def daily_vol_triple_barrier_label_example(close_series: pd.Series, side_series:
 
     # Compute daily volatility
     daily_vol = util.get_daily_vol(close=side_labeled_ohlcv_data['close'], lookback=50)
+    print(f'{daily_vol = }')
 
     # Apply Symmetric CUSUM Filter and get timestamps for events
     # Note: Only the CUSUM filter needs a point estimate for volatility
     cusum_events = timeseries_filters.cusum_filter(side_labeled_ohlcv_data['close'], threshold=daily_vol.mean() * 0.5)
-
+    print(f'{cusum_events = }')
     if len(cusum_events) == 0:
         logger.warning('\nNo CUSUM events found with the given parameters and provided data')
         return None
@@ -131,7 +133,7 @@ def daily_vol_triple_barrier_label_example(close_series: pd.Series, side_series:
                                                       num_minutes=tbl_kwargs.get('vertical_barrier_num_minutes', 0),
                                                       num_seconds=tbl_kwargs.get('vertical_barrier_num_seconds', 0)
                                                       )
-
+    print(f'{vertical_barriers = }')
     triple_barrier_events = labeling.get_events(close=side_labeled_ohlcv_data['close'],
                                                 side_prediction=side_labeled_ohlcv_data['side'],
                                                 t_events=cusum_events,
@@ -227,10 +229,18 @@ def compute_features_from_vbt_data(vbt_data):
 #     # },
 #     # i dont want the product of the paramets, i want [i], [i], [i]
 # )
-def flexible_tbm_labeling(close_series: pd.Series or vbt.Param, side_series: pd.Series or vbt.Param,
+def flexible_tbm_labeling(close_series: pd.Series or vbt.Param,
+                          # side_series: pd.Series or vbt.Param,
                           instrument_name: str or vbt.Param, **tbl_kwargs: dict):
-    assert close_series.index.equals(side_series.index), "close_series and side_series must have the same index"
+    # assert close_series.index.equals(side_series.index), "close_series and side_series must have the same index"
 
+    print(f'{close_series = }')
+
+    side_series = trend_scanning_labels(price_series=close_series, t_events=close_series.index,
+                                        look_forward_window=20,
+                                        min_sample_length=5, step=1)["bin"]
+
+    print(f'{side_series = }')
     triple_barrier_labeled_data = daily_vol_triple_barrier_label_example(close_series=close_series,
                                                                          side_series=side_series,
                                                                          **tbl_kwargs)
@@ -279,7 +289,11 @@ def TBM_labeling(
         symbols_data_obj = genie_loader.load_vbt_pickle(pickle_file_path)
 
     '''Label the sides of the entries when the decision is made, not when the trade is opened -1 0 1 labeled series'''
-    side_df = example_arb_strategy(VBT_OHLCV_Data=symbols_data_obj)
+    # side_df = example_arb_strategy(VBT_OHLCV_Data=symbols_data_obj)  # this if a strategy using VBT is used ...
+    # print(f'{side_df_.head(10) = }')
+    # todo this needs to be passed in rather than hard coded
+    # side_df = trend_scanning_labels(price_series=symbols_data_obj.close, t_events=symbols_data_obj.close.index, look_forward_window=20,
+    #                                 min_sample_length=5, step=1)["bin"]
 
     '''Compute features from the vbt OHLCV data'''  # FIXME can be moved to another process
     # features = compute_features_from_vbt_data(symbols_data_obj) # FIXME
@@ -289,13 +303,13 @@ def TBM_labeling(
     close_df = pd.DataFrame(symbols_data_obj.close)
     close_df.columns = symbols_data_obj.symbols
 
-    if isinstance(side_df, pd.Series):
-        side_df = side_df.to_frame()
-        side_df.columns = symbols_data_obj.symbols
+    # if isinstance(side_df, pd.Series):
+    #     side_df = side_df.to_frame()
+    #     side_df.columns = symbols_data_obj.symbols
 
-    assert close_df.columns.equals(side_df.columns), "The columns of the close and side series must be the same"
-    assert close_df.index.equals(side_df.index), "The indices of the close and side series must be the same"
-    assert close_df.index.equals(side_df.index), "The indices of the close and side series must be the same"
+    # assert close_df.columns.equals(side_df.columns), "The columns of the close and side series must be the same"
+    # assert close_df.index.equals(side_df.index), "The indices of the close and side series must be the same"
+    # assert close_df.index.equals(side_df.index), "The indices of the close and side series must be the same"
 
     # common_dates = symbols_data_obj.index.intersection(close_df.index).intersection(side_df.index)
     # close_df = close_df.loc[common_dates]
@@ -303,7 +317,7 @@ def TBM_labeling(
     #
 
     close_series = dataframe_to_series_list(close_df)
-    side_series = dataframe_to_series_list(side_df)
+    # side_series = dataframe_to_series_list(side_df)
 
     # Convert
     '''Using the close and side series and other tbl configuration parameters, label --> triple barrier labeling'''
@@ -325,8 +339,14 @@ def TBM_labeling(
     import itertools
 
     param_configs = list(itertools.starmap(
-        lambda c, s, i: {'close_series': c, 'side_series': s, 'instrument_name': i},
-        itertools.zip_longest(close_series, side_series, symbols_data_obj.symbols)
+        lambda c,
+               # s,
+               i: {'close_series': c,
+                   # 'side_series': s,
+                   'instrument_name': i},
+        itertools.zip_longest(close_series,
+                              # side_series,
+                              symbols_data_obj.symbols)
     ))
 
     tbml_data = flexible_tbm_labeling_instance(
@@ -351,6 +371,7 @@ if __name__ == "__main__":
     save_output_data: Saves the meta-labeled DataFrame to an output file.
     TBM_labeling: The main script that sets up input and output parameters and uses the other functions to generate a 
     meta-labeled DataFrame.
+    
     Here's a step-by-step guide on how to use these functions:
 
     Define your input data parameters in the INPUT_DATA_PARAMS dictionary, including the data file directories, data 
@@ -403,25 +424,29 @@ if __name__ == "__main__":
 
     INPUT_DATA_PARAMS = dict(
         # todo this will be changed as needed for the endpoint to save the data e.g. S3-bucket
+        # todo maybe i would like to also allow for data to be loaded from an exchange api
         data_file_dirs=DATA_FILE_DIRS,
         data_file_names=DATA_FILE_NAMES,
-        # rename_columns={"Open": "open", "High": "high", "Low": "low", "Close": "close", "Tick volume": "volume"},
-        rename_columns={"Open": "open", "High": "high", "Low": "low", "Close": "close"},
+        rename_columns={"Open": "open", "High": "high", "Low": "low", "Close": "close", "Tick volume": "volume"},
+        # rename_columns={"Open": "open", "High": "high", "Low": "low", "Close": "close"},
         scheduler='threads',
         first_or_last='first',
         n_rows=10000,
         #
-        # pickle_file_path=f"data_temp.pkl",  # if exists, then load from pickle file instead, else will create it
+        # pickle_file_path=f"data_temp_brent.pkl",  # if exists, then load from pickle file instead, else will create it
+        # pickle_file_path=f"data_temp_xau.pkl",  # if exists, then load from pickle file instead, else will create it
+        pickle_file_path=f"data_temp.pkl",  # if exists, then load from pickle file instead, else will create it
+
     )
     TBL_PARAMS = dict(
         pt_sl=[1, 1],
-        min_ret=0.001,
+        min_ret=0.001,  # todo allow user to pass a str of a function to be applied to the data to calculate this
         num_threads=28,
         #
         #  Number of D/H/m/s to add for vertical barrier
         vertical_barrier_num_days=0,
-        vertical_barrier_num_hours=4,
-        vertical_barrier_num_minutes=0,
+        vertical_barrier_num_hours=0,
+        vertical_barrier_num_minutes=30,
         vertical_barrier_num_seconds=0,
     )
     OUTPUT_DATA_PARAMS = dict(
