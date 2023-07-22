@@ -25,30 +25,30 @@ services:
     environment: # Add environment variables if necessary
       - REDIS_URL=${REDIS_URL}
       - PORT=${FRONTEND_PORT} # entry point will overwrite this
-    command: [ "wave", "run", "src.app.py"]  # Command to start the Wave Server
+    command: [ "wave", "run", "src.app.py" ]  # Command to start the Wave Server
 
 
-#  # FastAPI Microservice for Vectorized Data Analysis Module in a Conda Environment
-#  vectorized:
-#    build:
-#      context: ${VECTORIZED_CONTEXT}
-#      dockerfile: ${VECTORIZED_DOCKERFILE}
-#      args:
-#        YML_ENV_NAME: ${VECTORIZED_ENV_NAME}
-#        GITHUB_KEY: ${GITHUB_KEY}
-#    depends_on:
-#      - redis
-#    ports:
-#      - ${VECTORIZED_PORT}:${VECTORIZED_PORT}
-#    volumes:
-#      - ./Modules:/app/Modules  # Mount the Modules directory todo this can be done through a rest api or simply pip
-#      - ./Data:/app/Data
-#    networks:
-#      - my_network
-#    environment: # Add environment variables if necessary
-#      - REDIS_URL=${REDIS_URL}
-#      - PORT=${VECTORIZED_PORT} # entry point will overwrite this
-#    entrypoint: [ "/bin/bash", "-c", "conda run --no-capture-output -n vectorized uvicorn app:app --host ${VECTORIZED_HOST} --port ${VECTORIZED_PORT}" ]
+  # FastAPI Microservice for Vectorized Data Analysis Module in a Conda Environment
+  vectorized:
+    build:
+      context: ${VECTORIZED_CONTEXT}
+      dockerfile: ${VECTORIZED_DOCKERFILE}
+      args:
+        YML_ENV_NAME: ${VECTORIZED_ENV_NAME}
+        GITHUB_KEY: ${GITHUB_KEY}
+    depends_on:
+      - redis
+    ports:
+      - ${VECTORIZED_PORT}:${VECTORIZED_PORT}
+    volumes:
+      - ./Modules:/app/Modules  # Mount the Modules directory todo this can be done through a rest api or simply pip
+      - ./Data:/app/Data
+    networks:
+      - my_network
+    environment: # Add environment variables if necessary
+      - REDIS_URL=${REDIS_URL}
+      - PORT=${VECTORIZED_PORT} # entry point will overwrite this
+    entrypoint: [ "/bin/bash", "-c", "conda run --no-capture-output -n vectorized uvicorn app:app --host ${VECTORIZED_HOST} --port ${VECTORIZED_PORT}" ]
 #
 #
 #  wave_server:
@@ -72,8 +72,8 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16
-          gateway: 172.20.0.1
+        - subnet: ${SUBNET}
+          gateway: ${GATEWAY}
 
 
 

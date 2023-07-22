@@ -82,7 +82,13 @@ def example_arb_strategy(VBT_OHLCV_Data):
 
 
 # todo daily_vol_triple_barrier_label_example, generalize , allow to pass in OHLCV data and the name of the volatility function to be used
-def daily_vol_triple_barrier_label_example(close_series: pd.Series, side_series: pd.Series, **tbl_kwargs):
+def volatility_triple_barrier_label_example(
+        open_series: pd.Series,
+        high_series: pd.Series,
+        low_series: pd.Series,
+        close_series: pd.Series,
+        volume_series: pd.Series,
+        side_series: pd.Series, **tbl_kwargs):
     """
     This function is an example of how to use the triple barrier labeling algorythm
 
@@ -115,12 +121,12 @@ def daily_vol_triple_barrier_label_example(close_series: pd.Series, side_series:
 
     # Compute daily volatility
     daily_vol = util.get_daily_vol(close=side_labeled_ohlcv_data['close'], lookback=50)
-    print(f'{daily_vol = }')
+    logger.info(f'{daily_vol = }')
 
     # Apply Symmetric CUSUM Filter and get timestamps for events
     # Note: Only the CUSUM filter needs a point estimate for volatility
     cusum_events = timeseries_filters.cusum_filter(side_labeled_ohlcv_data['close'], threshold=daily_vol.mean() * 0.5)
-    print(f'{cusum_events = }')
+    logger.info(f'{cusum_events = }')
     if len(cusum_events) == 0:
         logger.warning('\nNo CUSUM events found with the given parameters and provided data')
         return None
@@ -133,7 +139,7 @@ def daily_vol_triple_barrier_label_example(close_series: pd.Series, side_series:
                                                       num_minutes=tbl_kwargs.get('vertical_barrier_num_minutes', 0),
                                                       num_seconds=tbl_kwargs.get('vertical_barrier_num_seconds', 0)
                                                       )
-    print(f'{vertical_barriers = }')
+    logger.info(f'{vertical_barriers = }')
     triple_barrier_events = labeling.get_events(close=side_labeled_ohlcv_data['close'],
                                                 side_prediction=side_labeled_ohlcv_data['side'],
                                                 t_events=cusum_events,
@@ -161,18 +167,19 @@ def daily_vol_triple_barrier_label_example(close_series: pd.Series, side_series:
     first_row = {'close': close_series[0], 'direction': side_series[0], 'ret': 0, 'target_ret': 0, 'meta_target': 0,
                  'prim_target': 0}
     first_row = pd.DataFrame(first_row, index=[close_series.index[0]])
-    returning_df = pd.concat([first_row, returning_df], axis=0)
+    returning_df = pd.concat([first_row, returning_df], axis=0)  # if memory is an issue switch to dask or loop-append
 
     # Change prim_target and meta_target to int
     returning_df['prim_target'] = returning_df['prim_target'].astype(int)
     returning_df['meta_target'] = returning_df['meta_target'].astype(int)
 
-    print("TBL-ML-Data")
-    print(returning_df[["direction", "prim_target", "meta_target"]].head(10))
+    logger.info("TBL-ML-Data")
+    logger.info(returning_df[["direction", "prim_target", "meta_target"]].head(10))
 
     # Print unique values
     unique_values = returning_df[["direction", "prim_target", "meta_target"]].apply(lambda x: x.unique())
-    print(unique_values)
+    logger.info("Unique Values")
+    logger.info(unique_values)
 
     return returning_df
 
@@ -203,7 +210,7 @@ def compute_features_from_vbt_data(vbt_data):
     # If mostly empty (features are not used) then drop the features column
     # Description describe() per column
     description = features.describe()
-    print(description)
+    logger.info(description)
 
     # Remove columns where mean is in [0, nan, inf, -inf] or count is 0
     columns_to_remove = []
@@ -212,8 +219,8 @@ def compute_features_from_vbt_data(vbt_data):
                 description[column]["25%"] == description[column]["75%"]:
             columns_to_remove.append(column)
     features = features.drop(columns=columns_to_remove)
-    print(f"Removed columns: {columns_to_remove}")
-    print(f'{features.head(10) = }')
+    logger.info(f"Removed columns: {columns_to_remove}")
+    logger.info(f'{features.head(10) = }')
     return features
 
 
@@ -229,20 +236,26 @@ def compute_features_from_vbt_data(vbt_data):
 #     # },
 #     # i dont want the product of the paramets, i want [i], [i], [i]
 # )
-def flexible_tbm_labeling(close_series: pd.Series or vbt.Param,
-                          # side_series: pd.Series or vbt.Param,
-                          instrument_name: str or vbt.Param, **tbl_kwargs: dict):
-
+def flexible_tbm_labeling(
+        open_series: pd.Series or vbt.Param,
+        high_series: pd.Series or vbt.Param,
+        low_series: pd.Series or vbt.Param,
+        close_series: pd.Series or vbt.Param,
+        volume_series: pd.Series or vbt.Param,
+        instrument_name: str or vbt.Param, **tbl_kwargs: dict):
     side_series = trend_scanning_labels(price_series=close_series, t_events=close_series.index,
                                         look_forward_window=20,
                                         min_sample_length=5, step=1)["bin"]
 
     assert close_series.index.equals(side_series.index), "close_series and side_series must have the same index"
 
-
-    triple_barrier_labeled_data = daily_vol_triple_barrier_label_example(close_series=close_series,
-                                                                         side_series=side_series,
-                                                                         **tbl_kwargs)
+    triple_barrier_labeled_data = volatility_triple_barrier_label_example(
+        open_series=open_series,
+        high_series=high_series,
+        low_series=low_series,
+        close_series=close_series,
+        volume_series=volume_series,
+        side_series=side_series, **tbl_kwargs)
 
     if triple_barrier_labeled_data is None:
         logging.warning("flexible_tbm_labeling returning a None value, most likely no CUSUM events were found")
@@ -289,7 +302,7 @@ def TBM_labeling(
 
     '''Label the sides of the entries when the decision is made, not when the trade is opened -1 0 1 labeled series'''
     # side_df = example_arb_strategy(VBT_OHLCV_Data=symbols_data_obj)  # this if a strategy using VBT is used ...
-    # print(f'{side_df_.head(10) = }')
+    # logger.info(f'{side_df_.head(10) = }')
     # todo this needs to be passed in rather than hard coded
     # side_df = trend_scanning_labels(price_series=symbols_data_obj.close, t_events=symbols_data_obj.close.index, look_forward_window=20,
     #                                 min_sample_length=5, step=1)["bin"]
@@ -299,24 +312,17 @@ def TBM_labeling(
 
     """<<<<<<<<<<<<<<                          TRIPLE BARRIER Meta LABELING                            >>>>>>>>>>>>"""
 
+    # fixme still using vbt data model
+    open_df = pd.DataFrame(symbols_data_obj.open)
+    open_df.columns = symbols_data_obj.symbols
+    high_df = pd.DataFrame(symbols_data_obj.high)
+    high_df.columns = symbols_data_obj.symbols
+    low_df = pd.DataFrame(symbols_data_obj.low)
+    low_df.columns = symbols_data_obj.symbols
     close_df = pd.DataFrame(symbols_data_obj.close)
     close_df.columns = symbols_data_obj.symbols
-
-    # if isinstance(side_df, pd.Series):
-    #     side_df = side_df.to_frame()
-    #     side_df.columns = symbols_data_obj.symbols
-
-    # assert close_df.columns.equals(side_df.columns), "The columns of the close and side series must be the same"
-    # assert close_df.index.equals(side_df.index), "The indices of the close and side series must be the same"
-    # assert close_df.index.equals(side_df.index), "The indices of the close and side series must be the same"
-
-    # common_dates = symbols_data_obj.index.intersection(close_df.index).intersection(side_df.index)
-    # close_df = close_df.loc[common_dates]
-    # side_df = side_df.loc[common_dates]
-    #
-
-    close_series = dataframe_to_series_list(close_df)
-    # side_series = dataframe_to_series_list(side_df)
+    volume_df = pd.DataFrame(symbols_data_obj.volume)
+    volume_df.columns = symbols_data_obj.symbols
 
     # Convert
     '''Using the close and side series and other tbl configuration parameters, label --> triple barrier labeling'''
@@ -337,15 +343,21 @@ def TBM_labeling(
     # todo refactor to a function
     import itertools
 
+    # add open high low volume
     param_configs = list(itertools.starmap(
-        lambda c,
-               # s,
-               i: {'close_series': c,
-                   # 'side_series': s,
-                   'instrument_name': i},
-        itertools.zip_longest(close_series,
-                              # side_series,
-                              symbols_data_obj.symbols)
+        lambda o, h, l, c, v, i: {'open_series': o,
+                                  'high_series': h,
+                                  'low_series': l,
+                                  'close_series': c,
+                                  'volume_series': v,
+                                  'instrument_name': i},
+        itertools.zip_longest(
+            dataframe_to_series_list(pd.DataFrame(symbols_data_obj.open)),
+            dataframe_to_series_list(pd.DataFrame(symbols_data_obj.high)),
+            dataframe_to_series_list(pd.DataFrame(symbols_data_obj.low)),
+            dataframe_to_series_list(pd.DataFrame(symbols_data_obj.close)),
+            dataframe_to_series_list(pd.DataFrame(symbols_data_obj.volume)),
+            symbols_data_obj.symbols)
     ))
 
     tbml_data = flexible_tbm_labeling_instance(
@@ -430,7 +442,7 @@ if __name__ == "__main__":
         # rename_columns={"Open": "open", "High": "high", "Low": "low", "Close": "close"},
         scheduler='threads',
         first_or_last='first',
-        # n_rows=10000,
+        n_rows=10000,
         #
         # pickle_file_path=f"data_temp_brent.pkl",  # if exists, then load from pickle file instead, else will create it
         # pickle_file_path=f"data_temp_xau.pkl",  # if exists, then load from pickle file instead, else will create it
@@ -439,13 +451,13 @@ if __name__ == "__main__":
     )
     TBL_PARAMS = dict(
         pt_sl=[1, 1],
-        min_ret=0.01,  # todo allow user to pass a str of a function to be applied to the data to calculate this
+        min_ret=0.0001,  # todo allow user to pass a str of a function to be applied to the data to calculate this
         num_threads=28,
         #
         #  Number of D/H/m/s to add for vertical barrier
         vertical_barrier_num_days=0,
-        vertical_barrier_num_hours=1,
-        vertical_barrier_num_minutes=0,
+        vertical_barrier_num_hours=0,
+        vertical_barrier_num_minutes=5,
         vertical_barrier_num_seconds=0,
     )
     OUTPUT_DATA_PARAMS = dict(
