@@ -8,15 +8,18 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from Modules.data_structures import get_volume_bars
-from Modules.microstructural_features import (get_vpin, get_bar_based_amihud_lambda, get_bar_based_kyle_lambda,
-                                               get_bekker_parkinson_vol, get_corwin_schultz_estimator,
-                                               get_bar_based_hasbrouck_lambda, get_roll_impact, get_roll_measure,
-                                               quantile_mapping, sigma_mapping, MicrostructuralFeaturesGenerator)
-from Modules.microstructural_features.encoding import encode_tick_rule_array
-from Modules.microstructural_features.entropy import get_plug_in_entropy, get_shannon_entropy, get_lempel_ziv_entropy, \
-    get_konto_entropy, _match_length
-from Modules.util import get_bvc_buy_volume
+from Modules.FinLab_Algorythms.data_structures_algorythms.standard_data_structures import get_volume_bars
+from Modules.FinLab_Algorythms.microstructural_features.encoding import encode_tick_rule_array, sigma_mapping, \
+    quantile_mapping
+from Modules.FinLab_Algorythms.microstructural_features.entropy import get_shannon_entropy, get_plug_in_entropy, \
+    get_lempel_ziv_entropy, get_konto_entropy, _match_length
+from Modules.FinLab_Algorythms.microstructural_features.feature_generator import MicrostructuralFeaturesGenerator
+from Modules.FinLab_Algorythms.microstructural_features.first_generation import get_roll_measure, get_roll_impact, \
+    get_corwin_schultz_estimator, get_bekker_parkinson_vol
+from Modules.FinLab_Algorythms.microstructural_features.second_generation import get_bar_based_kyle_lambda, \
+    get_bar_based_amihud_lambda, get_bar_based_hasbrouck_lambda
+from Modules.FinLab_Algorythms.microstructural_features.third_generation import get_vpin
+from Modules.FinLab_Algorythms.util import get_bvc_buy_volume
 
 
 class TestMicrostructuralFeatures(unittest.TestCase):

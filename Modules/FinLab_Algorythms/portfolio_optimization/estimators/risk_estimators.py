@@ -1,10 +1,11 @@
 # pylint: disable=missing-module-docstring
 import numpy as np
 import pandas as pd
-from sklearn.neighbors import KernelDensity
-from sklearn.covariance import MinCovDet, EmpiricalCovariance, ShrunkCovariance, LedoitWolf, OAS
 from scipy.optimize import minimize
-from Modules.portfolio_optimization.returns_estimators import ReturnsEstimators
+from sklearn.covariance import MinCovDet, EmpiricalCovariance, ShrunkCovariance, LedoitWolf, OAS
+from sklearn.neighbors import KernelDensity
+
+from Modules.FinLab_Algorythms.portfolio_optimization.estimators.returns_estimators import ReturnsEstimators
 
 
 class RiskEstimators:
@@ -338,7 +339,7 @@ class RiskEstimators:
         if denoise_method == 'target_shrink':
             # Based on the threshold, de-noising the correlation matrix
             corr = self._denoised_corr_targ_shrink(eigenval, eigenvec, num_facts, alpha)
-        else: # Default const_resid_eigen method
+        else:  # Default const_resid_eigen method
             # Based on the threshold, de-noising the correlation matrix
             corr = self._denoised_corr(eigenval, eigenvec, num_facts)
 
@@ -459,7 +460,7 @@ class RiskEstimators:
 
         # Marcenko-Pastur probability density function for eigen_space
         pdf = tn_relation * ((eigen_max - eigen_space) * (eigen_space - eigen_min)) ** (1 / 2) / \
-                             (2 * np.pi * var * eigen_space)
+              (2 * np.pi * var * eigen_space)
         pdf = pd.Series(pdf, index=eigen_space)
 
         return pdf

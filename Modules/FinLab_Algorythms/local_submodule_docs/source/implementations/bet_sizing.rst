@@ -1,4 +1,4 @@
-.. py:currentmodule:: Modules.bet_sizing.bet_sizing
+.. py:currentmodule:: Modules.FinLab_Algorythms.bet_sizing_algorythms.bet_sizing
 
 ==========
 Bet Sizing
@@ -29,7 +29,7 @@ Bet Sizing From Predicted Probability
 
 Assuming a machine learning algorithm has predicted a series of investment positions, one can use the probabilities of each of these predictions to derive the size of that specific bet.
 
-.. autofunction:: bet_size_probability
+.. autofunction:: calculate_bet_size
 
 Dynamic Bet Sizes
 *****************
@@ -54,11 +54,11 @@ Additional Utility Functions For Bet Sizing
 .. autofunction:: cdf_mixture
 .. autofunction:: single_bet_size_mixed
 
-.. py:currentmodule:: Modules.bet_sizing.ch10_snippets
+.. py:currentmodule:: Modules.FinLab_Algorythms.bet_sizing_algorythms.ch10_snippets
 
 Chapter 10 Code Snippets
 ########################
-Chapter 10 of "Advances in Financial Machine Learning" contains a number of Python code snippets, many of which are used to create the top level bet sizing functions. These functions can be found in ``Modules.bet_sizing.ch10_snippets.py``.
+Chapter 10 of "Advances in Financial Machine Learning" contains a number of Python code snippets, many of which are used to create the top level bet sizing functions. These functions can be found in ``Modules.FinLab_Algorythms.bet_sizing_algorythms.ch10_snippets.py``.
 
 Snippets For Bet Sizing From Probabilities
 ******************************************

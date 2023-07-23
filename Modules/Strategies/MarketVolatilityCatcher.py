@@ -5,6 +5,7 @@ from decimal import ROUND_DOWN
 from typing import Optional
 from typing import Union
 
+from nautilus_trader.adapters.binance.futures.types import BinanceFuturesMarkPriceUpdate
 from nautilus_trader.common.enums import LogColor
 from nautilus_trader.common.timer import TimeEvent
 from nautilus_trader.config import StrategyConfig
@@ -14,6 +15,7 @@ from nautilus_trader.core.data import Data
 from nautilus_trader.core.message import Event
 from nautilus_trader.execution.algorithm import ExecAlgorithm
 from nautilus_trader.indicators.atr import AverageTrueRange
+from nautilus_trader.model.data import DataType
 from nautilus_trader.model.data.bar import Bar
 from nautilus_trader.model.data.bar import BarType
 from nautilus_trader.model.data.book import OrderBookDelta
@@ -25,7 +27,7 @@ from nautilus_trader.model.enums import OrderType
 from nautilus_trader.model.enums import TimeInForce
 from nautilus_trader.model.enums import TriggerType
 from nautilus_trader.model.events.order import OrderFilled
-from nautilus_trader.model.identifiers import ClientOrderId
+from nautilus_trader.model.identifiers import ClientOrderId, ClientId
 from nautilus_trader.model.identifiers import InstrumentId
 from nautilus_trader.model.instruments import Instrument
 from nautilus_trader.model.objects import Quantity
@@ -147,7 +149,7 @@ class MarketVolatilityCatcher(Strategy):
 
         """
         # For debugging (must add a subscription)
-        # self.log.info(repr(data), LogColor.CYAN)
+        self.log.info(repr(data), LogColor.CYAN)
 
     def on_instrument(self, instrument: Instrument) -> None:
         """

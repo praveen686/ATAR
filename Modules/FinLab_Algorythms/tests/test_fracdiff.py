@@ -8,7 +8,10 @@ import math
 import numpy as np
 import pandas as pd
 
-from Modules.features import fracdiff, plot_min_ffd
+from Modules.FinLab_Algorythms.timeseries_algorythms._Fractionally_differenciated_series import FractionalDifferentiation, plot_min_ffd
+
+
+
 
 
 class TestFractionalDifferentiation(unittest.TestCase):
@@ -35,7 +38,7 @@ class TestFractionalDifferentiation(unittest.TestCase):
 
         diff_amt = 0.9
         number_ele = 100
-        weights = fracdiff.get_weights(diff_amt, size=number_ele)
+        weights = FractionalDifferentiation.get_weights(diff_amt, size=number_ele)
 
         # Last value in the set is still the same
         self.assertTrue(weights[-1] == 1.0)
@@ -55,7 +58,7 @@ class TestFractionalDifferentiation(unittest.TestCase):
         diff_amt = 0.9
         number_ele = 100
         thresh = 1e-3
-        weights = fracdiff.get_weights_ffd(diff_amt, thresh=thresh, lim=number_ele)
+        weights = FractionalDifferentiation.get_weights_ffd(diff_amt, thresh=thresh, lim=number_ele)
 
         # Last value in the set is still the same
         self.assertTrue(weights[-1] == 1.0)
@@ -72,7 +75,7 @@ class TestFractionalDifferentiation(unittest.TestCase):
         data_series = self.data['close'].to_frame()
 
         for diff_amt in np.arange(0.1, 1, 0.1):
-            fd_series = fracdiff.frac_diff(data_series, diff_amt=diff_amt)
+            fd_series = FractionalDifferentiation.frac_diff(data_series, diff_amt=diff_amt)
             self.assertTrue(fd_series.shape[0] == len(data_series))
             self.assertTrue(isinstance(fd_series['close'][0], np.float64) and math.isnan(fd_series['close'][0]))
 
@@ -85,7 +88,7 @@ class TestFractionalDifferentiation(unittest.TestCase):
         data_series = self.data['close'].to_frame()
 
         for diff_amt in np.arange(0.1, 1, 0.1):
-            fd_series = fracdiff.frac_diff_ffd(data_series, diff_amt=diff_amt)
+            fd_series = FractionalDifferentiation.frac_diff_ffd(data_series, diff_amt=diff_amt)
             self.assertTrue(fd_series.shape[0] == len(data_series))
             self.assertTrue(isinstance(fd_series['close'][0], np.float64) and math.isnan(fd_series['close'][0]))
 

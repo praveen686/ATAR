@@ -7,7 +7,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from Modules.filters.filters import cusum_filter, z_score_filter
+from Modules.FinLab_Algorythms.timeseries_algorythms.timeseries_filters import cusum_filter, z_score_filter
 
 
 class TestCUSUMFilter(unittest.TestCase):

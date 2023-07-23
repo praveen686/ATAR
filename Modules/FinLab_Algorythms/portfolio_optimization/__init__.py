@@ -1,13 +1,13 @@
 """
 Classes derived from Portfolio Optimisation module
 """
-
-from Modules.portfolio_optimization.cla import CriticalLineAlgorithm
-from Modules.portfolio_optimization.hrp import HierarchicalRiskParity
-from Modules.portfolio_optimization.mean_variance import MeanVarianceOptimisation
-from Modules.portfolio_optimization.herc import HierarchicalEqualRiskContribution
-from Modules.portfolio_optimization.risk_metrics import RiskMetrics
-from Modules.portfolio_optimization.returns_estimators import ReturnsEstimators
-from Modules.portfolio_optimization.nco import NCO
-from Modules.portfolio_optimization.risk_estimators import RiskEstimators
-from Modules.portfolio_optimization.tic import TIC
+from Modules.FinLab_Algorythms.portfolio_optimization.clustering.herc import HierarchicalEqualRiskContribution
+from Modules.FinLab_Algorythms.portfolio_optimization.clustering.hrp import HierarchicalRiskParity
+from Modules.FinLab_Algorythms.portfolio_optimization.clustering.nco import NestedClusteredOptimization
+from Modules.FinLab_Algorythms.portfolio_optimization.estimators.returns_estimators import ReturnsEstimators
+from Modules.FinLab_Algorythms.portfolio_optimization.estimators.risk_estimators import RiskEstimators
+from Modules.FinLab_Algorythms.portfolio_optimization.estimators.tic import TheoryImpliedCorrelation
+from Modules.FinLab_Algorythms.portfolio_optimization.modern_portfolio_theory.cla import CriticalLineAlgorithm
+from Modules.FinLab_Algorythms.portfolio_optimization.modern_portfolio_theory.mean_variance import \
+    MeanVarianceOptimisation
+from Modules.FinLab_Algorythms.portfolio_optimization.utils.risk_metrics import RiskMetrics

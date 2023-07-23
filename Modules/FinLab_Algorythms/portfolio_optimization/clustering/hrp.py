@@ -3,9 +3,8 @@ import numpy as np
 import pandas as pd
 from scipy.cluster.hierarchy import linkage as scipy_linkage, dendrogram
 from scipy.spatial.distance import squareform
-from Modules.portfolio_optimization.returns_estimators import ReturnsEstimators
-from Modules.portfolio_optimization.risk_metrics import RiskMetrics
-from Modules.portfolio_optimization.risk_estimators import RiskEstimators
+
+from Modules.FinLab_Algorythms.portfolio_optimization.estimators import ReturnsEstimators
 
 
 class HierarchicalRiskParity:
@@ -249,7 +248,6 @@ class HierarchicalRiskParity:
         :param asset_returns: (pd.DataFrame/numpy matrix) User supplied matrix of asset returns.
         :param covariance_matrix: (pd.Dataframe/numpy matrix) User supplied covariance matrix of asset returns
         """
-
 
         if asset_prices is None and asset_returns is None and covariance_matrix is None:
             raise ValueError(

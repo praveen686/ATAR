@@ -7,8 +7,8 @@ import unittest
 import os
 import numpy as np
 import pandas as pd
-from Modules.portfolio_optimization.risk_estimators import RiskEstimators
-from Modules.portfolio_optimization.returns_estimators import ReturnsEstimators
+
+from Modules.FinLab_Algorythms.portfolio_optimization import ReturnsEstimators, RiskEstimators
 
 
 class TestRiskEstimators(unittest.TestCase):

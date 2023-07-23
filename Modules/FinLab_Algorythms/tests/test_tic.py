@@ -7,8 +7,8 @@ import unittest
 import os
 import numpy as np
 import pandas as pd
-from Modules.portfolio_optimization.returns_estimators import ReturnsEstimators
-from Modules.portfolio_optimization.tic import TIC
+from Modules.FinLab_Algorythms.portfolio_optimization.returns_estimators import ReturnsEstimators
+from Modules.FinLab_Algorythms.portfolio_optimization.tic import TIC
 
 
 class TestTIC(unittest.TestCase):

@@ -2,34 +2,37 @@
 Tests the higher level functions in bet_sizing.py.
 """
 
+import datetime as dt
 import unittest
 from unittest.mock import patch
-import datetime as dt
+
 import numpy as np
 import pandas as pd
 from scipy.stats import norm, moment
 
-from Modules.bet_sizing.bet_sizing import (bet_size_probability, bet_size_dynamic, bet_size_budget, bet_size_reserve,
-                                            confirm_and_cast_to_df, get_concurrent_sides, cdf_mixture,
-                                            single_bet_size_mixed)
-from Modules.bet_sizing.ch10_snippets import (get_signal, avg_active_signals, discrete_signal,
-                                               get_w, get_target_pos, limit_price, bet_size)
-from Modules.bet_sizing.ef3m import M2N, raw_moment, most_likely_parameters
+from Modules.FinLab_Algorythms.bet_sizing_algorythms import raw_moment, M2N, most_likely_parameters
+from Modules.FinLab_Algorythms.bet_sizing_algorythms.bet_sizing import confirm_and_cast_to_df, get_concurrent_sides, \
+    bet_size_budget, bet_size_dynamic, single_bet_size_mixed, bet_size_reserve, cdf_mixture, calculate_bet_size
+from Modules.FinLab_Algorythms.bet_sizing_algorythms.ch10_snippets import get_signal, avg_active_signals, \
+    discrete_signal, get_w, get_target_pos, limit_price, bet_size
+
+
 
 
 class TestBetSizeProbability(unittest.TestCase):
     """
-    Tests the 'bet_size_probability' function.
+    Tests the 'calculate_bet_size' function.
     """
-    def test_bet_size_probability_default(self):
+
+    def test_calculate_bet_size_default(self):
         """
-        Tests for successful execution using the default arguments of 'bet_size_probability', which are:
+        Tests for successful execution using the default arguments of 'calculate_bet_size', which are:
          average_active = False
          step_size = 0.0
         """
         # Setup the test DataFrame.
         dates_test = np.array([dt.datetime(2000, 1, 1) + i * dt.timedelta(days=1) for i in range(5)])
-        shift_dt = np.array([dt.timedelta(days=0.5*i+1) for i in range(5)])
+        shift_dt = np.array([dt.timedelta(days=0.5 * i + 1) for i in range(5)])
         dates_shifted_test = dates_test + shift_dt
         events_test = pd.DataFrame(data=[[0.55, 1], [0.7, -1], [0.95, 1], [0.65, -1], [0.85, 1]],
                                    columns=['prob', 'side'],
@@ -40,15 +43,15 @@ class TestBetSizeProbability(unittest.TestCase):
         df_signal_0 = signal_0.to_frame('signal').join(events_test['t1'], how='left')
         signal_1 = df_signal_0.signal
         # Evaluate test.
-        self.assertTrue(signal_1.equals(bet_size_probability(events_test, events_test['prob'], 2, events_test['side'])))
+        self.assertTrue(signal_1.equals(calculate_bet_size(events_test, events_test['prob'], 2, events_test['side'])))
 
-    def test_bet_size_probability_avg_active(self):
+    def test_calculate_bet_size_avg_active(self):
         """
-        Tests for successful execution of 'bet_size_probability' with 'average_active' set to True.
+        Tests for successful execution of 'calculate_bet_size' with 'average_active' set to True.
         """
         # Setup the test DataFrame.
         dates_test = np.array([dt.datetime(2000, 1, 1) + i * dt.timedelta(days=1) for i in range(5)])
-        shift_dt = np.array([dt.timedelta(days=0.5*i+1) for i in range(5)])
+        shift_dt = np.array([dt.timedelta(days=0.5 * i + 1) for i in range(5)])
         dates_shifted_test = dates_test + shift_dt
         events_test = pd.DataFrame(data=[[0.55, 1], [0.7, -1], [0.95, 1], [0.65, -1], [0.85, 1]],
                                    columns=['prob', 'side'],
@@ -59,16 +62,17 @@ class TestBetSizeProbability(unittest.TestCase):
         df_signal_0 = signal_0.to_frame('signal').join(events_test['t1'], how='left')
         signal_1 = avg_active_signals(df_signal_0, 1)
         # Evaluate test.
-        self.assertTrue(signal_1.equals(bet_size_probability(events=events_test, prob=events_test['prob'], num_classes=2,
-                                                             pred=events_test['side'], average_active=True)))
+        self.assertTrue(
+            signal_1.equals(calculate_bet_size(events=events_test, predicted_probability=events_test['prob'], num_classes=2,
+                                                 predicted_side=events_test['side'], average_active_bets=True)))
 
-    def test_bet_size_probability_stepsize(self):
+    def test_calculate_bet_size_stepsize(self):
         """
-        Tests for successful execution of 'bet_size_probability' with 'step_size' greater than 0.
+        Tests for successful execution of 'calculate_bet_size' with 'step_size' greater than 0.
         """
         # Setup the test DataFrame.
         dates_test = np.array([dt.datetime(2000, 1, 1) + i * dt.timedelta(days=1) for i in range(5)])
-        shift_dt = np.array([dt.timedelta(days=0.5*i+1) for i in range(5)])
+        shift_dt = np.array([dt.timedelta(days=0.5 * i + 1) for i in range(5)])
         dates_shifted_test = dates_test + shift_dt
         events_test = pd.DataFrame(data=[[0.55, 1], [0.7, -1], [0.95, 1], [0.65, -1], [0.85, 1]],
                                    columns=['prob', 'side'],
@@ -80,14 +84,18 @@ class TestBetSizeProbability(unittest.TestCase):
         signal_1 = df_signal_0.signal
         signal_1 = discrete_signal(signal0=signal_1, step_size=0.1)
         # Evaluate test.
-        self.assertTrue(signal_1.equals(bet_size_probability(events=events_test, prob=events_test['prob'], num_classes=2,
-                                                             pred=events_test['side'], step_size=0.1)))
+        self.assertTrue(
+            # signal_1.equals(calculate_bet_size(events=events_test, prob=events_test['prob'], num_classes=2,
+            #                                      pred=events_test['side'], step_size=0.1)))
+            signal_1.equals(calculate_bet_size(events=events_test, predicted_probability=events_test['prob'],
+                                                  num_classes=2, predicted_side=events_test['side'], discretization_step=0.1)))
 
 
 class TestBetSizeDynamic(unittest.TestCase):
     """
     Tests the 'bet_size_dynamic' function.
     """
+
     def test_bet_size_dynamic_default(self):
         """
         Tests for successful execution using the default arguments of 'bet_size_dynamic', which are:
@@ -111,7 +119,7 @@ class TestBetSizeDynamic(unittest.TestCase):
                                                                                   row.max_pos, 'sigmoid'), axis=1)
         events_results['l_p'] = events_results.apply(lambda row: limit_price(row.t_pos, row.pos, row.f, w_param,
                                                                              row.max_pos, 'sigmoid'), axis=1)
-        events_results['bet_size'] = events_results.apply(lambda row: bet_size(w_param, row.f-row.m_p, 'sigmoid'),
+        events_results['bet_size'] = events_results.apply(lambda row: bet_size(w_param, row.f - row.m_p, 'sigmoid'),
                                                           axis=1)
         df_result = events_results[['bet_size', 't_pos', 'l_p']]
         # Evaluate.
@@ -123,13 +131,14 @@ class TestBetSizeBudget(unittest.TestCase):
     """
     Tests the 'bet_size_budget' function.
     """
+
     def test_bet_size_budget_default(self):
         """
         Tests for the successful execution of the 'bet_size_budget' function.
         """
         # Setup the test DataFrame.
         dates_test = np.array([dt.datetime(2000, 1, 1) + i * dt.timedelta(days=1) for i in range(5)])
-        shift_dt = np.array([dt.timedelta(days=0.5*i+1) for i in range(5)])
+        shift_dt = np.array([dt.timedelta(days=0.5 * i + 1) for i in range(5)])
         dates_shifted_test = dates_test + shift_dt
         events_test = pd.DataFrame(data=[[0.55, 1], [0.7, 1], [0.95, 1], [0.65, -1], [0.85, 1]],
                                    columns=['prob', 'side'],
@@ -150,7 +159,7 @@ class TestBetSizeBudget(unittest.TestCase):
         """
         # Setup the test DataFrame.
         dates_test = np.array([dt.datetime(2000, 1, 1) + i * dt.timedelta(days=1) for i in range(5)])
-        shift_dt = np.array([dt.timedelta(days=0.5*i+1) for i in range(5)])
+        shift_dt = np.array([dt.timedelta(days=0.5 * i + 1) for i in range(5)])
         dates_shifted_test = dates_test + shift_dt
         events_test = pd.DataFrame(data=[[0.55, 1], [0.7, 1], [0.95, 1], [0.65, 1], [0.85, 1]],
                                    columns=['prob', 'side'],
@@ -170,7 +179,8 @@ class TestBetSizeReserve(unittest.TestCase):
     """
     Tests the 'bet_size_reserve' function.
     """
-    @patch('Modules.bet_sizing.bet_sizing.most_likely_parameters')
+
+    @patch('Modules.FinLab_Algorythms.bet_sizing_algorythms.bet_sizing.most_likely_parameters')
     def test_bet_size_reserve_default(self, mock_likely_parameters):
         """
         Tests for successful execution of 'bet_size_reserve' using default arguments, return_parameters=False.
@@ -182,7 +192,7 @@ class TestBetSizeReserve(unittest.TestCase):
         sample_size = 500
         start_date = dt.datetime(2000, 1, 1)
         date_step = dt.timedelta(days=1)
-        dates = np.array([start_date + i*date_step for i in range(sample_size)])
+        dates = np.array([start_date + i * date_step for i in range(sample_size)])
         shift_dt = np.array([dt.timedelta(days=d) for d in np.random.uniform(1., 20., sample_size)])
         dates_shifted = dates + shift_dt
         time_1 = pd.Series(data=dates_shifted, index=dates)
@@ -206,7 +216,7 @@ class TestBetSizeReserve(unittest.TestCase):
         df_bet = bet_size_reserve(df_events['t1'], df_events['side'], fit_runs=10)
         self.assertTrue(events_active.equals(df_bet))
 
-    @patch('Modules.bet_sizing.bet_sizing.most_likely_parameters')
+    @patch('Modules.FinLab_Algorythms.bet_sizing_algorythms.bet_sizing.most_likely_parameters')
     def test_bet_size_reserve_return_params(self, mock_likely_parameters):
         """
         Tests for successful execution of 'bet_size_reserve' using return_parameters=True.
@@ -218,7 +228,7 @@ class TestBetSizeReserve(unittest.TestCase):
         sample_size = 500
         start_date = dt.datetime(2000, 1, 1)
         date_step = dt.timedelta(days=1)
-        dates = np.array([start_date + i*date_step for i in range(sample_size)])
+        dates = np.array([start_date + i * date_step for i in range(sample_size)])
         shift_dt = np.array([dt.timedelta(days=d) for d in np.random.uniform(1., 20., sample_size)])
         dates_shifted = dates + shift_dt
         time_1 = pd.Series(data=dates_shifted, index=dates)
@@ -249,6 +259,7 @@ class TestConfirmAndCastToDf(unittest.TestCase):
     """
     Tests the 'confirm_and_cast_to_df' function.
     """
+
     def test_cast_to_df_all_series(self):
         """
         Tests for successful execution of 'confirm_and_cast_to_df' when all dictionary values are pandas.Series.
@@ -306,6 +317,7 @@ class TestGetConcurrentSides(unittest.TestCase):
     """
     Tests the function 'get_concurrent_sides' for successful operation.
     """
+
     def test_get_concurrent_sides_default(self):
         """
         Tests for the successful execution of 'get_concurrent_sides'. Since there are no options or branches,
@@ -316,7 +328,7 @@ class TestGetConcurrentSides(unittest.TestCase):
         sample_size = 100
         start_date = dt.datetime(2000, 1, 1)
         date_step = dt.timedelta(days=1)
-        dates = np.array([start_date + i*date_step for i in range(sample_size)])
+        dates = np.array([start_date + i * date_step for i in range(sample_size)])
         shift_dt = np.array([dt.timedelta(days=d) for d in np.random.uniform(1., 20., sample_size)])
         dates_shifted = dates + shift_dt
         time_1 = pd.Series(data=dates_shifted, index=dates)
@@ -331,21 +343,23 @@ class TestGetConcurrentSides(unittest.TestCase):
         events_test['active_short'] = 0
         for idx in events_test.index:
             df_long_active_idx = set(events_test[(events_test.index <= idx) & (events_test['t1'] > idx) \
-                                        & (events_test['side'] > 0)].index)
+                                                 & (events_test['side'] > 0)].index)
             events_test.loc[idx, 'active_long'] = len(df_long_active_idx)
             df_short_active_idx = set(events_test[(events_test.index <= idx) & (events_test['t1'] > idx) \
-                                        & (events_test['side'] < 0)].index)
+                                                  & (events_test['side'] < 0)].index)
             events_test.loc[idx, 'active_short'] = len(df_short_active_idx)
         events_test = events_test[['active_long', 'active_short']]
         # Evaluate.
         df_results = get_concurrent_sides(df_events['t1'], df_events['side'])
-        self.assertTrue(np.allclose(events_test.to_numpy(), df_results[['active_long', 'active_short']].to_numpy(), 1e-9))
+        self.assertTrue(
+            np.allclose(events_test.to_numpy(), df_results[['active_long', 'active_short']].to_numpy(), 1e-9))
 
 
 class TestCdfMixture(unittest.TestCase):
     """
     Tests the 'cdf_mixture' function.
     """
+
     def test_cdf_mixture_default(self):
         """
         Tests for the successful execution of the 'cdf_mixture' function. Since there are no options or branches,
@@ -356,7 +370,7 @@ class TestCdfMixture(unittest.TestCase):
         mu_1, mu_2, sigma_1, sigma_2, p_1 = -1.0, 4.0, 2.0, 1.5, 0.4
         params = [mu_1, mu_2, sigma_1, sigma_2, p_1]
         # Calculate the expected results.
-        expected_result = (p_1 * norm.cdf(x_value, mu_1, sigma_1)) + ((1-p_1) * norm.cdf(x_value, mu_2, sigma_2))
+        expected_result = (p_1 * norm.cdf(x_value, mu_1, sigma_1)) + ((1 - p_1) * norm.cdf(x_value, mu_2, sigma_2))
         # Evaluate.
         self.assertEqual(expected_result, cdf_mixture(x_value, params))
 
@@ -365,6 +379,7 @@ class TestSingleBetSizeMixed(unittest.TestCase):
     """
     Tests the 'single_bet_size_mixed' function.
     """
+
     def test_single_bet_size_mixed_above_zero(self):
         """
         Tests for the successful execution of the 'single_bet_size_mixed' function where the 'c_t' parameter is

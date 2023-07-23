@@ -46,10 +46,18 @@ import numpy as np
 import pandas as pd
 import vectorbtpro as vbt
 
-from Modules.FinLab_Algorythms import util
-from Modules.FinLab_Algorythms.labeling_algorythms import labeling, trend_scanning_labels
-from Modules.FinLab_Algorythms.timeseries_algorythms import timeseries_filters
-from Modules.Vectorized.Genies.GenieLoader import GenieLoader
+try:
+    from Modules.FinLab_Algorythms import util
+    from Modules.FinLab_Algorythms.labeling_algorythms import labeling, trend_scanning_labels
+    from Modules.FinLab_Algorythms.timeseries_algorythms import timeseries_filters
+    from Modules.Vectorized.Genies.GenieLoader import GenieLoader
+except Exception as e:
+    import sys
+    sys.path.append('/home/ruben/PycharmProjects/Genie-Trader')  # Append the path of your module if not found
+    from Modules.FinLab_Algorythms import util
+    from Modules.FinLab_Algorythms.labeling_algorythms import labeling, trend_scanning_labels
+    from Modules.FinLab_Algorythms.timeseries_algorythms import timeseries_filters
+    from Modules.Vectorized.Genies.GenieLoader import GenieLoader
 
 logger = logging.getLogger(__name__)
 
@@ -442,16 +450,16 @@ if __name__ == "__main__":
         # rename_columns={"Open": "open", "High": "high", "Low": "low", "Close": "close"},
         scheduler='threads',
         first_or_last='first',
-        n_rows=10000,
+        # n_rows=10000,
         #
         # pickle_file_path=f"data_temp_brent.pkl",  # if exists, then load from pickle file instead, else will create it
         # pickle_file_path=f"data_temp_xau.pkl",  # if exists, then load from pickle file instead, else will create it
-        # pickle_file_path=f"data_temp.pkl",  # if exists, then load from pickle file instead, else will create it
+        pickle_file_path=f"data_temp.pkl",  # if exists, then load from pickle file instead, else will create it
 
     )
     TBL_PARAMS = dict(
-        pt_sl=[1, 1],
-        min_ret=0.0001,  # todo allow user to pass a str of a function to be applied to the data to calculate this
+        pt_sl=[0.01, 0.01],
+        min_ret=0.001,  # todo allow user to pass a str of a function to be applied to the data to calculate this
         num_threads=28,
         #
         #  Number of D/H/m/s to add for vertical barrier

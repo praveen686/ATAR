@@ -5,7 +5,8 @@ from unittest import TestCase
 import os
 import numpy as np
 import pandas as pd
-from Modules.online_portfolio_selection import BAH
+
+from Modules.FinLab_Algorythms.online_portfolio_selection.bah import BAH
 
 
 class TestBuyAndHold(TestCase):

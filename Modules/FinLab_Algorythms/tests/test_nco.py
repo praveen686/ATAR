@@ -6,7 +6,7 @@ Tests the Nested Clustered Optimization (NCO) algorithm.
 import unittest
 import numpy as np
 import pandas as pd
-from Modules.portfolio_optimization.nco import NCO
+from Modules.FinLab_Algorythms.portfolio_optimization.nco import NCO
 
 
 class TestNCO(unittest.TestCase):

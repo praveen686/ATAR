@@ -135,7 +135,7 @@ the average drawdown is :math:`0.15` units in which the portfolio price is measu
 Implementation
 ##############
 
-.. automodule:: Modules.portfolio_optimization.risk_metrics
+.. automodule:: Modules.FinLab_Algorythms.portfolio_optimization.risk_metrics
 
     .. autoclass:: RiskMetrics
         :members:

@@ -126,6 +126,20 @@ def mp_pandas_obj(func, pd_obj, num_threads=24, mp_batches=1, lin_mols=True, ver
     else:
         out = process_jobs(jobs, num_threads=num_threads, verbose=verbose)
 
+    # if isinstance(out[0], pd.DataFrame):
+    #     df0 = pd.DataFrame()
+    # elif isinstance(out[0], pd.Series):
+    #     df0 = pd.Series(dtype='float64')
+    # else:
+    #     return out
+    #
+    # for i in out:
+    #     df0 = df0.append(i)
+    # # df0 = pd.concat(out) # todo could us pd.concat instead of append for better performance # todo review implications in other implementations
+    #
+    # df0 = df0.sort_index()
+    # return df0
+
     if isinstance(out[0], pd.DataFrame):
         df0 = pd.DataFrame()
     elif isinstance(out[0], pd.Series):
@@ -133,10 +147,7 @@ def mp_pandas_obj(func, pd_obj, num_threads=24, mp_batches=1, lin_mols=True, ver
     else:
         return out
 
-
-    for i in out:
-        df0 = df0.append(i)
-    # df0 = pd.concat(out) # todo could us pd.concat instead of append for better performance # todo review implications in other implementations
+    df0 = pd.concat([df0, *out])
 
     df0 = df0.sort_index()
     return df0

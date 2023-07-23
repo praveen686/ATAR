@@ -5,10 +5,9 @@ from sklearn.covariance import LedoitWolf
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_samples
 from scipy.linalg import block_diag
-from Modules.portfolio_optimization.risk_estimators import RiskEstimators
+from Modules.FinLab_Algorythms.portfolio_optimization.estimators.risk_estimators import RiskEstimators
 
-
-class NCO:
+class NestedClusteredOptimization:
     """
     This class implements the Nested Clustered Optimization (NCO) algorithm, the Convex Optimization Solution (CVO),
     the  Monte Carlo Optimization Selection (MCOS) algorithm and sample data generating function. It is reproduced with

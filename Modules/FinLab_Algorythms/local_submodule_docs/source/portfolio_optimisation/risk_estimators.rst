@@ -71,7 +71,7 @@ visit `sklearn documentation <https://scikit-learn.org/stable/modules/generated/
 Implementation
 **************
 
-.. py:currentmodule:: Modules.portfolio_optimization.risk_estimators
+.. py:currentmodule:: Modules.FinLab_Algorythms.portfolio_optimization.risk_estimators
 
 .. autoclass:: RiskEstimators
    :members: __init__, minimum_covariance_determinant

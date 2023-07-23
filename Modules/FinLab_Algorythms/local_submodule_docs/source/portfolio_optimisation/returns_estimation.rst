@@ -78,7 +78,7 @@ Where :math:`R_{t}` is the return for :math:`t` -th observation, :math:`P_{t}` i
 Implementation
 ##############
 
-.. automodule:: Modules.portfolio_optimization.returns_estimators
+.. automodule:: Modules.FinLab_Algorythms.portfolio_optimization.returns_estimators
 
     .. autoclass:: ReturnsEstimators
         :members:

@@ -29,8 +29,15 @@ def ml_get_train_times(samples_info_sets: pd.Series, test_times: pd.Series) -> p
     :param test_times: (pd.Series) Times for the test dataset.
     :return: (pd.Series) Training set
     """
+    # train = samples_info_sets.copy(deep=True)
+    # for start_ix, end_ix in test_times.iteritems():
+    #     df0 = train[(start_ix <= train.index) & (train.index <= end_ix)].index  # Train starts within test
+    #     df1 = train[(start_ix <= train) & (train <= end_ix)].index  # Train ends within test
+    #     df2 = train[(train.index <= start_ix) & (end_ix <= train)].index  # Train envelops test
+    #     train = train.drop(df0.union(df1).union(df2))
+    # return train
     train = samples_info_sets.copy(deep=True)
-    for start_ix, end_ix in test_times.iteritems():
+    for start_ix, end_ix in test_times.items():
         df0 = train[(start_ix <= train.index) & (train.index <= end_ix)].index  # Train starts within test
         df1 = train[(start_ix <= train) & (train <= end_ix)].index  # Train ends within test
         df2 = train[(train.index <= start_ix) & (end_ix <= train)].index  # Train envelops test

@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 import cvxpy as cp
 import matplotlib.pyplot as plt
-from Modules.portfolio_optimization.returns_estimators import ReturnsEstimators
-from Modules.portfolio_optimization.risk_estimators import RiskEstimators
+from Modules.FinLab_Algorythms.portfolio_optimization.estimators.returns_estimators import ReturnsEstimators
+from Modules.FinLab_Algorythms.portfolio_optimization.estimators.risk_estimators import RiskEstimators
 
 
 class MeanVarianceOptimisation:

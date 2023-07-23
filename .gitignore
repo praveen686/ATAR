@@ -16,7 +16,7 @@
 .benchmarks*
 .coverage*
 .cache/
-.env/
+.env
 .git/
 .idea/
 .ipynb_checkpoints

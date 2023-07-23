@@ -18,7 +18,6 @@ from nautilus_trader.model.data import QuoteTick
 from nautilus_trader.model.identifiers import Venue
 from nautilus_trader.model.objects import Money
 
-from Modules.Nodes.examples.strategies.volatility_market_maker import VolatilityMarketMaker, VolatilityMarketMakerConfig
 from Modules.Strategies.MarketVolatilityCatcher import MarketVolatilityCatcherConfig, MarketVolatilityCatcher, \
     TWAPExecAlgorithm
 
@@ -236,25 +235,28 @@ class GenieBacktestNode(PipeLine):
                 end_time=dt_to_unix_nanos(end_time),
             )
 
-            # TODO refactor to handle ImportableStrategyConfig
+            # # TODO refactor to handle ImportableStrategyConfig
             strategy_config = MarketVolatilityCatcherConfig(
                 # strategy_id=f"{str(instrument.id)}-VolatilityMarketMaker",
                 instrument_id=str(instrument.id),
                 external_order_claims=[str(instrument.id)],
-                bar_type=f"{instrument.id}-1-HOUR-MID-INTERNAL",
+                bar_type=f"{instrument.id}-1-MINUTE-MID-INTERNAL",
                 atr_period=7,
                 atr_multiple=0.5,
+                # trade_size=Decimal(0.001),
                 trade_size=Decimal(10000),
+
             )
-            VolatilityMarketMaker(config=VolatilityMarketMakerConfig(
-                strategy_id=instrument.id.value,
-                instrument_id=instrument.id.value,
-                external_order_claims=[instrument.id.value],
-                bar_type=f"{instrument.id.value}-5-TICK-LAST-INTERNAL",
-                atr_period=7,
-                atr_multiple=0.5,
-                trade_size=Decimal('0.01'),
-            ))
+            # VolatilityMarketMaker(config=VolatilityMarketMakerConfig(
+            #     strategy_id=instrument.id.value,
+            #     instrument_id=instrument.id.value,
+            #     external_order_claims=[instrument.id.value],
+            #     bar_type=f"{instrument.id.value}-5-TICK-LAST-INTERNAL",
+            #     atr_period=7,
+            #     atr_multiple=0.5,
+            #     trade_size=Decimal('0.01'),
+            # )
+            # )
 
             # TODO: refactor to handle multiple strategies. To be fair this has to be done for the entire BT-pipeline
             # strategy_config = ImportableStrategyConfig(
@@ -337,11 +339,12 @@ class GenieLiveNode(PipeLine):
             "BINANCE": BinanceDataClientConfig(
                 # api_key=None,  # "YOUR_BINANCE_TESTNET_API_KEY"
                 # api_secret=None,  # "YOUR_BINANCE_TESTNET_API_SECRET"
-                account_type=BinanceAccountType.USDT_FUTURE,
+                # account_type=BinanceAccountType.USDT_FUTURE,
+                account_type=BinanceAccountType.SPOT,
                 base_url_http=None,  # Override with custom endpoint
                 base_url_ws=None,  # Override with custom endpoint
-                us=False,  # If client is for Binance US
-                testnet=True,  # If client uses the testnet
+                us=True,  # If client is for Binance US
+                testnet=False,  # If client uses the testnet
                 instrument_provider=InstrumentProviderConfig(load_all=True),
             ),
         }
@@ -350,11 +353,11 @@ class GenieLiveNode(PipeLine):
             "BINANCE": BinanceExecClientConfig(
                 # api_key=None,  # "YOUR_BINANCE_TESTNET_API_KEY"
                 # api_secret=None,  # "YOUR_BINANCE_TESTNET_API_SECRET"
-                account_type=BinanceAccountType.USDT_FUTURE,
+                account_type=BinanceAccountType.SPOT,
                 base_url_http=None,  # Override with custom endpoint
                 base_url_ws=None,  # Override with custom endpoint
-                us=False,  # If client is for Binance US
-                testnet=True,  # If client uses the testnet
+                us=True,  # If client is for Binance US
+                testnet=False,  # If client uses the testnet
                 instrument_provider=InstrumentProviderConfig(load_all=True),
             ),
         }
@@ -424,7 +427,8 @@ class GenieLiveNode(PipeLine):
     def set_up_data(self, **kwargs):
         # Instruments to trade
         INSTRUMENTS_TEMP_DICT = dict(
-            BTCUSDT_PERP_BINANCE=["BTCUSDT-PERP.BINANCE", Decimal(str(0.001 * 5)), "1-MINUTE-LAST-EXTERNAL"],
+            # BTCUSDT_PERP_BINANCE=["BTCUSDT-PERP.BINANCE", Decimal(str(0.001 * 5)), "1-MINUTE-LAST-EXTERNAL"],
+            # BTCUSDT_PERP_BINANCE=["BTCUSDT.BINANCE", Decimal(str(0.002)), "1-MINUTE-LAST-EXTERNAL"],
             # BTCUSDT_PERP_BINANCE=["BTCUSDT-PERP.BINANCE", Decimal(str(0.001 * 5)), "5-SECOND-MID-INTERNAL"],
             # ETHUSDT_PERP_BINANCE=["ETHUSDT-PERP.BINANCE", Decimal(str(0.003 * 5)), "5-SECOND-MID-INTERNAL"],
             # BCHUSDT_PERP_BINANCE=["BCHUSDT-PERP.BINANCE", Decimal(str(0.053 * 3)), "5-TICK-LAST-INTERNAL"],
@@ -464,6 +468,7 @@ class GenieLiveNode(PipeLine):
         except KeyboardInterrupt:
             with pd.option_context(
                     "display.max_rows",
+
                     100,
                     "display.max_columns",
                     None,
@@ -496,7 +501,16 @@ if __name__ == "__main__":
 
     # FIXME This is a very hard coded example, need to make it more flexible. The goal of this script is to work on the Genie Trader project
     VENUE_NAME = "SIM"
-    INSTRUMENT_IDS = ["AUDUSD.SIM"]
+    INSTRUMENT_IDS = [
+        # "AUDUSD.SIM",
+                      # "EURUSD.SIM",
+                      # "GBPUSD.SIM",
+                      # "NZDUSD.SIM",
+                      # "USDCAD.SIM",
+                      "USDCHF.SIM",
+                      # "USDJPY.SIM",
+
+                      ]  # only for backtesting right now. todos already on their way
     START_TIME = pd.Timestamp("2021-01-07-00:00:00", tz="UTC")
     END_TIME = pd.Timestamp("2021-01-07-09:00:00", tz="UTC")
     CATALOG_PATH = "/home/ruben/PycharmProjects/Genie-Trader/Data/tick_data_catalog"

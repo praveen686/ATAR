@@ -119,7 +119,7 @@ This method allows creating a random vector of means and a random covariance mat
 Implementation
 ##############
 
-.. automodule:: Modules.portfolio_optimization.nco
+.. automodule:: Modules.FinLab_Algorythms.portfolio_optimization.nco
 
     .. autoclass:: NCO
         :members:

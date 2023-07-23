@@ -5,7 +5,7 @@ from unittest import TestCase
 import os
 import numpy as np
 import pandas as pd
-from Modules.online_portfolio_selection.rmr import RMR
+from Modules.FinLab_Algorythms.online_portfolio_selection.rmr import RMR
 
 
 class TestRobustMedianReversion(TestCase):

@@ -5,13 +5,13 @@ Test functions from codependence module: correlation distances, mutual info, var
 import unittest
 import numpy as np
 
-from Modules.codependence.correlation import (squared_angular_distance, angular_distance, absolute_angular_distance,
+from Modules.FinLab_Algorythms.codependence_algorythms.correlation import (squared_angular_distance, angular_distance, absolute_angular_distance,
                                                distance_correlation)
-from Modules.codependence.information import (get_mutual_info, variation_of_information_score,
+from Modules.FinLab_Algorythms.codependence_algorythms.information import (get_mutual_info, variation_of_information_score,
                                                get_optimal_number_of_bins)
-from Modules.codependence.codependence_matrix import (get_dependence_matrix, get_distance_matrix)
-from Modules.codependence.gnpr_distance import (spearmans_rho, gpr_distance, gnpr_distance)
-from Modules.util.generate_dataset import get_classification_data
+from Modules.FinLab_Algorythms.codependence_algorythms.codependence_matrix import (get_dependence_matrix, get_distance_matrix)
+from Modules.FinLab_Algorythms.codependence_algorythms.gnpr_distance import (spearmans_rho, gpr_distance, gnpr_distance)
+from Modules.FinLab_Algorythms.util.generate_dataset import get_classification_data
 
 # pylint: disable=invalid-name
 

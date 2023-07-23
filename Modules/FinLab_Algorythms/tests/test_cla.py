@@ -2,12 +2,13 @@
 Tests the Critical Line Algorithm (CLA).
 """
 
-import unittest
 import os
+import unittest
+
 import numpy as np
 import pandas as pd
-from Modules.portfolio_optimization.cla import CriticalLineAlgorithm
-from Modules.portfolio_optimization.returns_estimators import ReturnsEstimators
+
+from Modules.FinLab_Algorythms.portfolio_optimization import CriticalLineAlgorithm, ReturnsEstimators
 
 
 class TestCLA(unittest.TestCase):
@@ -36,7 +37,7 @@ class TestCLA(unittest.TestCase):
         cla = CriticalLineAlgorithm(weight_bounds=(0, 1), calculate_expected_returns="mean")
         cla.allocate(asset_prices=self.data, asset_names=self.data.columns)
         weights = cla.weights.values
-        weights[weights <= 1e-15] = 0 # Convert very very small numbers to 0
+        weights[weights <= 1e-15] = 0  # Convert very very small numbers to 0
         for turning_point in weights:
             assert (turning_point >= 0).all()
             assert len(turning_point) == self.data.shape[1]
@@ -48,7 +49,7 @@ class TestCLA(unittest.TestCase):
         instead of just lower and upper bound value.
         """
 
-        cla = CriticalLineAlgorithm(weight_bounds=([0]*self.data.shape[1], [1]*self.data.shape[1]),
+        cla = CriticalLineAlgorithm(weight_bounds=([0] * self.data.shape[1], [1] * self.data.shape[1]),
                                     calculate_expected_returns="mean")
         cla.allocate(asset_prices=self.data, asset_names=self.data.columns)
         weights = cla.weights.values
@@ -66,7 +67,7 @@ class TestCLA(unittest.TestCase):
         cla = CriticalLineAlgorithm(weight_bounds=(0, 1), calculate_expected_returns="exponential")
         cla.allocate(asset_prices=self.data, asset_names=self.data.columns)
         weights = cla.weights.values
-        weights[weights <= 1e-15] = 0 # Convert very very small numbers to 0
+        weights[weights <= 1e-15] = 0  # Convert very very small numbers to 0
         for turning_point in weights:
             assert (turning_point >= 0).all()
             assert len(turning_point) == self.data.shape[1]
@@ -135,7 +136,7 @@ class TestCLA(unittest.TestCase):
 
         cla = CriticalLineAlgorithm(weight_bounds=(0, 1), calculate_expected_returns="mean")
         cla.allocate(asset_prices=self.data, solution='min_volatility', asset_names=self.data.columns)
-        x, y = cla._free_bound_weight(free_weights=[1]*(cla.expected_returns.shape[0]+1))
+        x, y = cla._free_bound_weight(free_weights=[1] * (cla.expected_returns.shape[0] + 1))
         assert not x
         assert not y
 
@@ -200,7 +201,7 @@ class TestCLA(unittest.TestCase):
             cla = CriticalLineAlgorithm(weight_bounds=(0, 1), calculate_expected_returns="mean")
             cla.allocate(asset_prices=self.data, solution='cla_turning_points', asset_names=self.data.columns)
             cla.weights = list(cla.weights.values)
-            cla.weights = cla.weights*100
+            cla.weights = cla.weights * 100
             cla._purge_num_err(tol=1e-18)
 
     def test_flag_true_for_purge_num_err(self):

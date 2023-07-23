@@ -8,8 +8,8 @@ from io import StringIO
 import os
 import numpy as np
 import pandas as pd
-from Modules.portfolio_optimization.mean_variance import MeanVarianceOptimisation
-from Modules.portfolio_optimization.returns_estimators import ReturnsEstimators
+from Modules.FinLab_Algorythms.portfolio_optimization.mean_variance import MeanVarianceOptimisation
+from Modules.FinLab_Algorythms.portfolio_optimization.returns_estimators import ReturnsEstimators
 
 
 class TestMVO(unittest.TestCase):
