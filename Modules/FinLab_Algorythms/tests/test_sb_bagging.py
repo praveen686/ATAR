@@ -15,11 +15,11 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import LinearSVC
 
-from Modules.util.volatility import get_daily_vol
-from Modules.filters.filters import cusum_filter
-from Modules.labeling_algorythms.labeling import get_events, add_vertical_barrier, get_bins
-from Modules.sampling.bootstrapping import get_ind_matrix, get_ind_mat_label_uniqueness
-from Modules.ensemble_algorythms.sb_bagging import SequentiallyBootstrappedBaggingClassifier, \
+from Modules.FinLab_Algorythms.labeling_algorythms.filters import cusum_filter
+from Modules.FinLab_Algorythms.util.volatility import get_daily_vol
+from Modules.FinLab_Algorythms.labeling_algorythms.labeling import get_events, add_vertical_barrier, get_bins
+from Modules.FinLab_Algorythms.sampling.bootstrapping import get_ind_matrix, get_ind_mat_label_uniqueness
+from Modules.FinLab_Algorythms.ensemble_algorythms.sb_bagging import SequentiallyBootstrappedBaggingClassifier, \
     SequentiallyBootstrappedBaggingRegressor
 
 

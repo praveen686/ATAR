@@ -7,7 +7,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from Modules.data_structures import time_data_structures as ds
+from Modules.FinLab_Algorythms.data_structures_algorythms import time_data_structures as ds
 
 
 class TestTimeDataStructures(unittest.TestCase):

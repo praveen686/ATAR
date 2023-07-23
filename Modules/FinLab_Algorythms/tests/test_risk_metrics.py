@@ -2,7 +2,8 @@
 import unittest
 import os
 import pandas as pd
-from Modules.FinLab_Algorythms.portfolio_optimization.risk_metrics import RiskMetrics
+
+from Modules.FinLab_Algorythms.portfolio_optimization import RiskMetrics
 
 
 class TestRiskMetrics(unittest.TestCase):

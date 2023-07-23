@@ -6,7 +6,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from Modules.labeling_algorythms.raw_return import raw_return
+from Modules.FinLab_Algorythms.labeling_algorythms.raw_return import raw_return
 
 
 class TestLabelingRawReturns(unittest.TestCase):

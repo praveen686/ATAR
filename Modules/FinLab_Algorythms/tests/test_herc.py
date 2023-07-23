@@ -6,9 +6,8 @@ import unittest
 import os
 import numpy as np
 import pandas as pd
-from Modules.FinLab_Algorythms.portfolio_optimization.herc import HierarchicalEqualRiskContribution
-from Modules.FinLab_Algorythms.portfolio_optimization.returns_estimators import ReturnsEstimators
-
+from Modules.FinLab_Algorythms.portfolio_optimization.clustering.herc import HierarchicalEqualRiskContribution
+from Modules.FinLab_Algorythms.portfolio_optimization.estimators.returns_estimators import ReturnsEstimators
 
 class TestHERC(unittest.TestCase):
     # pylint: disable=too-many-public-methods

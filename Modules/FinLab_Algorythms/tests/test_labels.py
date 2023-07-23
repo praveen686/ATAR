@@ -8,9 +8,9 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from Modules.filters.filters import cusum_filter
-from Modules.labeling_algorythms.labeling import add_vertical_barrier, get_events, get_bins, drop_labels
-from Modules.util.volatility import get_daily_vol
+from Modules.FinLab_Algorythms.labeling_algorythms.filters import cusum_filter
+from Modules.FinLab_Algorythms.labeling_algorythms.labeling import add_vertical_barrier, get_events, get_bins, drop_labels
+from Modules.FinLab_Algorythms.util.volatility import get_daily_vol
 
 
 class TestChapter3(unittest.TestCase):

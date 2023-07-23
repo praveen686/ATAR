@@ -8,8 +8,8 @@ from io import StringIO
 import os
 import numpy as np
 import pandas as pd
-from Modules.FinLab_Algorythms.portfolio_optimization.mean_variance import MeanVarianceOptimisation
-from Modules.FinLab_Algorythms.portfolio_optimization.returns_estimators import ReturnsEstimators
+from Modules.FinLab_Algorythms.portfolio_optimization.modern_portfolio_theory.mean_variance import MeanVarianceOptimisation
+from Modules.FinLab_Algorythms.portfolio_optimization.estimators.returns_estimators import ReturnsEstimators
 
 
 class TestMVO(unittest.TestCase):
@@ -514,6 +514,7 @@ class TestMVO(unittest.TestCase):
         with patch('sys.stdout', new=StringIO()) as fake_out:
             mvo.get_portfolio_metrics()
             output = fake_out.getvalue().strip()
+            print(f'{output = }')
             self.assertTrue('Portfolio Return = 0.017362404155484328' in output)
             self.assertTrue('Portfolio Risk = 9.385801639141577e-06' in output)
             self.assertTrue('Portfolio Sharpe Ratio = 9.385801639141577e-06' in output)
@@ -544,6 +545,7 @@ class TestMVO(unittest.TestCase):
         assert (weights >= 0).all()
         assert len(weights) == self.data.shape[1]
         assert mvo.asset_names == list(range(mvo.num_assets))
+        print(f'{mvo.portfolio_return = }')
         assert mvo.portfolio_return == 0.012854555899642236
         assert  mvo.portfolio_risk == 3.0340907720046832
         np.testing.assert_almost_equal(np.sum(weights), 1)

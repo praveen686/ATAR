@@ -4,7 +4,7 @@ import unittest
 import os
 import numpy as np
 import pandas as pd
-from Modules.labeling_algorythms.return_vs_benchmark import return_over_benchmark
+from Modules.FinLab_Algorythms.labeling_algorythms.return_vs_benchmark import return_over_benchmark
 
 
 class TestReturnOverBenchmark(unittest.TestCase):
@@ -44,7 +44,7 @@ class TestReturnOverBenchmark(unittest.TestCase):
                                     index=self.idx10, columns=data3.columns)
         pd.testing.assert_series_equal(test1, test1_actual, check_names=False)
         pd.testing.assert_series_equal(test2, test1_actual.apply(np.sign), check_names=False)
-        pd.testing.assert_frame_equal(test3, test3_actual, check_less_precise=True)
+        pd.testing.assert_frame_equal(test3, test3_actual)
 
     def test_given_benchmark(self):
         """

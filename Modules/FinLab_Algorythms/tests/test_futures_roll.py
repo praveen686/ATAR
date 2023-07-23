@@ -7,7 +7,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from Modules.multi_product.etf_trick import get_futures_roll_series
+from Modules.FinLab_Algorythms.multi_product.etf_trick import get_futures_roll_series
 
 
 class TestETFTrick(unittest.TestCase):

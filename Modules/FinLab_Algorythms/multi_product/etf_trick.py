@@ -34,7 +34,6 @@ class ETFTrick:
          If None then trivial (all values equal 1.0) is generated
         :param index_col: (int): positional index of index column. Used for to determine index column in csv files
         """
-
         warnings.warn("This a beta version of ETF trick. Please proof check the results", DeprecationWarning)
         self.index_col = index_col
         self.prev_k = 1.0  # Init with $1 as initial value
@@ -298,33 +297,23 @@ class ETFTrick:
         self.prev_allocs_change = bool(~(self.prev_allocs == alloc_df.iloc[-3]).all())
 
     def _csv_file_etf_series(self, batch_size):
-        """
-        Csv based ETF trick series generation
-
-        :param: batch_size: (int): Size of the batch that you would like to make use of
-        :return: (pd.Series): pandas Series with ETF trick values starting from 1.0
-        """
         etf_series = pd.Series(dtype='float64')
         self._get_batch_from_csv(batch_size)
-        # Data frame which contains all precomputed info for etf trick
-        data_df = self.generate_trick_components(cache=None)  # Cache is empty on the first batch run
+        data_df = self.generate_trick_components(cache=None)
         cache = self._update_cache()
-        # Delete first nans (first row of close price difference is nan)
         data_df = data_df.iloc[1:]
-        # Drop last row value from previous batch (this row needs to be recalculated using new data)
         omit_last_row = False
 
-        # Read data in batch until StopIteration exception is raised
         while True:
             try:
                 chunk_etf_series = self._chunk_loop(data_df)
                 if omit_last_row is True:
-                    etf_series = etf_series.iloc[:-1]  # Delete last row (chunk_etf_series stores updated row value)
-                etf_series = etf_series.append(chunk_etf_series)
+                    etf_series = etf_series.iloc[:-1]
+                etf_series = pd.concat([etf_series, chunk_etf_series])
                 self._get_batch_from_csv(batch_size)
-                self._rewind_etf_trick(data_df['w'], etf_series)  # Rewind etf series one step back
-                data_df = self.generate_trick_components(cache)  # Update data_df for ETF trick calculation
-                cache = self._update_cache()  # Update cache
+                self._rewind_etf_trick(data_df['w'], etf_series)
+                data_df = self.generate_trick_components(cache)
+                cache = self._update_cache()
                 omit_last_row = True
             except StopIteration:
                 return etf_series

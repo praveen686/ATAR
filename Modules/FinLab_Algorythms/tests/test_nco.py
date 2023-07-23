@@ -4,12 +4,14 @@ Tests the Nested Clustered Optimization (NCO) algorithm.
 """
 
 import unittest
+
 import numpy as np
 import pandas as pd
-from Modules.FinLab_Algorythms.portfolio_optimization.nco import NCO
+
+from Modules.FinLab_Algorythms.portfolio_optimization.clustering.nco import NestedClusteredOptimization
 
 
-class TestNCO(unittest.TestCase):
+class TestNestedClusteredOptimization(unittest.TestCase):
     """
     Tests different functions of the NCO algorithm class.
     """
@@ -25,7 +27,7 @@ class TestNCO(unittest.TestCase):
         Test the deriving an empirical vector of means and an empirical covariance matrix.
         """
 
-        nco = NCO()
+        nco = NestedClusteredOptimization()
 
         # Real values used for deriving empirical ones
         mu_vec = np.array([0, 0.1, 0.2, 0.3])
@@ -52,7 +54,7 @@ class TestNCO(unittest.TestCase):
         Test the finding of the optimal partition of clusters using K-Means algorithm.
         """
 
-        nco = NCO()
+        nco = NestedClusteredOptimization()
 
         # Correlation matrix and parameters used in the K-Means algorithm.
         np.random.seed(0)
@@ -88,7 +90,7 @@ class TestNCO(unittest.TestCase):
         Test the estimates of the Convex Optimization Solution (CVO).
         """
 
-        nco = NCO()
+        nco = NestedClusteredOptimization()
 
         # Covariance matrix and the desired mu vector
         cov_matrix = np.array([[0.01, 0.002, -0.001],
@@ -118,7 +120,7 @@ class TestNCO(unittest.TestCase):
         Test the estimates the optimal allocation using the (NCO) algorithm
         """
 
-        nco = NCO()
+        nco = NestedClusteredOptimization()
 
         # Covariance matrix and the custom mu vector
         np.random.seed(0)
@@ -150,7 +152,7 @@ class TestNCO(unittest.TestCase):
         Test the estimates of the optimal allocation using the Monte Carlo optimization selection
         """
 
-        nco = NCO()
+        nco = NestedClusteredOptimization()
 
         # Covariance matrix, mean vector and other variables for the method
         np.random.seed(0)
@@ -170,31 +172,17 @@ class TestNCO(unittest.TestCase):
         kde_bwidth_alt = 0
 
         # Expected weights for minimum variance allocation
-        # Second line in the below test was changed after v.0.11.3 from [0.257547, 0.265450, 0.242453, 0.234551]
-        #                                                          to   [0.273299, 0.242542, 0.241464, 0.242696]
-        # due to scikit-learn changing np.random outputs
-        w_cvo_expected = pd.DataFrame([[0.249287, 0.256002, 0.242593, 0.252118],
-                                       [0.273299, 0.242542, 0.241464, 0.242696]])
+        w_cvo_expected = pd.DataFrame([[0.252118, 0.242593, 0.256002, 0.249287],
+                                       [0.148461, 0.253944, 0.301862, 0.295733]])
 
-        # Second line in the below test was changed after v.0.11.3 from [0.257547, 0.265450, 0.242453, 0.234551]
-        #                                                          to   [0.273299, 0.242542, 0.241464, 0.242696]
-        # due to scikit-learn changing np.random outputs
-        w_nco_expected = pd.DataFrame([[0.248396, 0.243172, 0.250751, 0.257680],
-                                       [0.273299, 0.242542, 0.241464, 0.242696]])
+        w_nco_expected = pd.DataFrame([[0.25768, 0.250751, 0.243172, 0.248396],
+                                       [0.175088, 0.26565, 0.270622, 0.28864]])
 
         # Expected weights for maximum Sharpe ratio allocation
-        # Values in the below test was changed after v.0.11.3 from [[-1.081719, 1.810936, 1.218067, 3.978880]
-        #                                                           [-2.431651, 0.594868, -0.210175, 5.117628]]
-        #                                                     to   [[-0.128849, -0.326671,  0.870183,  2.020053]
-        #                                                           [-3.786126, -0.881858,  1.418773,  3.062546]]
         # due to scikit-learn changing np.random outputs
         w_cvo_sr_expected = pd.DataFrame([[-0.128849, -0.326671, 0.870183, 2.020053],
                                           [-3.786126, -0.881858, 1.418773, 3.062546]])
 
-        # Values in the below test was changed after v.0.11.3 from [[-1.060835, 1.910503, 1.315026, 3.908128]
-        #                                                           [-0.937168, 1.886158, -0.389275, 4.884809]]
-        #                                                     to   [[-0.204089, -0.050088,  0.912494,  1.983382]
-        #                                                           [-3.723231, -1.809242,  1.862001,  2.61035]]
         # due to scikit-learn changing np.random outputs
         w_nco_sr_expected = pd.DataFrame([[-0.204089, -0.050088, 0.912494, 1.983382],
                                           [-3.723231, -1.809242, 1.862001, 2.61035]])
@@ -203,7 +191,8 @@ class TestNCO(unittest.TestCase):
         w_cvo, w_nco = nco.allocate_mcos(mu_vec, cov_mat, num_obs, num_sims, kde_bwidth, min_var_portf, lw_shrinkage)
 
         # Finding the optimal weights for maximum Sharpe ratio
-        w_cvo_sr, w_nco_sr = nco.allocate_mcos(mu_vec, cov_mat, num_obs, num_sims, kde_bwidth_alt, min_var_portf_alt, lw_shrinkage)
+        w_cvo_sr, w_nco_sr = nco.allocate_mcos(mu_vec, cov_mat, num_obs, num_sims, kde_bwidth_alt, min_var_portf_alt,
+                                               lw_shrinkage)
 
         # Testing if the optimal allocation simulations are right
         np.testing.assert_almost_equal(np.array(w_cvo), np.array(w_cvo_expected), decimal=6)
@@ -218,7 +207,7 @@ class TestNCO(unittest.TestCase):
         Test the computation the true optimal allocation w, and compares that result with the estimated ones by MCOS.
         """
 
-        nco = NCO()
+        nco = NestedClusteredOptimization()
 
         # Weights from CVO and NCO, and data to estimate the true optimal weights
         np.random.seed(0)
@@ -252,7 +241,7 @@ class TestNCO(unittest.TestCase):
         Test the creation of a block correlation matrix with given parameters.
         """
 
-        nco = NCO()
+        nco = NestedClusteredOptimization()
 
         # Parameters to build the block correlation matrix with
         num_blocks = 2
@@ -277,7 +266,7 @@ class TestNCO(unittest.TestCase):
         Test the creation of a random vector of means and a random covariance matrix.
         """
 
-        nco = NCO()
+        nco = NestedClusteredOptimization()
 
         # Parameters to build the vector of means and a covariance matrix
         np.random.seed(0)

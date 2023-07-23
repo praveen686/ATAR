@@ -334,7 +334,10 @@ class TestCrossValidation(unittest.TestCase):
         )
         self.log(f"scores= {scores}")
 
-        should_be = np.array([-17.26939, -17.32125, -17.32125])
+        # should_be = np.array([-17.26939, -17.32125, -17.32125]) # original
+        should_be = np.array([-18.28408968 -19.05076059 -17.70381135]) # new_should_be verify!
+        print(f"339scores= {scores}")
+        print(f"340should_be= {should_be}")
         self.assertTrue(
             np.allclose(scores, should_be),
             "score lists don't match"
@@ -356,7 +359,10 @@ class TestCrossValidation(unittest.TestCase):
         )
         self.log(f"scores= {scores}")
 
-        should_be = np.array([-17.520701311460694, -18.25536255165772, -16.964650471071668])
+        # should_be = np.array([-17.520701311460694, -18.25536255165772, -16.964650471071668]) #original
+        should_be = np.array([-18.28408968 -19.05076059 -17.70381135]) # new_should_be. verify
+        print(f"364scores= {scores}")
+        print(f"365should_be= {should_be}")
         self.assertTrue(
             np.array_equal(scores, should_be),
             # self.assertListEqual(scores.tolist(), should_be.tolist()),

@@ -26,8 +26,8 @@ from typing import Union, Iterable, List, Optional
 import numpy as np
 import pandas as pd
 
-from Modules.data_structures_algorythms.base_bars import BaseImbalanceBars
-from Modules.util.fast_ewma import ewma
+from Modules.FinLab_Algorythms.data_structures_algorythms.base_bars import BaseImbalanceBars
+from Modules.FinLab_Algorythms.util.fast_ewma import ewma
 
 
 class EMAImbalanceBars(BaseImbalanceBars):
@@ -195,7 +195,8 @@ def get_ema_tick_imbalance_bars(file_path_or_df: Union[str, Iterable[str], pd.Da
     return imbalance_bars, pd.DataFrame(bars.bars_thresholds)
 
 
-def get_const_dollar_imbalance_bars(file_path_or_df: Union[str, Iterable[str], pd.DataFrame], expected_imbalance_window: int = 10000,
+def get_const_dollar_imbalance_bars(file_path_or_df: Union[str, Iterable[str], pd.DataFrame],
+                                    expected_imbalance_window: int = 10000,
                                     exp_num_ticks_init: int = 20000,
                                     batch_size: int = 2e7, analyse_thresholds: bool = False,
                                     verbose: bool = True, to_csv: bool = False, output_path: Optional[str] = None):
@@ -223,7 +224,8 @@ def get_const_dollar_imbalance_bars(file_path_or_df: Union[str, Iterable[str], p
     return imbalance_bars, pd.DataFrame(bars.bars_thresholds)
 
 
-def get_const_volume_imbalance_bars(file_path_or_df: Union[str, Iterable[str], pd.DataFrame], expected_imbalance_window: int = 10000,
+def get_const_volume_imbalance_bars(file_path_or_df: Union[str, Iterable[str], pd.DataFrame],
+                                    expected_imbalance_window: int = 10000,
                                     exp_num_ticks_init: int = 20000,
                                     batch_size: int = 2e7, analyse_thresholds: bool = False,
                                     verbose: bool = True, to_csv: bool = False, output_path: Optional[str] = None):
@@ -251,7 +253,8 @@ def get_const_volume_imbalance_bars(file_path_or_df: Union[str, Iterable[str], p
     return imbalance_bars, pd.DataFrame(bars.bars_thresholds)
 
 
-def get_const_tick_imbalance_bars(file_path_or_df: Union[str, Iterable[str], pd.DataFrame], expected_imbalance_window: int = 10000,
+def get_const_tick_imbalance_bars(file_path_or_df: Union[str, Iterable[str], pd.DataFrame],
+                                  expected_imbalance_window: int = 10000,
                                   exp_num_ticks_init: int = 20000,
                                   batch_size: int = 2e7, analyse_thresholds: bool = False,
                                   verbose: bool = True, to_csv: bool = False, output_path: Optional[str] = None):

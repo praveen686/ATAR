@@ -7,8 +7,8 @@ import unittest
 import os
 import numpy as np
 import pandas as pd
-from Modules.FinLab_Algorythms.portfolio_optimization.returns_estimators import ReturnsEstimators
-from Modules.FinLab_Algorythms.portfolio_optimization.tic import TIC
+from Modules.FinLab_Algorythms.portfolio_optimization.estimators.returns_estimators import ReturnsEstimators
+from Modules.FinLab_Algorythms.portfolio_optimization.estimators.tic import TheoryImpliedCorrelation
 
 
 class TestTIC(unittest.TestCase):
@@ -40,7 +40,7 @@ class TestTIC(unittest.TestCase):
         Testing the creation of a linkage object from empirical correlation matrix and tree graph
         """
 
-        tic = TIC()
+        tic = TheoryImpliedCorrelation()
 
         # Taking the first 5 ETFs for test purposes
         etf_prices = self.returns_data.iloc[:, :5]
@@ -78,7 +78,7 @@ class TestTIC(unittest.TestCase):
         Testing the transformation of linkage object from local linkage to global linkage
         """
 
-        tic = TIC()
+        tic = TheoryImpliedCorrelation()
 
         # Creating a sample input
         lnk0 = np.array([])
@@ -105,7 +105,7 @@ class TestTIC(unittest.TestCase):
         Testing the update of the general distance matrix to take the new clusters into account
         """
 
-        tic = TIC()
+        tic = TheoryImpliedCorrelation()
 
         # Creating a sample input
         dist0 = pd.DataFrame([[0.0, 0.595671], [0.595671, 0.0]], columns=[20, 10], index=[20, 10])
@@ -140,7 +140,7 @@ class TestTIC(unittest.TestCase):
         Testing the obtaining of the atoms included in an element from a linkage object
         """
 
-        tic = TIC()
+        tic = TheoryImpliedCorrelation()
 
         # Creating a sample input
         lnk = np.array([(1, 4, 0.10526126, 2), (5, 3, 0.23105119, 3),
@@ -162,7 +162,7 @@ class TestTIC(unittest.TestCase):
         Test the process of deriving a correlation matrix from the linkage object
         """
 
-        tic = TIC()
+        tic = TheoryImpliedCorrelation()
 
         # Creating a sample input
         etf_prices = self.returns_data.iloc[:, :5]
@@ -192,7 +192,7 @@ class TestTIC(unittest.TestCase):
         Test the calculation the Theory-Implies Correlation (TIC) matrix.
         """
 
-        tic = TIC()
+        tic = TheoryImpliedCorrelation()
 
         # Taking the first 5 ETFs for test purposes
         etf_prices = self.returns_data.iloc[:, :5]
@@ -223,7 +223,7 @@ class TestTIC(unittest.TestCase):
         Test the calculation of the correlation matrix distance
         """
 
-        tic = TIC()
+        tic = TheoryImpliedCorrelation()
 
         # Taking the original correlation matrix and the TIC matrix
         etf_prices = self.returns_data.iloc[:, :5]

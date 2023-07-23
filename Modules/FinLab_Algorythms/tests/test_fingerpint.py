@@ -3,11 +3,14 @@ Test RegressionModelFingerprint and ClassificationModelFingerprint implementatio
 """
 
 import unittest
+
 import pandas as pd
+from sklearn.datasets import load_breast_cancer
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.linear_model import LinearRegression
-from sklearn.datasets import load_boston, load_breast_cancer
-from Modules.feature_importance_algorythms import RegressionModelFingerprint, ClassificationModelFingerprint
+
+from Modules.FinLab_Algorythms.feature_importance_algorythms import RegressionModelFingerprint, \
+    ClassificationModelFingerprint
 
 
 # pylint: disable=invalid-name
@@ -23,12 +26,21 @@ class TestModelFingerprint(unittest.TestCase):
         Set the file path for the sample dollar bars data.
         """
 
-        self.X, self.y = load_boston(return_X_y=True)
-        self.X = pd.DataFrame(self.X[:100])
-        self.y = pd.Series(self.y[:100])
+        import pandas as pd
+        import numpy as np
+        # self.X, self.y = load_boston(return_X_y=True)
+        # self.X = pd.DataFrame(self.X[:100])
+        # self.y = pd.Series(self.y[:100])
+
+        data_url = "http://lib.stat.cmu.edu/datasets/boston"
+        raw_df = pd.read_csv(data_url, sep="\s+", skiprows=22, header=None)
+        data = np.hstack([raw_df.values[::2, :], raw_df.values[1::2, :2]])
+        target = raw_df.values[1::2, 2]
+        self.X = pd.DataFrame(data[:100])
+        self.y = pd.Series(target[:100])
 
         self.reg_rf = RandomForestRegressor(n_estimators=10, random_state=42)
-        self.reg_linear = LinearRegression(fit_intercept=True, normalize=False)
+        self.reg_linear = LinearRegression(fit_intercept=True)
         self.reg_rf.fit(self.X, self.y)
         self.reg_linear.fit(self.X, self.y)
 

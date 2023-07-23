@@ -2,12 +2,13 @@
 Test various filters.
 """
 
-import unittest
 import os
+import unittest
+
 import numpy as np
 import pandas as pd
 
-from Modules.FinLab_Algorythms.timeseries_algorythms.timeseries_filters import cusum_filter, z_score_filter
+from Modules.FinLab_Algorythms.labeling_algorythms.filters import cusum_filter, z_score_filter
 
 
 class TestCUSUMFilter(unittest.TestCase):

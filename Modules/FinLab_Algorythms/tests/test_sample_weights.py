@@ -7,10 +7,10 @@ import unittest
 
 import pandas as pd
 
-from Modules.filters.filters import cusum_filter
-from Modules.labeling_algorythms.labeling import get_events, add_vertical_barrier
-from Modules.sample_weights.attribution import get_weights_by_return, get_weights_by_time_decay
-from Modules.util.volatility import get_daily_vol
+from Modules.FinLab_Algorythms.labeling_algorythms.labeling import get_events, add_vertical_barrier
+from Modules.FinLab_Algorythms.sample_weights.attribution import get_weights_by_return, get_weights_by_time_decay
+from Modules.FinLab_Algorythms.timeseries_algorythms.timeseries_filters import cusum_filter
+from Modules.FinLab_Algorythms.util.volatility import get_daily_vol
 
 
 class TestSampling(unittest.TestCase):
