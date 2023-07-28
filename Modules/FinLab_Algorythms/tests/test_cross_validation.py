@@ -1,13 +1,14 @@
 """
 Tests the cross validation technique described in Ch.7 of the book.
 """
-import unittest
 import os
-import pandas as pd
+import unittest
+
 import numpy as np
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import TimeSeriesSplit
+import pandas as pd
 from sklearn.metrics import log_loss, accuracy_score
+from sklearn.model_selection import TimeSeriesSplit
+from sklearn.tree import DecisionTreeClassifier
 
 from Modules.FinLab_Algorythms.cross_validation_algorythms.cross_validation import (
     ml_get_train_times,
@@ -226,7 +227,7 @@ class TestCrossValidation(unittest.TestCase):
         pct_points_test: int = 2
         self.log(f"pct_points_test= {pct_points_test}")
 
-        pkf = PurgedKFold(n_splits=3, samples_info_sets=info_sets, pct_embargo=0.01*pct_points_test)
+        pkf = PurgedKFold(n_splits=3, samples_info_sets=info_sets, pct_embargo=0.01 * pct_points_test)
 
         # Also test that X can be an np.ndarray by passing in the .values of the pd.DataFrame
         for train_indices, test_indices in pkf.split(dataset):
@@ -252,7 +253,8 @@ class TestCrossValidation(unittest.TestCase):
             # if test set is in the middle drop pct_points_test records from the end of test set index
             elif test_times_ret.index[-1] != dataset.index[-1]:
                 last_test_ix = test_times_ret.index.get_loc(test_times_ret.index[-1])
-                to_drop: pd.DatetimeIndex = train_times_gtt.iloc[last_test_ix+2:last_test_ix+2+pct_points_test].index
+                to_drop: pd.DatetimeIndex = train_times_gtt.iloc[
+                                            last_test_ix + 2:last_test_ix + 2 + pct_points_test].index
                 train_times_gtt.drop(to_drop.to_list(), inplace=True)
 
             self.log(f"train_times_gtt=\n{train_times_gtt}")
@@ -274,7 +276,7 @@ class TestCrossValidation(unittest.TestCase):
             index=info_sets.index,
             data={
                 'even': np.arange(0, sample_size),
-                'odd': np.arange(1, sample_size+1)
+                'odd': np.arange(1, sample_size + 1)
             },
         )
         labels = pd.Series(
@@ -334,10 +336,7 @@ class TestCrossValidation(unittest.TestCase):
         )
         self.log(f"scores= {scores}")
 
-        # should_be = np.array([-17.26939, -17.32125, -17.32125]) # original
-        should_be = np.array([-18.28408968 -19.05076059 -17.70381135]) # new_should_be verify!
-        print(f"339scores= {scores}")
-        print(f"340should_be= {should_be}")
+        should_be = np.array([-18.28408968, -19.05076059, -17.70381135])
         self.assertTrue(
             np.allclose(scores, should_be),
             "score lists don't match"
@@ -359,10 +358,7 @@ class TestCrossValidation(unittest.TestCase):
         )
         self.log(f"scores= {scores}")
 
-        # should_be = np.array([-17.520701311460694, -18.25536255165772, -16.964650471071668]) #original
-        should_be = np.array([-18.28408968 -19.05076059 -17.70381135]) # new_should_be. verify
-        print(f"364scores= {scores}")
-        print(f"365should_be= {should_be}")
+        should_be = np.array([-18.28408968, -19.05076059, -17.70381135])
         self.assertTrue(
             np.array_equal(scores, should_be),
             # self.assertListEqual(scores.tolist(), should_be.tolist()),

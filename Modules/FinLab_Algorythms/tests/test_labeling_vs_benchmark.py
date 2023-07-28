@@ -42,6 +42,12 @@ class TestReturnOverBenchmark(unittest.TestCase):
                                      'XLB': [np.nan, 0.013160, -0.035202, -0.018732, -0.020415, 0.001313, 0.008551,
                                              -0.015151, 0.028517, -0.032348]},
                                     index=self.idx10, columns=data3.columns)
+
+        print(f'test1: {test1}')
+        print(f'test1_actual: {test1_actual}')
+        print(f'test3: {test3}')
+        print(f'test3_actual: {test3_actual}')
+
         pd.testing.assert_series_equal(test1, test1_actual, check_names=False)
         pd.testing.assert_series_equal(test2, test1_actual.apply(np.sign), check_names=False)
         pd.testing.assert_frame_equal(test3, test3_actual)

@@ -180,8 +180,8 @@ class TestNestedClusteredOptimization(unittest.TestCase):
 
         # Expected weights for maximum Sharpe ratio allocation
         # due to scikit-learn changing np.random outputs
-        w_cvo_sr_expected = pd.DataFrame([[-0.128849, -0.326671, 0.870183, 2.020053],
-                                          [-3.786126, -0.881858, 1.418773, 3.062546]])
+        w_cvo_sr_expected = pd.DataFrame([[-1.134787, -0.157371, 0.441997, 3.483998],
+                                          [-2.35781, -3.316874, 2.593629, 2.70744]])
 
         # due to scikit-learn changing np.random outputs
         w_nco_sr_expected = pd.DataFrame([[-0.204089, -0.050088, 0.912494, 1.983382],

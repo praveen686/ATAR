@@ -9,7 +9,8 @@ import numpy as np
 import pandas as pd
 
 from Modules.FinLab_Algorythms.labeling_algorythms.filters import cusum_filter
-from Modules.FinLab_Algorythms.labeling_algorythms.labeling import add_vertical_barrier, get_events, get_bins, drop_labels
+from Modules.FinLab_Algorythms.labeling_algorythms.labeling import add_vertical_barrier, get_events, get_bins, \
+    drop_labels
 from Modules.FinLab_Algorythms.util.volatility import get_daily_vol
 
 
@@ -57,7 +58,7 @@ class TestChapter3(unittest.TestCase):
             vertical_barriers = add_vertical_barrier(t_events=cusum_events, close=self.data['close'], num_days=days)
 
             # For each row assert the time delta is correct
-            for start_date, end_date in vertical_barriers.iteritems():
+            for start_date, end_date in vertical_barriers.items():
                 self.assertTrue((end_date - start_date).days >= 1)
 
         # Check hourly barriers
