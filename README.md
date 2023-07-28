@@ -2,6 +2,9 @@
 
 # Genie-Trader
 
+(In Progress - Not all features are available, these are targets and guides for contributors. To be updated as the project develops)
+
+
 Welcome to the Genie Trader GitHub repository! Here you'll discover our innovative algorithmic and statistical modeling
 platform designed for traders. Genie Trader is a microservice system that expertly manages intricate processes, creating
 a seamless and self-consistent environment.
@@ -136,7 +139,7 @@ We encourage active collaboration among team members through:
 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)\
 [Risk and Performance Disclaimer](RISK_AND_PERFORMANCE_DISCLAIMER.md)
 
-## Introduction to the Platform Features
+## Introduction to the Platform Features (In Progress - Not all features are available, these are targets and guides for contributors)
 Welcome to our state-of-the-art trading platform, currently in development, designed to provide a comprehensive and versatile trading environment tailored to the needs of a diverse user base. Our platform focuses on enhancing user experience, streamlining the trading process, and facilitating continuous learning and improvement. In this section, we will provide an overview of the key features under development that will set our platform apart and contribute to its robust capabilities once completed.
 
 Our platform encompasses a wide range of features to address essential aspects of the trading process, such as security, education, and market analysis. These features, while still in early development stages, have been meticulously designed to cater to users with varying needs and preferences, ensuring a seamless and satisfying trading experience for all upon completion.
