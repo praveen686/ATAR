@@ -1,16 +1,15 @@
 from collections import deque
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 from _constants import (
     AMENDS_SUFFIX,
     CIK_LENGTH,
-    FORM_FULL_SUBMISSION_FILENAME,
     PRIMARY_DOC_FILENAME_STEM,
     ROOT_FORMS_SAVE_FOLDER_NAME,
     SUBMISSION_FILE_FORMAT,
     URL_FILING,
-    URL_SUBMISSIONS,
+    URL_SUBMISSIONS, FORM_FULL_SUBMISSION_FILENAME,
 )
 from _sec_gateway import (
     download_filing,
@@ -129,6 +128,7 @@ def get_to_download(cik: str, acc_num: str, doc: str) -> FormsToDownload:
 def fetch_and_save_filings(download_metadata: FormsDownloadMetadata, user_agent: str) -> int:
     # TODO: do not download files that already exist
     # TODO: add try/except around failed downloads and continue
+    # todo i can probably split this into fetching raw data and/or html to serve for example and the actual writing to file in case we do not want to save
     successfully_downloaded = 0
     to_download = aggregate_forms_to_download(download_metadata, user_agent)
     for td in to_download:
@@ -145,16 +145,16 @@ def fetch_and_save_filings(download_metadata: FormsDownloadMetadata, user_agent:
     return successfully_downloaded
 
 
-def get_ticker_to_cik_mapping(user_agent: str) -> Dict[str, str]:
+def get_ticker_cik_mapping(user_agent: str) -> Tuple[Dict[str, str], Dict[str, str]]:
+    """Get the mapping from ticker to CIK and CIK to ticker."""
     ticker_metadata = get_ticker_metadata(user_agent)
     fields = ticker_metadata["fields"]
     ticker_data = ticker_metadata["data"]
 
     # Find index that corresponds with the CIK and ticker fields
-    cik_idx = fields.index("cik")
-    ticker_idx = fields.index("ticker")
+    cik_idx, ticker_idx = fields.index("cik"), fields.index("ticker")
 
-    return {
-        str(td[ticker_idx]).upper(): str(td[cik_idx]).zfill(CIK_LENGTH)
-        for td in ticker_data
-    }
+    ticker_to_cik = {str(td[ticker_idx]).upper(): str(td[cik_idx]).zfill(CIK_LENGTH) for td in ticker_data}
+    cik_to_ticker = {cik: ticker for ticker, cik in ticker_to_cik.items()}
+
+    return ticker_to_cik, cik_to_ticker

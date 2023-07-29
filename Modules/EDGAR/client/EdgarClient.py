@@ -10,7 +10,7 @@ from _constants import (
     BASE_URL_SUBMISSIONS, BASE_URL_XBRL_COMPANY_CONCEPTS, BASE_URL_XBRL_COMPANY_FACTS, BASE_URL_XBRL_FRAMES,
     SUPPORTED_FORMS, DEFAULT_AFTER_DATE, DEFAULT_BEFORE_DATE, ROOT_FACTS_SAVE_FOLDER_NAME
 )
-from _orchestrator import fetch_and_save_filings, get_ticker_to_cik_mapping
+from _orchestrator import fetch_and_save_filings, get_ticker_cik_mapping
 from _types import FormsDownloadMetadata, DownloadPath, JSONType
 from _utils import merge_submission_dicts, validate_and_return_cik, validate_and_parse_date
 
@@ -49,9 +49,7 @@ class EdgarClient(BaseClient):
             self.download_folder = Path(download_folder).expanduser().resolve()
 
         self.supported_forms = SUPPORTED_FORMS
-
-        self.ticker_to_cik_mapping = get_ticker_to_cik_mapping(self.user_agent)
-        self.cik_to_ticker_mapping = {v: k for k, v in self.ticker_to_cik_mapping.items()}
+        self.ticker_to_cik_mapping, self.cik_to_ticker_mapping = get_ticker_cik_mapping(self.user_agent)
 
         super().__init__(self.user_agent)
 
@@ -340,23 +338,23 @@ if __name__ == "__main__":
     #
 
     equity_ids = [
-        "GOOGL", "AMZN", "AAPL", "MSFT", "META", "1067983", "JNJ", "PG",
-        "V", "JPM", "TSLA", "NVDA", "UNH", "XOM", "HD", "DIS", "BAC",
-        "PFE", "VZ", "T", "INTC", "MA", "MRK", "KO", "CMCSA", "NFLX", "CSCO",
-        "PEP", "WMT", "ADBE", "ABT", "CRM", "ABBV", "CVX", "COST", "MCD",
-        "MDT", "NKE", "NEE", "PYPL", "AVGO", "ACN", "TXN", "QCOM", "LLY",
-        "DHR", "PM", "AMGN", "LIN", "HON", "UNP", "UPS", "SBUX", "LOW",
-        "ORCL", "IBM", "AMT", "MMM", "CAT", "GILD", "GE", "CHTR", "TMO",
-        "NOW", "INTU", "AMD", "ISRG", "FIS", "MDLZ", "CVS", "ZTS", "BLK",
-        "MO", "SPGI", "GS", "BDX", "AXP", "CCI", "CI", "TGT", "LMT",
-        "CME", "SYK", "TJX", "PLD", "SPG", "D", "ADP", "EQIX", "ATVI", "CSX",
-        "BKNG", "DUK", "PNC", "CL", "ICE", "SO", "USB", "RTX", "BDX", "CLX",
-        "CCI", "AON", "ITW", "ISRG", "SCHW", "ILMN", "VRTX", "BIIB",
-        "F", "EOG", "GPN", "GM", "COP", "DE", "TFC", "EL", "MS", "SRE",
-        "WM", "ADSK", "BK", "TRV", "HCA", "SHW", "EW", "APD", "ALGN",
-        "CCL", "DD", "DOW", "KMB", "HPQ", "HLT", "EA", "ROST", "LHX", "MET",
-        "EXC", "WBA", "AIG", "NEM", "ETN", "ADI", "CTSH", "LUV", "FDX", "KMI",
-        "YUM", "EBAY", "ALL", "BMY", "DAL", "SLB", "PRU", "ZBH"
+        "GOOGL", "AMZN",  # "AAPL", "MSFT", "META", "1067983", "JNJ", "PG",
+        # "V", "JPM", "TSLA", "NVDA", "UNH", "XOM", "HD", "DIS", "BAC",
+        # "PFE", "VZ", "T", "INTC", "MA", "MRK", "KO", "CMCSA", "NFLX", "CSCO",
+        # "PEP", "WMT", "ADBE", "ABT", "CRM", "ABBV", "CVX", "COST", "MCD",
+        # "MDT", "NKE", "NEE", "PYPL", "AVGO", "ACN", "TXN", "QCOM", "LLY",
+        # "DHR", "PM", "AMGN", "LIN", "HON", "UNP", "UPS", "SBUX", "LOW",
+        # "ORCL", "IBM", "AMT", "MMM", "CAT", "GILD", "GE", "CHTR", "TMO",
+        # "NOW", "INTU", "AMD", "ISRG", "FIS", "MDLZ", "CVS", "ZTS", "BLK",
+        # "MO", "SPGI", "GS", "BDX", "AXP", "CCI", "CI", "TGT", "LMT",
+        # "CME", "SYK", "TJX", "PLD", "SPG", "D", "ADP", "EQIX", "ATVI", "CSX",
+        # "BKNG", "DUK", "PNC", "CL", "ICE", "SO", "USB", "RTX", "BDX", "CLX",
+        # "CCI", "AON", "ITW", "ISRG", "SCHW", "ILMN", "VRTX", "BIIB",
+        # "F", "EOG", "GPN", "GM", "COP", "DE", "TFC", "EL", "MS", "SRE",
+        # "WM", "ADSK", "BK", "TRV", "HCA", "SHW", "EW", "APD", "ALGN",
+        # "CCL", "DD", "DOW", "KMB", "HPQ", "HLT", "EA", "ROST", "LHX", "MET",
+        # "EXC", "WBA", "AIG", "NEM", "ETN", "ADI", "CTSH", "LUV", "FDX", "KMI",
+        # "YUM", "EBAY", "ALL", "BMY", "DAL", "SLB", "PRU", "ZBH"
     ]
 
     # start_date = "1944-01-01"
@@ -364,7 +362,7 @@ if __name__ == "__main__":
     end_date = "2025-01-01"
     forms = ["10-K", "10-Q", "8-K"]
 
-    edgar_client.download_facts_for_companies(tickers_or_ciks=equity_ids, skip_if_exists=True)
+    # edgar_client.download_facts_for_companies(tickers_or_ciks=equity_ids, skip_if_exists=True)
     edgar_client.download_forms_for_companies(tickers_or_ciks=equity_ids, form_types=forms,
                                               limit_per_form=None, after=start_date, before=end_date,
                                               include_amends=False, download_details=True)
