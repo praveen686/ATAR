@@ -305,39 +305,39 @@ if __name__ == "__main__":
     SKIP_IF_EXISTS = True
     tickers_saved = []
     tickers_skipped = []
-    # if not os.path.exists(sec_edgar_facts_dir):
-    #     os.makedirs(sec_edgar_facts_dir)
-    # for equity_id in equity_ids:
-    #     if SKIP_IF_EXISTS:
-    #         # check if the file exists
-    #         if os.path.exists(f'{sec_edgar_facts_dir}/{equity_id}/facts.json'):
-    #             print(f"Skipping {equity_id} because it already exists")
-    #             continue
-    #
-    #     try:
-    #         values = edgar_client.get_company_facts(equity_id)
-    #         # save json
-    #
-    #         # if not make the make sec-edgar-filings/{equity_id}/facts.json
-    #         # make the directories as needed
-    #         if not os.path.exists(f'{sec_edgar_facts_dir}/{equity_id}'):
-    #             os.makedirs(f'{sec_edgar_facts_dir}/{equity_id}')
-    #
-    #         with open(f'{sec_edgar_facts_dir}/{equity_id}/facts.json', 'w') as outfile:
-    #             json.dump(values, outfile)
-    #
-    #         # save the ticker
-    #         tickers_saved.append(equity_id)
-    #     except Exception as e:
-    #         tickers_skipped.append(equity_id)
-    #         print(f"Skipping {equity_id}")
-    #         print(e)
-    #         continue
-    #
-    # print(f"Saved {len(tickers_saved)} tickers")
-    # print(f"Saved tickers: {tickers_saved}")
-    # print(f"Skipped {len(tickers_skipped)} tickers")
-    # print(f"Skipped tickers: {tickers_skipped}")
+    if not os.path.exists(sec_edgar_facts_dir):
+        os.makedirs(sec_edgar_facts_dir)
+    for equity_id in equity_ids:
+        if SKIP_IF_EXISTS:
+            # check if the file exists
+            if os.path.exists(f'{sec_edgar_facts_dir}/{equity_id}/facts.json'):
+                print(f"Skipping {equity_id} because it already exists")
+                continue
+
+        try:
+            values = edgar_client.get_company_facts(equity_id)
+            # save json
+
+            # if not make the make sec-edgar-filings/{equity_id}/facts.json
+            # make the directories as needed
+            if not os.path.exists(f'{sec_edgar_facts_dir}/{equity_id}'):
+                os.makedirs(f'{sec_edgar_facts_dir}/{equity_id}')
+
+            with open(f'{sec_edgar_facts_dir}/{equity_id}/facts.json', 'w') as outfile:
+                json.dump(values, outfile)
+
+            # save the ticker
+            tickers_saved.append(equity_id)
+        except Exception as e:
+            tickers_skipped.append(equity_id)
+            print(f"Skipping {equity_id}")
+            print(e)
+            continue
+
+    print(f"Saved {len(tickers_saved)} tickers")
+    print(f"Saved tickers: {tickers_saved}")
+    print(f"Skipped {len(tickers_skipped)} tickers")
+    print(f"Skipped tickers: {tickers_skipped}")
     #
     # exit()
     for equity_id in equity_ids:
