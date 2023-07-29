@@ -8,9 +8,9 @@ from typing import Optional, Union, List
 from _BaseClient import BaseClient
 from _constants import (
     BASE_URL_SUBMISSIONS, BASE_URL_XBRL_COMPANY_CONCEPTS, BASE_URL_XBRL_COMPANY_FACTS, BASE_URL_XBRL_FRAMES,
-    SUPPORTED_FORMS, DEFAULT_AFTER_DATE, DEFAULT_BEFORE_DATE, ROOT_FACTS_SAVE_FOLDER_NAME
+    SUPPORTED_FORMS, DEFAULT_AFTER_DATE, DEFAULT_BEFORE_DATE, ROOT_FACTS_SAVE_FOLDER_NAME, ROOT_FORMS_SAVE_FOLDER_NAME
 )
-from _orchestrator import fetch_and_save_filings, get_ticker_cik_mapping
+from _orchestrator import fetch_and_save_filings, get_ticker_cik_name_mapping
 from _types import FormsDownloadMetadata, DownloadPath, JSONType
 from _utils import merge_submission_dicts, validate_and_return_cik, validate_and_parse_date
 
@@ -42,14 +42,17 @@ class EdgarClient(BaseClient):
                 "for rate-limiting purposes."
             )
         if download_folder is None:
-            self.download_folder = Path.cwd()
+            self.parent_download_folder = Path.cwd()
         elif isinstance(download_folder, Path):
-            self.download_folder = download_folder
+            self.parent_download_folder = download_folder
         else:
-            self.download_folder = Path(download_folder).expanduser().resolve()
+            self.parent_download_folder = Path(download_folder).expanduser().resolve()
 
         self.supported_forms = SUPPORTED_FORMS
-        self.ticker_to_cik_mapping, self.cik_to_ticker_mapping = get_ticker_cik_mapping(self.user_agent)
+        self.facts_save_folder = self.parent_download_folder / ROOT_FACTS_SAVE_FOLDER_NAME
+        self.forms_save_folder = self.parent_download_folder / ROOT_FORMS_SAVE_FOLDER_NAME
+        self.ticker_to_cik_mapping, self.cik_to_ticker_mapping, self.cik_to_name = \
+            get_ticker_cik_name_mapping(self.user_agent)
 
         super().__init__(self.user_agent)
 
@@ -239,7 +242,7 @@ class EdgarClient(BaseClient):
 
         num_downloaded = fetch_and_save_filings(
             FormsDownloadMetadata(
-                self.download_folder,
+                self.parent_download_folder,
                 form_type,
                 cik,
                 ticker,
@@ -258,7 +261,7 @@ class EdgarClient(BaseClient):
         ticker_facts_saved = []
         ticker_facts_skipped = []
 
-        root_facts_directory = Path(self.download_folder, ROOT_FACTS_SAVE_FOLDER_NAME)
+        root_facts_directory = Path(self.parent_download_folder, ROOT_FACTS_SAVE_FOLDER_NAME)
         root_facts_directory.mkdir(parents=True, exist_ok=True)
 
         for ticker_or_cik in tickers_or_ciks:
@@ -275,7 +278,7 @@ class EdgarClient(BaseClient):
                 print(f"Skipping {ticker_name} because it already exists")
                 continue
             try:
-                values = edgar_client.get_company_facts(ticker_name)
+                values = self.get_company_facts(ticker_name)
             except Exception as e:
                 print(f"Skipping {ticker_name}  while downloading facts because of error: {e}")
                 ticker_facts_skipped.append(ticker_name)
@@ -314,16 +317,16 @@ class EdgarClient(BaseClient):
                 continue
 
             for filing_type in form_types:
-                if filing_type not in edgar_client.supported_forms:
+                if filing_type not in self.supported_forms:
                     print(f"Skipping form {filing_type} for equity {ticker_name} because it is not supported")
                     continue
                 try:
                     # todo check if already exists for given equity, form, and dates
-                    n_saved_filings = edgar_client.download_form(ticker_name, filing_type,
-                                                                 after=after, before=before,
-                                                                 limit=limit_per_form, include_amends=include_amends,
-                                                                 download_details=download_details
-                                                                 )
+                    n_saved_filings = self.download_form(ticker_name, filing_type,
+                                                         after=after, before=before,
+                                                         limit=limit_per_form, include_amends=include_amends,
+                                                         download_details=download_details
+                                                         )
                     print(f"Saved {n_saved_filings} filings for {ticker_name}-{filing_type}")
                     forms_saved.append(f'{ticker_name}-{filing_type}')
                 except Exception as e:
@@ -333,36 +336,28 @@ class EdgarClient(BaseClient):
 
 
 if __name__ == "__main__":
-    edgar_client = EdgarClient(company_name="Carbonyl", email_address="ruben@carbonyl.org",
-                               download_folder="/home/ruben/PycharmProjects/Genie-Trader/Data/raw_data/SEC")
+    DOWNLOAD_FOLDER = "/home/ruben/PycharmProjects/Genie-Trader/Data/raw_data/SEC"
+    # edgar_client = EdgarClient(company_name="Carbonyl", email_address="ruben@carbonyl.org",
+    #                            download_folder=DOWNLOAD_FOLDER)
     #
 
-    equity_ids = [
-        "GOOGL", "AMZN",  # "AAPL", "MSFT", "META", "1067983", "JNJ", "PG",
-        # "V", "JPM", "TSLA", "NVDA", "UNH", "XOM", "HD", "DIS", "BAC",
-        # "PFE", "VZ", "T", "INTC", "MA", "MRK", "KO", "CMCSA", "NFLX", "CSCO",
-        # "PEP", "WMT", "ADBE", "ABT", "CRM", "ABBV", "CVX", "COST", "MCD",
-        # "MDT", "NKE", "NEE", "PYPL", "AVGO", "ACN", "TXN", "QCOM", "LLY",
-        # "DHR", "PM", "AMGN", "LIN", "HON", "UNP", "UPS", "SBUX", "LOW",
-        # "ORCL", "IBM", "AMT", "MMM", "CAT", "GILD", "GE", "CHTR", "TMO",
-        # "NOW", "INTU", "AMD", "ISRG", "FIS", "MDLZ", "CVS", "ZTS", "BLK",
-        # "MO", "SPGI", "GS", "BDX", "AXP", "CCI", "CI", "TGT", "LMT",
-        # "CME", "SYK", "TJX", "PLD", "SPG", "D", "ADP", "EQIX", "ATVI", "CSX",
-        # "BKNG", "DUK", "PNC", "CL", "ICE", "SO", "USB", "RTX", "BDX", "CLX",
-        # "CCI", "AON", "ITW", "ISRG", "SCHW", "ILMN", "VRTX", "BIIB",
-        # "F", "EOG", "GPN", "GM", "COP", "DE", "TFC", "EL", "MS", "SRE",
-        # "WM", "ADSK", "BK", "TRV", "HCA", "SHW", "EW", "APD", "ALGN",
-        # "CCL", "DD", "DOW", "KMB", "HPQ", "HLT", "EA", "ROST", "LHX", "MET",
-        # "EXC", "WBA", "AIG", "NEM", "ETN", "ADI", "CTSH", "LUV", "FDX", "KMI",
-        # "YUM", "EBAY", "ALL", "BMY", "DAL", "SLB", "PRU", "ZBH"
-    ]
+    tickers = ["AAPL", "MSFT", "GOOG", "AMZN", "TSLA", "NVDA", "PYPL", "ADBE", "NFLX", "INTC", "CMCSA", "PEP",
+               "CSCO", "AVGO", "TXN", "QCOM", "TMUS", "AMGN", "SBUX", "CHTR", "GILD", "INTU", "MDLZ", "FISV", "BKNG",
+               "ADP", "ISRG", "VRTX", "REGN", "AMD", "MU", "ILMN", "CSX", "LRCX", "ZM", "ATVI", "ADI", "ADSK", "MELI",
+               "BIIB", "NXPI", "ADP", "KHC", "EXC", "EA", "WBA", "JD", "EBAY", "MAR", "ROST", "BIDU", "CTSH", "WDAY",
+               "KLAC", "MNST", "ORLY", "NTES", "SNPS", "CTAS", "VRSK", "PCAR", "SGEN", "XEL", "DLTR", "ANSS", "CDNS",
+               ]
 
-    # start_date = "1944-01-01"
-    start_date = "2022-01-01"
-    end_date = "2025-01-01"
-    forms = ["10-K", "10-Q", "8-K"]
+    for ticker in tickers:
+        # Parse the facts json for a company
+        # with open(f'{edgar_client.facts_save_folder}/{COMPANY_X}-facts.json') as f:
+        with open(f'{DOWNLOAD_FOLDER}/sec-edgar-facts/{ticker}-facts.json') as f:
+            company_facts = json.load(f)
 
-    # edgar_client.download_facts_for_companies(tickers_or_ciks=equity_ids, skip_if_exists=True)
-    edgar_client.download_forms_for_companies(tickers_or_ciks=equity_ids, form_types=forms,
-                                              limit_per_form=None, after=start_date, before=end_date,
-                                              include_amends=False, download_details=True)
+        print(company_facts["cik"])
+        print(company_facts["entityName"])
+        print(company_facts["facts"].keys())  # varies but ['dei', 'us-gaap'] seem to be common
+        print(company_facts["facts"]["dei"].keys())  # varies but ['dei', 'us-gaap'] seem to be common
+        print(company_facts["facts"]["us-gaap"].keys())  # varies but ['dei', 'us-gaap'] seem to be common
+        print()
+        exit()

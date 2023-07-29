@@ -2,6 +2,8 @@ from collections import deque
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
+import pandas as pd
+
 from _constants import (
     AMENDS_SUFFIX,
     CIK_LENGTH,
@@ -145,16 +147,35 @@ def fetch_and_save_filings(download_metadata: FormsDownloadMetadata, user_agent:
     return successfully_downloaded
 
 
-def get_ticker_cik_mapping(user_agent: str) -> Tuple[Dict[str, str], Dict[str, str]]:
+def get_ticker_cik_name_mapping(user_agent: str) -> Tuple[Dict[str, str], Dict[str, str], Dict[str, str]]:
     """Get the mapping from ticker to CIK and CIK to ticker."""
     ticker_metadata = get_ticker_metadata(user_agent)
     fields = ticker_metadata["fields"]
     ticker_data = ticker_metadata["data"]
 
     # Find index that corresponds with the CIK and ticker fields
-    cik_idx, ticker_idx = fields.index("cik"), fields.index("ticker")
+    cik_idx, ticker_idx, name_idx = fields.index("cik"), fields.index("ticker"), fields.index("name")
 
     ticker_to_cik = {str(td[ticker_idx]).upper(): str(td[cik_idx]).zfill(CIK_LENGTH) for td in ticker_data}
     cik_to_ticker = {cik: ticker for ticker, cik in ticker_to_cik.items()}
+    cik_to_name = {cik: name for name, cik in ticker_to_cik.items()}
 
-    return ticker_to_cik, cik_to_ticker
+    return ticker_to_cik, cik_to_ticker, cik_to_name
+
+
+def get_ticker_dataframe(user_agent: str) -> pd.DataFrame:
+    """Get the ticker metadata as a pandas DataFrame."""
+    ticker_metadata = get_ticker_metadata(user_agent)
+    fields = ticker_metadata["fields"]  # ['cik', 'name', 'ticker', 'exchange']
+    ticker_data = ticker_metadata["data"]
+
+    # Convert raw data into DataFrame
+    df = pd.DataFrame(ticker_data, columns=fields)
+
+    # Ensure data types
+    df['cik'] = df['cik'].astype(str).str.zfill(CIK_LENGTH)
+    df['ticker'] = df['ticker'].str.upper()
+
+    return df
+
+

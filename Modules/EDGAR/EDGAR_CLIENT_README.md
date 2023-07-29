@@ -1,4 +1,5 @@
-# EdgarClient
+# EdgarClient 
+(TESTS ARE OUT OF DATE AND WILL BE UPDATED SOON, REFACTORING MERGER)
 
 **EdgarClient** provides a lightweight, unofficial Python API wrapper for
 the [SEC EDGAR REST API](https://www.sec.gov/edgar/sec-api-documentation).
