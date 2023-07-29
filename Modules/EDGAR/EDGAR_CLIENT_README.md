@@ -26,14 +26,14 @@ the [SEC CIK lookup tool](https://www.sec.gov/edgar/searchedgar/cik.htm) if you 
 ```python
 # Specify user-agent string to pass to SEC to identify
 # requests for rate-limiting purposes
->>> edgar = EdgarClient(company_name="<Sample Company Name>", 
-                         email_address="<Admin Contact>@<Sample Company Domain>", 
+>> > edgar = EdgarClient(company_name="<Sample Company Name>",
+                         email_address="<Admin Contact>@<Sample Company Domain>",
                          download_folder=None)
 
 # Get submissions for Apple with the additional paginated files
 # appended to the recent filings to prevent the need for extra
 # manual pagination handling
->>> edgar.get_submissions(cik="320193")
+>> > edgar.get_submissions(cik="320193")
 {
     "cik": "320193",
     "entityType": "operating",
@@ -74,7 +74,7 @@ the [SEC CIK lookup tool](https://www.sec.gov/edgar/searchedgar/cik.htm) if you 
 
 # Get submissions for Apple without automatic pagination handling,
 # which requires manual handling of the paginated files (not recommended)
->>> edgar.get_submissions(cik="320193", handle_pagination=False)
+>> > edgar.get_submissions(cik="320193", handle_pagination=False)
 {
     "cik": "320193",
     "entityType": "operating",
@@ -120,7 +120,7 @@ the [SEC CIK lookup tool](https://www.sec.gov/edgar/searchedgar/cik.htm) if you 
 }
 
 # Get company concept for Apple
->>> edgar.get_company_concept(cik="320193", taxonomy="us-gaap", tag="AccountsPayableCurrent")
+>> > edgar.get_company_concept(cik="320193", taxonomy="us-gaap", tag="AccountsPayableCurrent")
 {
     "cik": 320193,
     "taxonomy": "us-gaap",
@@ -134,7 +134,7 @@ the [SEC CIK lookup tool](https://www.sec.gov/edgar/searchedgar/cik.htm) if you 
 }
 
 # Get company facts for Apple
->>> edgar.get_company_facts(cik="320193")
+>> > edgar.get_company_facts(cik="320193")
 {
     "cik": 320193,
     "entityName": "Apple Inc.",
@@ -177,7 +177,7 @@ the [SEC CIK lookup tool](https://www.sec.gov/edgar/searchedgar/cik.htm) if you 
 
 # Get one fact for each reporting entity in specified
 # calendar period (Q1 2019)
->>> edgar.get_frames(taxonomy="us-gaap", tag="AccountsPayableCurrent", unit="USD", year="2019", quarter=1)
+>> > edgar.get_frames(taxonomy="us-gaap", tag="AccountsPayableCurrent", unit="USD", year="2019", quarter=1)
 {
     "taxonomy": "us-gaap",
     "tag": "AccountsPayableCurrent",
@@ -283,11 +283,11 @@ for equity_id in equity_ids:
 
 | Wrapper Function                                                | API Route                   | Full API URI                                                                                 |
 |-----------------------------------------------------------------|-----------------------------|----------------------------------------------------------------------------------------------|
-| `get_submissions(cik)`                                          | `/submissions/`             | `data.sec.gov/submissions/CIK{cik}.json`                                                     |
-| `get_company_concept(cik, taxonomy, tag)`                       | `/api/xbrl/companyconcept/` | `data.sec.gov/api/xbrl/companyconcept/CIK{cik}/{taxonomy}/{tag}.json`                        |
-| `get_company_facts(cik)`                                        | `/api/xbrl/companyfacts/`   | `data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json`                                           |
+| `get_submissions(ticker_or_cik)`                                | `/submissions/`             | `data.sec.gov/submissions/CIK{cik}.json`                                                     |
+| `get_company_concept(ticker_or_cik, taxonomy, tag)`             | `/api/xbrl/companyconcept/` | `data.sec.gov/api/xbrl/companyconcept/CIK{cik}/{taxonomy}/{tag}.json`                        |
+| `get_company_facts(ticker_or_cik)`                              | `/api/xbrl/companyfacts/`   | `data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json`                                           |
 | `get_frames(taxonomy, tag, unit, year, quarter, instantaneous)` | `/api/xbrl/frames/`         | `data.sec.gov/api/xbrl/frames/{taxonomy}/{tag}/{unit}/CY{year}{quarter}{instantaneous}.json` |
-| `get(form, ticker_or_cik, *, limit, after, before, include)`    | `/api/xbrl/frames/`         | `data.sec.gov/api/xbrl/frames/{taxonomy}/{tag}/{unit}/CY{year}{quarter}{instantaneous}.json` |
+| `get(form, ticker_or_cik, *, limit, after, before, include)`    |                             |                                                                                              |
 
 More details on each endpoint can be found on the official SEC API
 documentation: [sec.gov/edgar/sec-api-documentation](https://www.sec.gov/edgar/sec-api-documentation).
