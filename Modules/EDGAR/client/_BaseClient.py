@@ -5,9 +5,9 @@ from pyrate_limiter import Duration, Limiter, RequestRate
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from ._constants import BACKOFF_FACTOR, MAX_REQUESTS_PER_SECOND, MAX_RETRIES
-from ._types import JSONType
-from .EdgarAPIError import EdgarAPIError
+from _constants import BACKOFF_FACTOR, MAX_REQUESTS_PER_SECOND, MAX_RETRIES
+from _types import JSONType
+from EdgarAPIError import EdgarAPIError
 
 # Rate limiter
 rate = RequestRate(MAX_REQUESTS_PER_SECOND, Duration.SECOND)

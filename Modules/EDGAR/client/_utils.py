@@ -1,18 +1,11 @@
 from datetime import date
 from datetime import datetime as dt
+from itertools import chain
 from typing import Dict
-
-from ._constants import CIK_LENGTH, DATE_FORMAT_TOKENS
-from ._types import DownloadMetadata,SubmissionsType
-from itertools import chain
 from typing import List
 
-
-
-from itertools import chain
-from typing import List
-
-from ._types import SubmissionsType
+from _constants import CIK_LENGTH, DATE_FORMAT_TOKENS
+from _types import DownloadMetadata, SubmissionsType
 
 
 def validate_cik(cik: str) -> str:
@@ -43,7 +36,7 @@ def merge_submission_dicts(to_merge: List[SubmissionsType]) -> SubmissionsType:
 
 
 def validate_and_convert_ticker_or_cik(
-    ticker_or_cik: str, ticker_to_cik_mapping: Dict[str, str]
+        ticker_or_cik: str, ticker_to_cik_mapping: Dict[str, str]
 ) -> str:
     ticker_or_cik = str(ticker_or_cik).strip().upper()
 
@@ -84,10 +77,8 @@ def validate_and_parse_date(date_format: str) -> date:
 
 
 def within_requested_date_range(
-    download_metadata: DownloadMetadata,
-    filing_date: str,
+        download_metadata: DownloadMetadata,
+        filing_date: str,
 ) -> bool:
     target_date = dt.strptime(filing_date, DATE_FORMAT_TOKENS).date()
     return download_metadata.after <= target_date <= download_metadata.before
-    
-    

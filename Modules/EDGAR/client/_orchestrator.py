@@ -2,7 +2,7 @@ from collections import deque
 from pathlib import Path
 from typing import Any, Dict, List
 
-from ._constants import (
+from _constants import (
     AMENDS_SUFFIX,
     CIK_LENGTH,
     FILING_FULL_SUBMISSION_FILENAME,
@@ -12,13 +12,14 @@ from ._constants import (
     URL_FILING,
     URL_SUBMISSIONS,
 )
-from ._sec_gateway import (
+from _sec_gateway import (
     download_filing,
     get_list_of_available_filings,
     get_ticker_metadata,
 )
-from ._types import DownloadMetadata, ToDownload
-from ._utils import within_requested_date_range
+from _types import DownloadMetadata, ToDownload
+from _utils import within_requested_date_range
+
 
 
 def get_save_location(

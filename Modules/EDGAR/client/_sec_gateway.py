@@ -1,9 +1,10 @@
+# python 3.10
 from typing import Any
 
 import requests
 from pyrate_limiter import Limiter
 
-from ._constants import (
+from _constants import (
     HOST_DATA_SEC,
     HOST_WWW_SEC,
     SEC_RATE_LIMIT,
@@ -29,6 +30,7 @@ def _call_sec(uri: str, user_agent: str, host: str) -> Any:
 
 
 def download_filing(uri: str, user_agent: str) -> Any:
+    print(f'{uri = }')
     return _call_sec(uri, user_agent, HOST_WWW_SEC).content
 
 

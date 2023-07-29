@@ -2,13 +2,10 @@ import sys
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
+from typing import Any, Dict, List
 from typing import Union
 
-from ._constants import DEFAULT_AFTER_DATE, DEFAULT_BEFORE_DATE
-
-
-from typing import Any, Dict, List
-
+from _constants import DEFAULT_AFTER_DATE, DEFAULT_BEFORE_DATE
 
 
 @dataclass
