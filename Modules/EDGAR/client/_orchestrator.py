@@ -5,9 +5,9 @@ from typing import Any, Dict, List
 from _constants import (
     AMENDS_SUFFIX,
     CIK_LENGTH,
-    FILING_FULL_SUBMISSION_FILENAME,
+    FORM_FULL_SUBMISSION_FILENAME,
     PRIMARY_DOC_FILENAME_STEM,
-    ROOT_SAVE_FOLDER_NAME,
+    ROOT_FORMS_SAVE_FOLDER_NAME,
     SUBMISSION_FILE_FORMAT,
     URL_FILING,
     URL_SUBMISSIONS,
@@ -17,43 +17,42 @@ from _sec_gateway import (
     get_list_of_available_filings,
     get_ticker_metadata,
 )
-from _types import DownloadMetadata, ToDownload
+from _types import FormsDownloadMetadata, FormsToDownload
 from _utils import within_requested_date_range
 
 
-
-def get_save_location(
-    download_metadata: DownloadMetadata,
-    accession_number: str,
-    save_filename: str,
+def get_forms_save_location(
+        download_metadata: FormsDownloadMetadata,
+        accession_number: str,
+        save_filename: str,
 ) -> Path:
     return (
-        download_metadata.download_folder
-        / ROOT_SAVE_FOLDER_NAME
-        / download_metadata.cik
-        / download_metadata.form
-        / accession_number
-        / save_filename
+            download_metadata.download_folder
+            / ROOT_FORMS_SAVE_FOLDER_NAME
+            / f'{download_metadata.ticker}-{download_metadata.cik}'
+            / download_metadata.form
+            / accession_number
+            / save_filename
     )
 
 
-def save_document(
-    filing_contents: Any,
-    download_metadata: DownloadMetadata,
-    accession_number: str,
-    save_filename: str,
+def save_form_document(
+        filing_contents: Any,
+        download_metadata: FormsDownloadMetadata,
+        accession_number: str,
+        save_filename: str,
 ) -> None:
     # Create all parent directories as needed and write content to file
-    save_path = get_save_location(download_metadata, accession_number, save_filename)
+    save_path = get_forms_save_location(download_metadata, accession_number, save_filename)
     save_path.parent.mkdir(parents=True, exist_ok=True)
     # TODO: resolve URLs so that images show up in HTML files?
     save_path.write_bytes(filing_contents)
 
 
-def aggregate_filings_to_download(
-    download_metadata: DownloadMetadata, user_agent: str
-) -> List[ToDownload]:
-    filings_to_download: List[ToDownload] = []
+def aggregate_forms_to_download(
+        download_metadata: FormsDownloadMetadata, user_agent: str
+) -> List[FormsToDownload]:
+    filings_to_download: List[FormsToDownload] = []
     fetched_count = 0
     filings_available = True
     submissions_uri = URL_SUBMISSIONS.format(
@@ -77,15 +76,15 @@ def aggregate_filings_to_download(
         filing_dates = filings_json["filingDate"]
 
         for acc_num, form, doc, f_date in zip(
-            accession_numbers, forms, documents, filing_dates, strict=True
+                accession_numbers, forms, documents, filing_dates, strict=True
         ):
             if (
-                form != download_metadata.form
-                or (
+                    form != download_metadata.form
+                    or (
                     not download_metadata.include_amends
                     and form.endswith(AMENDS_SUFFIX)
-                )
-                or not within_requested_date_range(download_metadata, f_date)
+            )
+                    or not within_requested_date_range(download_metadata, f_date)
             ):
                 continue
 
@@ -108,7 +107,7 @@ def aggregate_filings_to_download(
     return filings_to_download
 
 
-def get_to_download(cik: str, acc_num: str, doc: str) -> ToDownload:
+def get_to_download(cik: str, acc_num: str, doc: str) -> FormsToDownload:
     cik = cik.strip("0")
     acc_num_no_dash = acc_num.replace("-", "")
     raw_filing_uri = URL_FILING.format(
@@ -119,7 +118,7 @@ def get_to_download(cik: str, acc_num: str, doc: str) -> ToDownload:
     )
     primary_doc_suffix = Path(doc).suffix.replace("htm", "html")
 
-    return ToDownload(
+    return FormsToDownload(
         raw_filing_uri,
         primary_doc_uri,
         acc_num,
@@ -127,29 +126,19 @@ def get_to_download(cik: str, acc_num: str, doc: str) -> ToDownload:
     )
 
 
-def fetch_and_save_filings(download_metadata: DownloadMetadata, user_agent: str) -> int:
+def fetch_and_save_filings(download_metadata: FormsDownloadMetadata, user_agent: str) -> int:
     # TODO: do not download files that already exist
     # TODO: add try/except around failed downloads and continue
     successfully_downloaded = 0
-    to_download = aggregate_filings_to_download(download_metadata, user_agent)
+    to_download = aggregate_forms_to_download(download_metadata, user_agent)
     for td in to_download:
         raw_filing = download_filing(td.raw_filing_uri, user_agent)
-        save_document(
-            raw_filing,
-            download_metadata,
-            td.accession_number,
-            FILING_FULL_SUBMISSION_FILENAME,
-        )
+        save_form_document(raw_filing, download_metadata, td.accession_number, FORM_FULL_SUBMISSION_FILENAME)
 
         if download_metadata.download_details:
             primary_doc = download_filing(td.primary_doc_uri, user_agent)
             primary_doc_filename = f"{PRIMARY_DOC_FILENAME_STEM}{td.details_doc_suffix}"
-            save_document(
-                primary_doc,
-                download_metadata,
-                td.accession_number,
-                primary_doc_filename,
-            )
+            save_form_document(primary_doc, download_metadata, td.accession_number, primary_doc_filename)
 
         successfully_downloaded += 1
 

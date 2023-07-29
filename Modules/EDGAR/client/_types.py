@@ -9,12 +9,13 @@ from _constants import DEFAULT_AFTER_DATE, DEFAULT_BEFORE_DATE
 
 
 @dataclass
-class DownloadMetadata:
+class FormsDownloadMetadata:
     """Class for representing internal download metadata."""
 
     download_folder: Path
     form: str
     cik: str
+    ticker: str
     limit: int = sys.maxsize
     after: date = DEFAULT_AFTER_DATE
     before: date = DEFAULT_BEFORE_DATE
@@ -23,7 +24,7 @@ class DownloadMetadata:
 
 
 @dataclass
-class ToDownload:
+class FormsToDownload:
     raw_filing_uri: str
     primary_doc_uri: str
     accession_number: str

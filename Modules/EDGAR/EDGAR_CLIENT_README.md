@@ -21,6 +21,10 @@ the [SEC CIK lookup tool](https://www.sec.gov/edgar/searchedgar/cik.htm) if you 
 
 ## Quick Start
 
+(**DETAILS ARE ABOUT TO CHANGE DUE TO REFACTORING to accommodate optional
+download_facts_for_companies & download_forms_for_companies methods
+**)
+
 ### Lightweight Methods Usage
 
 ```python

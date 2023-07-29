@@ -2,7 +2,6 @@ from datetime import date
 
 from pyrate_limiter import Duration, RequestRate
 
-
 _BASE_URL_SEC_API = "https://data.sec.gov"
 _BASE_URL_XBRL = f"{_BASE_URL_SEC_API}/api/xbrl"
 
@@ -16,7 +15,6 @@ BASE_URL_XBRL_FRAMES = f"{_BASE_URL_XBRL}/frames"
 MAX_REQUESTS_PER_SECOND = 10
 MAX_RETRIES = 10
 BACKOFF_FACTOR = 1 / MAX_REQUESTS_PER_SECOND
-
 
 DATE_FORMAT_TOKENS = "%Y-%m-%d"
 DEFAULT_BEFORE_DATE = date.today()
@@ -43,8 +41,9 @@ STANDARD_HEADERS = {
 }
 
 # Save metadata
-ROOT_SAVE_FOLDER_NAME = "sec-edgar-filings"
-FILING_FULL_SUBMISSION_FILENAME = "full-submission.txt"
+ROOT_FORMS_SAVE_FOLDER_NAME = "sec-edgar-filings"
+ROOT_FACTS_SAVE_FOLDER_NAME = "sec-edgar-facts"
+FORM_FULL_SUBMISSION_FILENAME = "full-submission.txt"
 PRIMARY_DOC_FILENAME_STEM = "primary-document"
 
 CIK_LENGTH = 10

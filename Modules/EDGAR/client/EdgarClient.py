@@ -1,16 +1,18 @@
 """Unofficial SEC EDGAR API wrapper."""
+import json
+import os
 import sys
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 from _BaseClient import BaseClient
 from _constants import (
     BASE_URL_SUBMISSIONS, BASE_URL_XBRL_COMPANY_CONCEPTS, BASE_URL_XBRL_COMPANY_FACTS, BASE_URL_XBRL_FRAMES,
-    SUPPORTED_FORMS, DEFAULT_AFTER_DATE, DEFAULT_BEFORE_DATE
+    SUPPORTED_FORMS, DEFAULT_AFTER_DATE, DEFAULT_BEFORE_DATE, ROOT_FACTS_SAVE_FOLDER_NAME
 )
 from _orchestrator import fetch_and_save_filings, get_ticker_to_cik_mapping
-from _types import DownloadMetadata, DownloadPath, JSONType
-from _utils import merge_submission_dicts, validate_and_convert_ticker_or_cik, validate_and_parse_date
+from _types import FormsDownloadMetadata, DownloadPath, JSONType
+from _utils import merge_submission_dicts, validate_and_return_cik, validate_and_parse_date
 
 
 class EdgarClient(BaseClient):
@@ -49,6 +51,7 @@ class EdgarClient(BaseClient):
         self.supported_forms = SUPPORTED_FORMS
 
         self.ticker_to_cik_mapping = get_ticker_to_cik_mapping(self.user_agent)
+        self.cik_to_ticker_mapping = {v: k for k, v in self.ticker_to_cik_mapping.items()}
 
         super().__init__(self.user_agent)
 
@@ -69,9 +72,7 @@ class EdgarClient(BaseClient):
         :return: JSON response from the data.sec.gov/submissions/ API endpoint
             for the specified CIK.
         """
-        cik = validate_and_convert_ticker_or_cik(
-            ticker_or_cik, self.ticker_to_cik_mapping
-        )
+        cik = validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping)
         api_endpoint = f"{BASE_URL_SUBMISSIONS}/CIK{cik}.json"
         submissions = self._rate_limited_get(api_endpoint)
 
@@ -115,9 +116,7 @@ class EdgarClient(BaseClient):
         :return: JSON response from the data.sec.gov/api/xbrl/companyconcept/
             API endpoint for the specified CIK.
         """
-        cik = validate_and_convert_ticker_or_cik(
-            ticker_or_cik, self.ticker_to_cik_mapping
-        )
+        cik = validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping)
 
         api_endpoint = (
             f"{BASE_URL_XBRL_COMPANY_CONCEPTS}/CIK{cik}/{taxonomy}/{tag}.json"
@@ -133,9 +132,7 @@ class EdgarClient(BaseClient):
         :return: JSON response from the data.sec.gov/api/xbrl/companyfacts/
             API endpoint for the specified CIK.
         """
-        cik = validate_and_convert_ticker_or_cik(
-            ticker_or_cik, self.ticker_to_cik_mapping
-        )
+        cik = validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping)
         api_endpoint = f"{BASE_URL_XBRL_COMPANY_FACTS}/CIK{cik}.json"
         return self._rate_limited_get(api_endpoint)
 
@@ -171,10 +168,10 @@ class EdgarClient(BaseClient):
         api_endpoint = f"{BASE_URL_XBRL_FRAMES}/{taxonomy}/{tag}/{unit}/{period}.json"
         return self._rate_limited_get(api_endpoint)
 
-    def get(
+    def download_form(
             self,
-            form: str,
             ticker_or_cik: str,
+            form_type: str,
             *,
             limit: Optional[int] = None,
             after: Optional[str] = None,
@@ -186,7 +183,7 @@ class EdgarClient(BaseClient):
         Fetches and saves SEC filings.
 
         Args:
-            form (str): The form type to download.
+            form_type (str): The form type to download.
             ticker_or_cik (str): The ticker or CIK to download filings for.
             limit (Optional[int], default=None): The maximum number of filings to download. If not specified, all available filings are downloaded.
             after (Optional[str], default=None): The earliest date for filings. If not specified, downloads filings available since 1994.
@@ -202,9 +199,7 @@ class EdgarClient(BaseClient):
         """
         # TODO: add validation and defaulting
         # TODO: can we rely on class default values rather than manually checking None?
-        cik = validate_and_convert_ticker_or_cik(
-            ticker_or_cik, self.ticker_to_cik_mapping
-        )
+        cik = validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping)
 
         if limit is None:
             # If amount is not specified, obtain all available filings.
@@ -235,18 +230,21 @@ class EdgarClient(BaseClient):
         if after_date > before_date:
             raise ValueError("After date cannot be greater than the before date.")
 
-        if form not in SUPPORTED_FORMS:
+        if form_type not in SUPPORTED_FORMS:
             form_options = ", ".join(self.supported_forms)
             raise ValueError(
-                f"{form!r} forms are not supported. "
+                f"{form_type!r} forms are not supported. "
                 f"Please choose from the following: {form_options}."
             )
 
+        ticker = self.cik_to_ticker_mapping.get(cik, None)
+
         num_downloaded = fetch_and_save_filings(
-            DownloadMetadata(
+            FormsDownloadMetadata(
                 self.download_folder,
-                form,
+                form_type,
                 cik,
+                ticker,
                 limit,
                 after_date,
                 before_date,
@@ -258,102 +256,115 @@ class EdgarClient(BaseClient):
 
         return num_downloaded
 
+    def download_facts_for_companies(self, tickers_or_ciks: List[str], skip_if_exists=True):
+        ticker_facts_saved = []
+        ticker_facts_skipped = []
 
-def print_keys(json_object, prefix=""):
-    if isinstance(json_object, dict):
-        for key in json_object:
-            print(f"{prefix}{key}")
-            if isinstance(json_object[key], dict) or isinstance(json_object[key], list):
-                print_keys(json_object[key], prefix=f"{prefix}{key}.")
-    elif isinstance(json_object, list):
-        for i in range(len(json_object)):
-            print(f"{prefix}[{i}]")
-            if isinstance(json_object[i], dict) or isinstance(json_object[i], list):
-                print_keys(json_object[i], prefix=f"{prefix}[{i}].")
+        root_facts_directory = Path(self.download_folder, ROOT_FACTS_SAVE_FOLDER_NAME)
+        root_facts_directory.mkdir(parents=True, exist_ok=True)
+
+        for ticker_or_cik in tickers_or_ciks:
+            try:
+                cik = validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping)
+                ticker_name = self.cik_to_ticker_mapping.get(cik)
+                save_json_path = f'{root_facts_directory}/{ticker_name}-facts.json'
+            except Exception as e:
+                print(e)
+                print(f"Skipping {ticker_or_cik} because it is not in the ticker to cik mapping")
+                ticker_facts_skipped.append(ticker_or_cik)
+                continue
+            if skip_if_exists and os.path.exists(save_json_path):
+                print(f"Skipping {ticker_name} because it already exists")
+                continue
+            try:
+                values = edgar_client.get_company_facts(ticker_name)
+            except Exception as e:
+                print(f"Skipping {ticker_name}  while downloading facts because of error: {e}")
+                ticker_facts_skipped.append(ticker_name)
+                continue
+            try:
+                with open(save_json_path, 'w') as outfile:
+                    json.dump(values, outfile)
+                print(f"Saved {ticker_name} facts")
+                ticker_facts_saved.append(ticker_name)
+            except Exception as e:
+                print(f"Skipping {ticker_name}  while saving facts because of error: {e}")
+                ticker_facts_skipped.append(ticker_name)
+                continue
+        return ticker_facts_saved, ticker_facts_skipped
+
+    def download_forms_for_companies(self,
+                                     tickers_or_ciks: List[str], form_types: List[str],
+                                     *,
+                                     limit_per_form: Optional[int] = None,
+                                     after: Optional[str] = None,
+                                     before: Optional[str] = None,
+                                     include_amends: bool = False,
+                                     download_details: bool = True,
+                                     ):
+
+        forms_saved = []
+        forms_skipped = []
+        for ticker_or_cik in tickers_or_ciks:
+            try:
+                ticker_name = self.cik_to_ticker_mapping.get(
+                    validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping))
+
+                print(f"Downloading forms for {ticker_name}")
+            except Exception as e:
+                print(f"Skipping {ticker_or_cik} because it is not in the ticker to cik mapping: {e}")
+                continue
+
+            for filing_type in form_types:
+                if filing_type not in edgar_client.supported_forms:
+                    print(f"Skipping form {filing_type} for equity {ticker_name} because it is not supported")
+                    continue
+                try:
+                    # todo check if already exists for given equity, form, and dates
+                    n_saved_filings = edgar_client.download_form(ticker_name, filing_type,
+                                                                 after=after, before=before,
+                                                                 limit=limit_per_form, include_amends=include_amends,
+                                                                 download_details=download_details
+                                                                 )
+                    print(f"Saved {n_saved_filings} filings for {ticker_name}-{filing_type}")
+                    forms_saved.append(f'{ticker_name}-{filing_type}')
+                except Exception as e:
+                    print(f"Skipping form {filing_type} for ticker {ticker_name} during download because of error: {e}")
+                    forms_skipped.append(f'{ticker_name}-{filing_type}')
+                    continue
 
 
 if __name__ == "__main__":
-    edgar_client = EdgarClient(company_name="Carbonyl", email_address="ruben@carbonyl.org", download_folder=None)
+    edgar_client = EdgarClient(company_name="Carbonyl", email_address="ruben@carbonyl.org",
+                               download_folder="/home/ruben/PycharmProjects/Genie-Trader/Data/raw_data/SEC")
     #
 
     equity_ids = [
         "GOOGL", "AMZN", "AAPL", "MSFT", "META", "1067983", "JNJ", "PG",
-        "V", "JPM", "TSLA", "NVDA", "JPM", "UNH", "XOM", "HD", "DIS", "BAC",
+        "V", "JPM", "TSLA", "NVDA", "UNH", "XOM", "HD", "DIS", "BAC",
         "PFE", "VZ", "T", "INTC", "MA", "MRK", "KO", "CMCSA", "NFLX", "CSCO",
         "PEP", "WMT", "ADBE", "ABT", "CRM", "ABBV", "CVX", "COST", "MCD",
         "MDT", "NKE", "NEE", "PYPL", "AVGO", "ACN", "TXN", "QCOM", "LLY",
         "DHR", "PM", "AMGN", "LIN", "HON", "UNP", "UPS", "SBUX", "LOW",
         "ORCL", "IBM", "AMT", "MMM", "CAT", "GILD", "GE", "CHTR", "TMO",
         "NOW", "INTU", "AMD", "ISRG", "FIS", "MDLZ", "CVS", "ZTS", "BLK",
-        "MO", "SPGI", "GS", "BDX", "AXP", "CCI", "ANTM", "CI", "TGT", "LMT",
+        "MO", "SPGI", "GS", "BDX", "AXP", "CCI", "CI", "TGT", "LMT",
         "CME", "SYK", "TJX", "PLD", "SPG", "D", "ADP", "EQIX", "ATVI", "CSX",
         "BKNG", "DUK", "PNC", "CL", "ICE", "SO", "USB", "RTX", "BDX", "CLX",
-        "CCI", "AON", "ITW", "ISRG", "SCHW", "ILMN", "VRTX", "ZTS", "BIIB",
-        "VRTX", "ZTS", "BIIB", "VRTX", "ZTS", "BIIB", "VRTX", "ZTS", "BIIB",
+        "CCI", "AON", "ITW", "ISRG", "SCHW", "ILMN", "VRTX", "BIIB",
         "F", "EOG", "GPN", "GM", "COP", "DE", "TFC", "EL", "MS", "SRE",
-        "WM", "ADSK", "BK", "TRV", "HCA", "SHW", "GS", "EW", "APD", "ALGN",
+        "WM", "ADSK", "BK", "TRV", "HCA", "SHW", "EW", "APD", "ALGN",
         "CCL", "DD", "DOW", "KMB", "HPQ", "HLT", "EA", "ROST", "LHX", "MET",
         "EXC", "WBA", "AIG", "NEM", "ETN", "ADI", "CTSH", "LUV", "FDX", "KMI",
-        "YUM", "EBAY", "ALL", "BMY", "DAL", "SLB", "AGN", "PRU", "ZBH"
+        "YUM", "EBAY", "ALL", "BMY", "DAL", "SLB", "PRU", "ZBH"
     ]
 
-    start_date = "1944-01-01"
+    # start_date = "1944-01-01"
+    start_date = "2022-01-01"
     end_date = "2025-01-01"
     forms = ["10-K", "10-Q", "8-K"]
 
-    sec_edgar_facts_dir = "sec-edgar-facts"
-    SKIP_IF_EXISTS = True
-    tickers_saved = []
-    tickers_skipped = []
-    if not os.path.exists(sec_edgar_facts_dir):
-        os.makedirs(sec_edgar_facts_dir)
-    for equity_id in equity_ids:
-        if SKIP_IF_EXISTS:
-            # check if the file exists
-            if os.path.exists(f'{sec_edgar_facts_dir}/{equity_id}/facts.json'):
-                print(f"Skipping {equity_id} because it already exists")
-                continue
-
-        try:
-            values = edgar_client.get_company_facts(equity_id)
-            # save json
-
-            # if not make the make sec-edgar-filings/{equity_id}/facts.json
-            # make the directories as needed
-            if not os.path.exists(f'{sec_edgar_facts_dir}/{equity_id}'):
-                os.makedirs(f'{sec_edgar_facts_dir}/{equity_id}')
-
-            with open(f'{sec_edgar_facts_dir}/{equity_id}/facts.json', 'w') as outfile:
-                json.dump(values, outfile)
-
-            # save the ticker
-            tickers_saved.append(equity_id)
-        except Exception as e:
-            tickers_skipped.append(equity_id)
-            print(f"Skipping {equity_id}")
-            print(e)
-            continue
-
-    print(f"Saved {len(tickers_saved)} tickers")
-    print(f"Saved tickers: {tickers_saved}")
-    print(f"Skipped {len(tickers_skipped)} tickers")
-    print(f"Skipped tickers: {tickers_skipped}")
-    #
-    # exit()
-    for equity_id in equity_ids:
-        try:
-            cik = validate_and_convert_ticker_or_cik(
-                equity_id, edgar_client.ticker_to_cik_mapping
-            )
-            # for filing_type in edgar_client.supported_filings:
-            for filing_type in forms:
-                if filing_type not in edgar_client.supported_forms:
-                    print(f"Skipping form {filing_type} for equity {equity_id} because it is not supported")
-                    continue
-
-                # Download filings for the specified company and filing type
-                print(edgar_client.get(filing_type, cik, after=start_date, before=end_date))
-
-        except Exception as e:
-            print(f"Skipping {equity_id} because of an {e}")
-            continue
+    edgar_client.download_facts_for_companies(tickers_or_ciks=equity_ids, skip_if_exists=True)
+    edgar_client.download_forms_for_companies(tickers_or_ciks=equity_ids, form_types=forms,
+                                              limit_per_form=None, after=start_date, before=end_date,
+                                              include_amends=False, download_details=True)
