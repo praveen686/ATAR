@@ -335,29 +335,70 @@ class EdgarClient(BaseClient):
                     continue
 
 
+import feedparser
+import time
+
+
+def get_rss_feed_updates(feed_url):
+    while True:
+        # Fetch the RSS feed
+        feed = feedparser.parse(feed_url)
+
+        if not feed.entries:
+            print("No entries found in the RSS feed.")
+        else:
+            # Display the latest update from the feed
+            latest_entry = feed.entries[0]
+            print("Latest update:")
+            print("Title:", latest_entry.title)
+            print("Published Date:", latest_entry.published)
+            print("Summary:", latest_entry.summary)
+
+        # Wait for some time before checking for updates again (e.g., every 5 minutes)
+        time.sleep(300)  # 300 seconds = 5 minutes
+
+
+if __name__ == "__main__":
+    # Replace this URL with the RSS feed URL you want to subscribe to
+    rss_feed_url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent"
+    get_rss_feed_updates(rss_feed_url)
+    exit()
+
 if __name__ == "__main__":
     DOWNLOAD_FOLDER = "/home/ruben/PycharmProjects/Genie-Trader/Data/raw_data/SEC"
+
+    TICKERS_TO_ANALYZE = ['AAPL']
+
+    # # Create an EdgarClient instance
     # edgar_client = EdgarClient(company_name="Carbonyl", email_address="ruben@carbonyl.org",
     #                            download_folder=DOWNLOAD_FOLDER)
-    #
 
-    tickers = ["AAPL", "MSFT", "GOOG", "AMZN", "TSLA", "NVDA", "PYPL", "ADBE", "NFLX", "INTC", "CMCSA", "PEP",
-               "CSCO", "AVGO", "TXN", "QCOM", "TMUS", "AMGN", "SBUX", "CHTR", "GILD", "INTU", "MDLZ", "FISV", "BKNG",
-               "ADP", "ISRG", "VRTX", "REGN", "AMD", "MU", "ILMN", "CSX", "LRCX", "ZM", "ATVI", "ADI", "ADSK", "MELI",
-               "BIIB", "NXPI", "ADP", "KHC", "EXC", "EA", "WBA", "JD", "EBAY", "MAR", "ROST", "BIDU", "CTSH", "WDAY",
-               "KLAC", "MNST", "ORLY", "NTES", "SNPS", "CTAS", "VRSK", "PCAR", "SGEN", "XEL", "DLTR", "ANSS", "CDNS",
-               ]
+    # get tickers from directory and filenames {ticker}-facts.json
+    tickers = TICKERS_TO_ANALYZE or [f.replace('-facts.json', '') for f in
+                                     os.listdir(f'{DOWNLOAD_FOLDER}/sec-edgar-facts') if
+                                     f.endswith('-facts.json')]
 
     for ticker in tickers:
         # Parse the facts json for a company
-        # with open(f'{edgar_client.facts_save_folder}/{COMPANY_X}-facts.json') as f:
+        # with open(f'{edgar_client.facts_save_folder}/{ticker}-facts.json') as f:
         with open(f'{DOWNLOAD_FOLDER}/sec-edgar-facts/{ticker}-facts.json') as f:
             company_facts = json.load(f)
 
-        print(company_facts["cik"])
-        print(company_facts["entityName"])
-        print(company_facts["facts"].keys())  # varies but ['dei', 'us-gaap'] seem to be common
-        print(company_facts["facts"]["dei"].keys())  # varies but ['dei', 'us-gaap'] seem to be common
-        print(company_facts["facts"]["us-gaap"].keys())  # varies but ['dei', 'us-gaap'] seem to be common
-        print()
-        exit()
+        # parse the company facts into a dataframe(s) for analysis
+        print(f'Parsing {company_facts["entityName"]} facts')
+        taxonomies = company_facts['facts']
+        #             taxonomy: str,
+        #             tag: str,
+        #             unit: str,
+
+        for taxonomy_name in taxonomies.keys():
+            print(f'    Taxonomy {taxonomy_name}')
+            for tag_name in taxonomies[taxonomy_name].keys():
+                units = taxonomies[taxonomy_name][tag_name]["units"].keys()
+
+                print(f'      Tag {tag_name}')
+                print(f'        Label: {taxonomies[taxonomy_name][tag_name]["label"]}')
+                print(f'        Description: {taxonomies[taxonomy_name][tag_name]["description"]}')
+                print(f'        Units: {list(units)}')
+
+                exit()
