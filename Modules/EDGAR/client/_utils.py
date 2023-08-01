@@ -83,3 +83,9 @@ def within_requested_date_range(
     target_date = dt.strptime(filing_date, DATE_FORMAT_TOKENS).date()
     return download_metadata.after <= target_date <= download_metadata.before
 
+def get_valid_after_date(after, after_date):
+    if after is None:
+        return after_date
+
+    after_date = validate_and_parse_date(after)
+    return max(after_date, after_date)

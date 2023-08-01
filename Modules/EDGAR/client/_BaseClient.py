@@ -2,12 +2,12 @@ from weakref import finalize
 
 import requests
 from pyrate_limiter import Duration, Limiter, RequestRate
+from requests import Response
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from EdgarAPIError import EdgarAPIError
 from _constants import BACKOFF_FACTOR, MAX_REQUESTS_PER_SECOND, MAX_RETRIES, HOST_DATA_SEC, STANDARD_HEADERS
-from _types import JSONType
 from logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -48,7 +48,7 @@ class BaseClient:
 
     # @limiter.ratelimit("sec_global_rate_limit",delay=True)
     @limiter.ratelimit(delay=True)
-    def _rate_limited_get(self, url: str, headers: dict = None, host=None) -> JSONType:
+    def _rate_limited_get(self, url: str, headers: dict = None, host=None) -> Response:
         """Make a rate-limited GET request.
 
         SEC limits users to a maximum of 10 requests per second.
@@ -66,6 +66,8 @@ class BaseClient:
             resp.raise_for_status()
         except requests.exceptions.RequestException as e:
             raise EdgarAPIError(
-                f"An error occurred with the SEC EDGAR API: {e}"
-            ) from None
+                exception=e,
+                status_code=resp.status_code,
+                url=resp.url,
+            )
         return resp

@@ -12,19 +12,29 @@ import requests
 from Modules.EDGAR.client._DownloadFormManager import DownloadFormManager
 from _BaseClient import BaseClient
 from _constants import (
-    BASE_URL_SUBMISSIONS, BASE_URL_XBRL_COMPANY_CONCEPTS, BASE_URL_XBRL_COMPANY_FACTS, BASE_URL_XBRL_FRAMES,
-    SUPPORTED_FORMS, DEFAULT_AFTER_DATE, DEFAULT_BEFORE_DATE, ROOT_FACTS_SAVE_FOLDER_NAME, ROOT_FORMS_SAVE_FOLDER_NAME,
-    HOST_WWW_SEC, STANDARD_HEADERS
+    SUPPORTED_FORMS, DEFAULT_AFTER_DATE, DEFAULT_BEFORE_DATE,
+    ROOT_FACTS_SAVE_FOLDER_NAME, ROOT_FORMS_SAVE_FOLDER_NAME,
+    HOST_WWW_SEC, STANDARD_HEADERS, URL_XBRL_COMPANY_CONCEPTS, URL_XBRL_FRAMES, URL_XBRL_COMPANY_FACTS, URL_SUBMISSIONS,
+    URL_PAGINATED_SUBMISSIONS
 )
 from _types import FormsDownloadMetadata, DownloadPath, JSONType
-from _utils import merge_submission_dicts, validate_and_return_cik, validate_and_parse_date
+from _utils import merge_submission_dicts, validate_and_return_cik, validate_and_parse_date, get_valid_after_date
 from logger import setup_logger
 
 logger = setup_logger(name="EdgarClient")
 
 
 class EdgarClient(BaseClient, DownloadFormManager):
-    """An :class:`EdgarClient` object."""
+    """An :class:`EdgarClient` object.
+
+    Header Defaults to the following:
+        {
+            **STANDARD_HEADERS, # {"Accept-Encoding": "gzip, deflate", }
+            "User-Agent": user_agent, # "<Sample Company Name> <Sample Company Email>"
+            "Host": HOST_DATA_SEC, # "data.sec.gov"
+        }
+
+    """
 
     def __init__(
             self,
@@ -65,8 +75,6 @@ class EdgarClient(BaseClient, DownloadFormManager):
         self.ticker_to_cik_mapping, self.cik_to_ticker_mapping, self.cik_to_name = \
             self.get_ticker_cik_name_mapping()
 
-
-
     def get_submissions(self, ticker_or_cik: str, *, handle_pagination: bool = True) -> JSONType:
         """Get submissions for a specified CIK. Requests data from the
         data.sec.gov/submissions API endpoint. Full API documentation:
@@ -85,9 +93,8 @@ class EdgarClient(BaseClient, DownloadFormManager):
             for the specified CIK.
         """
         cik = validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping)
-        api_endpoint = f"{BASE_URL_SUBMISSIONS}/CIK{cik}.json"
-        submissions = self._rate_limited_get(api_endpoint).json()
-
+        submissions_uri = URL_SUBMISSIONS.format(cik=cik)
+        submissions = self._rate_limited_get(submissions_uri).json()
         filings = submissions["filings"]
         paginated_submissions = filings["files"]
 
@@ -96,7 +103,7 @@ class EdgarClient(BaseClient, DownloadFormManager):
             to_merge = [filings["recent"]]
             for submission in paginated_submissions:
                 filename = submission["name"]
-                api_endpoint = f"{BASE_URL_SUBMISSIONS}/{filename}"
+                api_endpoint = URL_PAGINATED_SUBMISSIONS.format(paginated_file_name=filename)
                 resp = self._rate_limited_get(api_endpoint).json()
                 to_merge.append(resp)
 
@@ -128,11 +135,11 @@ class EdgarClient(BaseClient, DownloadFormManager):
         :return: JSON response from the data.sec.gov/api/xbrl/companyconcept/
             API endpoint for the specified CIK.
         """
-        return self._rate_limited_get(BASE_URL_XBRL_COMPANY_CONCEPTS.format(
+        return self._rate_limited_get(URL_XBRL_COMPANY_CONCEPTS.format(
             cik=validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping),
             taxonomy=taxonomy,
             tag=tag,
-        ))
+        )).json()
 
     def get_company_facts(self, ticker_or_cik: str) -> JSONType:
         """Get all company concepts for a specified CIK. Requests data from the
@@ -143,9 +150,9 @@ class EdgarClient(BaseClient, DownloadFormManager):
         :return: JSON response from the data.sec.gov/api/xbrl/companyfacts/
             API endpoint for the specified CIK.
         """
-        cik = validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping)
-        api_endpoint = f"{BASE_URL_XBRL_COMPANY_FACTS}/CIK{cik}.json"
-        return self._rate_limited_get(api_endpoint).json()
+        return self._rate_limited_get(URL_XBRL_COMPANY_FACTS.format(
+            cik=validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping),
+        )).json()
 
     def get_frames(
             self,
@@ -176,8 +183,12 @@ class EdgarClient(BaseClient, DownloadFormManager):
         )
         _instantaneous = "I" if instantaneous else ""
         period = f"CY{year}{_quarter}{_instantaneous}"
-        api_endpoint = f"{BASE_URL_XBRL_FRAMES}/{taxonomy}/{tag}/{unit}/{period}.json"
-        return self._rate_limited_get(api_endpoint).json()
+        return self._rate_limited_get(URL_XBRL_FRAMES.format(
+            taxonomy=taxonomy,
+            tag=tag,
+            unit=unit,
+            period=period,
+        )).json()
 
     def download_form(
             self,
@@ -211,44 +222,23 @@ class EdgarClient(BaseClient, DownloadFormManager):
         # TODO: add validation and defaulting
         # TODO: can we rely on class default values rather than manually checking None?
         cik = validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping)
+        ticker = self.cik_to_ticker_mapping.get(cik, None)
 
-        if limit is None:
-            # If amount is not specified, obtain all available filings.
-            # We simply need a large number to denote this and the loop
-            # responsible for fetching the URLs will break appropriately.
-            limit = sys.maxsize
-        else:
-            limit = int(limit)
-            if limit < 1:
-                raise ValueError(
-                    "Invalid amount. Please enter a number greater than 1."
-                )
+        # If the amount is not specified, obtain all available filings.
+        # We simply need a large number to denote this, and the loop
+        # responsible for fetching the URLs will break appropriately.
+        limit = sys.maxsize if limit is None else int(limit)
+        if limit < 1: raise ValueError("Invalid amount. Please enter a number greater than 1.")
 
         # SEC allows for filing searches from 1994 onwards
-        if after is None:
-            after_date = DEFAULT_AFTER_DATE
-        else:
-            after_date = validate_and_parse_date(after)
+        after_date = get_valid_after_date(after, after_date=DEFAULT_AFTER_DATE)
+        before_date = DEFAULT_BEFORE_DATE if before is None else validate_and_parse_date(before)
 
-            if after_date < DEFAULT_AFTER_DATE:
-                after_date = DEFAULT_AFTER_DATE
-
-        if before is None:
-            before_date = DEFAULT_BEFORE_DATE
-        else:
-            before_date = validate_and_parse_date(before)
-
-        if after_date > before_date:
-            raise ValueError("After date cannot be greater than the before date.")
+        if after_date > before_date: raise ValueError("After date cannot be greater than the before date.")
 
         if form_type not in SUPPORTED_FORMS:
             form_options = ", ".join(self.supported_forms)
-            raise ValueError(
-                f"{form_type!r} forms are not supported. "
-                f"Please choose from the following: {form_options}."
-            )
-
-        ticker = self.cik_to_ticker_mapping.get(cik, None)
+            raise ValueError(f"{form_type!r} forms aren't supported. Please choose from the following: {form_options}.")
 
         num_downloaded = self.fetch_and_save_filings(
             FormsDownloadMetadata(
@@ -261,7 +251,7 @@ class EdgarClient(BaseClient, DownloadFormManager):
                 before_date,
                 include_amends,
                 download_details,
-            ) )
+            ))
 
         return num_downloaded
 
@@ -315,9 +305,8 @@ class EdgarClient(BaseClient, DownloadFormManager):
         forms_skipped = []
         for ticker_or_cik in tickers_or_ciks:
             try:
-                ticker_name = self.cik_to_ticker_mapping.get(
-                    validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping))
-
+                cik = validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping)
+                ticker_name = self.cik_to_ticker_mapping.get(cik)
                 logger.info(f"Downloading forms for {ticker_name}")
             except Exception as e:
                 logger.error(f"Skipping {ticker_or_cik} because it is not in the ticker to cik mapping: {e}")
@@ -392,60 +381,13 @@ if __name__ == "__main__":
     edgar_client = EdgarClient(company_name="Carbonyl LLC", email_address="ruben@carbonyl.org",
                                download_folder=DOWNLOAD_FOLDER)
 
-    # # Download 1 10-K forms for Apple
-    # edgar_client.download_form(ticker_or_cik='AAPL', form_type='10-K', limit=1)
-
-    # rss_feed_url = f"https://{HOST_WWW_SEC}/cgi-bin/browse-edgar?action=getcurrent&type=&company=&dateb=&owner=include&start=0&output=atom&count=100"
-    # edgar_client.subscribe_to_rss_feed(url=rss_feed_url, interval=5, callback_func=None)
-    # exit()
-    edgar_client.get_company_facts(ticker_or_cik='AAPL')
-
-    # logger(edgar_client.get_company_concept(
-    #     ticker_or_cik='AAPL',
-    #     taxonomy='us-gaap',
-    #     tag='AccountsPayableCurrent',
-    #
-    # ))
-
-    exit()
-    TICKERS_TO_ANALYZE = ['AAPL']
-
-    # get tickers from directory and filenames {ticker}-facts.json
-    tickers = TICKERS_TO_ANALYZE or [f.replace('-facts.json', '') for f in
-                                     os.listdir(f'{DOWNLOAD_FOLDER}/sec-edgar-facts') if
-                                     f.endswith('-facts.json')]
-
-    # Initialize an empty DataFrame
-    multi_df = pd.DataFrame()
-
-    for ticker in tickers:
-        with open(f'{DOWNLOAD_FOLDER}/sec-edgar-facts/{ticker}-facts.json') as f:
-            company_facts = json.load(f)
-
-        logger(f'Parsing {company_facts["entityName"]} facts')
-        taxonomies = company_facts['facts']
-
-        for taxonomy_name in taxonomies.keys():
-            logger(f'    Taxonomy {taxonomy_name}')
-            for tag_name in taxonomies[taxonomy_name].keys():
-                units = taxonomies[taxonomy_name][tag_name]["units"].keys()
-
-                logger(f'      Tag {tag_name}')
-                # logger(f'        Label: {taxonomies[taxonomy_name][tag_name]["label"]}')
-                # logger(f'        Description: {taxonomies[taxonomy_name][tag_name]["description"]}')
-                # logger(f'        Units: {list(units)}')
-
-                for unit in units:
-                    # Create a DataFrame from the data list
-                    events_df = pd.DataFrame(taxonomies[taxonomy_name][tag_name]["units"][unit])
-
-                    logger(f'            Keys -> {list(events_df.keys())}')
-
-                    # Add multi-index before concatenating to the main DataFrame
-                    events_df.columns = pd.MultiIndex.from_product(
-                        [[taxonomy_name], [tag_name], [unit], events_df.columns])
-
-                    # Concatenate the data to the main DataFrame
-                    multi_df = pd.concat([multi_df, events_df], axis=1)
-
-    logger(multi_df.head())
+    a = edgar_client.download_form(
+        ticker_or_cik="AAPL",  # str
+        form_type="10-K",  # str
+        limit=1,  # Optional[int] = sys.maxsize
+        after="2020-01-01",  # Optional[str] = date(1994, 1, 1)
+        before="2020-12-31",  # Optional[str] = date.today()
+        include_amends=False,  # bool = False
+        download_details=True,  # bool = True
+    )
+    print(a)

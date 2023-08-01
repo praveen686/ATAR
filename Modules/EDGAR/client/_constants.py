@@ -19,26 +19,25 @@ AMENDS_SUFFIX = "/A"
 HOST_WWW_SEC = "www.sec.gov"
 HOST_DATA_SEC = "data.sec.gov"
 #
-SUBMISSION_FILE_FORMAT = f"CIK{{cik}}.json"
 STANDARD_HEADERS = {"Accept-Encoding": "gzip, deflate", }
 
 # SEC API endpoints as documented here:
 # https://www.sec.gov/edgar/sec-api-documentation
-BASE_URL_SUBMISSIONS = f"https://{HOST_DATA_SEC}/submissions"
+# _BASE's_
+_BASE_URL_SUBMISSIONS = f"https://{HOST_DATA_SEC}/submissions"
+_BASE_URL_XBRL_COMPANY_CONCEPTS = f"https://{HOST_DATA_SEC}/api/xbrl/companyconcept"
+_BASE_URL_XBRL_COMPANY_FACTS = f"https://{HOST_DATA_SEC}/api/xbrl/companyfacts"
+_BASE_URL_XBRL_FRAMES = f"https://{HOST_DATA_SEC}/api/xbrl/frames"
+# _URLs_
+URL_PAGINATED_SUBMISSIONS = f"{_BASE_URL_SUBMISSIONS}/{{paginated_file_name}}"
+URL_SUBMISSIONS = f"{_BASE_URL_SUBMISSIONS}/CIK{{cik}}.json"
 
-BASE_URL_XBRL_COMPANY_CONCEPTS = f"https://{HOST_DATA_SEC}/api/xbrl/companyconcept"
-URL_XBRL_COMPANY_CONCEPTS = f"{BASE_URL_XBRL_COMPANY_CONCEPTS}/CIK{{cik}}/{{taxonomy}}/{{tag}}.json"
-
-BASE_URL_XBRL_COMPANY_FACTS = f"https://{HOST_DATA_SEC}/api/xbrl/companyfacts"
-
-
-BASE_URL_XBRL_FRAMES = f"https://{HOST_DATA_SEC}/api/xbrl/frames"
-
+URL_XBRL_COMPANY_CONCEPTS = f"{_BASE_URL_XBRL_COMPANY_CONCEPTS}/CIK{{cik}}/{{taxonomy}}/{{tag}}.json"
+URL_XBRL_COMPANY_FACTS = f"{_BASE_URL_XBRL_COMPANY_FACTS}/CIK{{cik}}.json"
+URL_XBRL_FRAMES = f"{_BASE_URL_XBRL_FRAMES}/{{taxonomy}}/{{tag}}/{{unit}}/{{period}}.json"
 
 URL_CIK_MAPPING = f"https://{HOST_WWW_SEC}/files/company_tickers_exchange.json"
 URL_FILING = (f"https://{HOST_WWW_SEC}/Archives/edgar/data/{{cik}}/{{acc_num_no_dash}}/{{document}}")
-
-URL_SUBMISSIONS = f"{BASE_URL_SUBMISSIONS}/{{submission}}"
 
 # Save metadata
 ROOT_FORMS_SAVE_FOLDER_NAME = "sec-edgar-filings"
