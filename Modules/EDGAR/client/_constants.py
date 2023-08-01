@@ -2,43 +2,43 @@ from datetime import date
 
 from pyrate_limiter import Duration, RequestRate
 
-_BASE_URL_SEC_API = "https://data.sec.gov"
-_BASE_URL_XBRL = f"{_BASE_URL_SEC_API}/api/xbrl"
-
-# SEC API endpoints as documented here:
-# https://www.sec.gov/edgar/sec-api-documentation
-BASE_URL_SUBMISSIONS = f"{_BASE_URL_SEC_API}/submissions"
-BASE_URL_XBRL_COMPANY_CONCEPTS = f"{_BASE_URL_XBRL}/companyconcept"
-BASE_URL_XBRL_COMPANY_FACTS = f"{_BASE_URL_XBRL}/companyfacts"
-BASE_URL_XBRL_FRAMES = f"{_BASE_URL_XBRL}/frames"
-
-MAX_REQUESTS_PER_SECOND = 10
-MAX_RETRIES = 10
-BACKOFF_FACTOR = 1 / MAX_REQUESTS_PER_SECOND
-
-DATE_FORMAT_TOKENS = "%Y-%m-%d"
-DEFAULT_BEFORE_DATE = date.today()
-DEFAULT_AFTER_DATE = date(1994, 1, 1)
-
-AMENDS_SUFFIX = "/A"
-
 # 10 requests per second rate limit set by SEC:
 # https://www.sec.gov/os/webmaster-faq#developers
 SEC_RATE_LIMIT = RequestRate(10, Duration.SECOND)
-
+#
+MAX_REQUESTS_PER_SECOND = 10
+MAX_RETRIES = 10
+BACKOFF_FACTOR = 1 / MAX_REQUESTS_PER_SECOND
+#
+DATE_FORMAT_TOKENS = "%Y-%m-%d"
+DEFAULT_BEFORE_DATE = date.today()
+DEFAULT_AFTER_DATE = date(1994, 1, 1)
+#
+AMENDS_SUFFIX = "/A"
+#
 HOST_WWW_SEC = "www.sec.gov"
 HOST_DATA_SEC = "data.sec.gov"
+#
+SUBMISSION_FILE_FORMAT = f"CIK{{cik}}.json"
+STANDARD_HEADERS = {"Accept-Encoding": "gzip, deflate", }
 
-URL_CIK_MAPPING = "https://www.sec.gov/files/company_tickers_exchange.json"
-URL_FILING = (
-    "https://www.sec.gov/Archives/edgar/data/{cik}/{acc_num_no_dash}/{document}"
-)
-URL_SUBMISSIONS = "https://data.sec.gov/submissions/{submission}"
+# SEC API endpoints as documented here:
+# https://www.sec.gov/edgar/sec-api-documentation
+BASE_URL_SUBMISSIONS = f"https://{HOST_DATA_SEC}/submissions"
 
-SUBMISSION_FILE_FORMAT = "CIK{cik}.json"
-STANDARD_HEADERS = {
-    "Accept-Encoding": "gzip, deflate",
-}
+BASE_URL_XBRL_COMPANY_CONCEPTS = f"https://{HOST_DATA_SEC}/api/xbrl/companyconcept"
+URL_XBRL_COMPANY_CONCEPTS = f"{BASE_URL_XBRL_COMPANY_CONCEPTS}/CIK{{cik}}/{{taxonomy}}/{{tag}}.json"
+
+BASE_URL_XBRL_COMPANY_FACTS = f"https://{HOST_DATA_SEC}/api/xbrl/companyfacts"
+
+
+BASE_URL_XBRL_FRAMES = f"https://{HOST_DATA_SEC}/api/xbrl/frames"
+
+
+URL_CIK_MAPPING = f"https://{HOST_WWW_SEC}/files/company_tickers_exchange.json"
+URL_FILING = (f"https://{HOST_WWW_SEC}/Archives/edgar/data/{{cik}}/{{acc_num_no_dash}}/{{document}}")
+
+URL_SUBMISSIONS = f"{BASE_URL_SUBMISSIONS}/{{submission}}"
 
 # Save metadata
 ROOT_FORMS_SAVE_FOLDER_NAME = "sec-edgar-filings"

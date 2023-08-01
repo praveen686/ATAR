@@ -5,9 +5,12 @@ from pyrate_limiter import Duration, Limiter, RequestRate
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from _constants import BACKOFF_FACTOR, MAX_REQUESTS_PER_SECOND, MAX_RETRIES
-from _types import JSONType
 from EdgarAPIError import EdgarAPIError
+from _constants import BACKOFF_FACTOR, MAX_REQUESTS_PER_SECOND, MAX_RETRIES, HOST_DATA_SEC, STANDARD_HEADERS
+from _types import JSONType
+from logger import setup_logger
+
+logger = setup_logger(__name__)
 
 # Rate limiter
 rate = RequestRate(MAX_REQUESTS_PER_SECOND, Duration.SECOND)
@@ -24,14 +27,17 @@ retries = Retry(
 
 class BaseClient:
     def __init__(self, user_agent: str):
+
         self._session = requests.Session()
         self._session.headers.update(
             {
+                **STANDARD_HEADERS,
                 "User-Agent": user_agent,
-                "Accept-Encoding": "gzip, deflate",
-                "Host": "data.sec.gov",
+                "Host": HOST_DATA_SEC,
             }
         )
+        logger.debug(f'{self._session.headers = }')
+
         self._session.mount("http://", HTTPAdapter(max_retries=retries))
         self._session.mount("https://", HTTPAdapter(max_retries=retries))
 
@@ -40,18 +46,26 @@ class BaseClient:
         # Source: https://stackoverflow.com/a/67312839/3820660
         finalize(self, self._session.close)
 
+    # @limiter.ratelimit("sec_global_rate_limit",delay=True)
     @limiter.ratelimit(delay=True)
-    def _rate_limited_get(self, url: str) -> JSONType:
+    def _rate_limited_get(self, url: str, headers: dict = None, host=None) -> JSONType:
         """Make a rate-limited GET request.
 
         SEC limits users to a maximum of 10 requests per second.
         Source: https://www.sec.gov/developer
         """
-        resp = self._session.get(url)
+        # Merge session headers with provided headers, if any
+        session_headers_copy = self._session.headers.copy()
+        if headers is not None:
+            session_headers_copy.update(headers)
+        elif host is not None:
+            session_headers_copy.update({"Host": host})
+
+        resp = self._session.get(url, headers=session_headers_copy)
         try:
             resp.raise_for_status()
         except requests.exceptions.RequestException as e:
             raise EdgarAPIError(
                 f"An error occurred with the SEC EDGAR API: {e}"
             ) from None
-        return resp.json()
+        return resp

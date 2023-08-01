@@ -2,20 +2,28 @@
 import json
 import os
 import sys
+import time
 from pathlib import Path
 from typing import Optional, Union, List
 
+import feedparser
+import requests
+
+from Modules.EDGAR.client._DownloadFormManager import DownloadFormManager
 from _BaseClient import BaseClient
 from _constants import (
     BASE_URL_SUBMISSIONS, BASE_URL_XBRL_COMPANY_CONCEPTS, BASE_URL_XBRL_COMPANY_FACTS, BASE_URL_XBRL_FRAMES,
-    SUPPORTED_FORMS, DEFAULT_AFTER_DATE, DEFAULT_BEFORE_DATE, ROOT_FACTS_SAVE_FOLDER_NAME, ROOT_FORMS_SAVE_FOLDER_NAME
+    SUPPORTED_FORMS, DEFAULT_AFTER_DATE, DEFAULT_BEFORE_DATE, ROOT_FACTS_SAVE_FOLDER_NAME, ROOT_FORMS_SAVE_FOLDER_NAME,
+    HOST_WWW_SEC, STANDARD_HEADERS
 )
-from _orchestrator import fetch_and_save_filings, get_ticker_cik_name_mapping
 from _types import FormsDownloadMetadata, DownloadPath, JSONType
 from _utils import merge_submission_dicts, validate_and_return_cik, validate_and_parse_date
+from logger import setup_logger
+
+logger = setup_logger(name="EdgarClient")
 
 
-class EdgarClient(BaseClient):
+class EdgarClient(BaseClient, DownloadFormManager):
     """An :class:`EdgarClient` object."""
 
     def __init__(
@@ -32,6 +40,7 @@ class EdgarClient(BaseClient):
             email_address (str): The email address to use in the user-agent string.
             download_folder (Optional[DownloadPath], default=None): The folder to download files to. If not specified, the current directory is used.
         """
+
         # TODO: add validation for email
         self.user_agent = f"{company_name} {email_address}"
         if not self.user_agent:  # todo - check company, email etc... are valid
@@ -41,6 +50,8 @@ class EdgarClient(BaseClient):
                 "This is required by the SEC to identify your requests "
                 "for rate-limiting purposes."
             )
+        super().__init__(self.user_agent)
+
         if download_folder is None:
             self.parent_download_folder = Path.cwd()
         elif isinstance(download_folder, Path):
@@ -52,9 +63,9 @@ class EdgarClient(BaseClient):
         self.facts_save_folder = self.parent_download_folder / ROOT_FACTS_SAVE_FOLDER_NAME
         self.forms_save_folder = self.parent_download_folder / ROOT_FORMS_SAVE_FOLDER_NAME
         self.ticker_to_cik_mapping, self.cik_to_ticker_mapping, self.cik_to_name = \
-            get_ticker_cik_name_mapping(self.user_agent)
+            self.get_ticker_cik_name_mapping()
 
-        super().__init__(self.user_agent)
+
 
     def get_submissions(self, ticker_or_cik: str, *, handle_pagination: bool = True) -> JSONType:
         """Get submissions for a specified CIK. Requests data from the
@@ -75,7 +86,7 @@ class EdgarClient(BaseClient):
         """
         cik = validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping)
         api_endpoint = f"{BASE_URL_SUBMISSIONS}/CIK{cik}.json"
-        submissions = self._rate_limited_get(api_endpoint)
+        submissions = self._rate_limited_get(api_endpoint).json()
 
         filings = submissions["filings"]
         paginated_submissions = filings["files"]
@@ -86,7 +97,7 @@ class EdgarClient(BaseClient):
             for submission in paginated_submissions:
                 filename = submission["name"]
                 api_endpoint = f"{BASE_URL_SUBMISSIONS}/{filename}"
-                resp = self._rate_limited_get(api_endpoint)
+                resp = self._rate_limited_get(api_endpoint).json()
                 to_merge.append(resp)
 
             # Merge all paginated submissions from files key into recent
@@ -117,12 +128,11 @@ class EdgarClient(BaseClient):
         :return: JSON response from the data.sec.gov/api/xbrl/companyconcept/
             API endpoint for the specified CIK.
         """
-        cik = validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping)
-
-        api_endpoint = (
-            f"{BASE_URL_XBRL_COMPANY_CONCEPTS}/CIK{cik}/{taxonomy}/{tag}.json"
-        )
-        return self._rate_limited_get(api_endpoint)
+        return self._rate_limited_get(BASE_URL_XBRL_COMPANY_CONCEPTS.format(
+            cik=validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping),
+            taxonomy=taxonomy,
+            tag=tag,
+        ))
 
     def get_company_facts(self, ticker_or_cik: str) -> JSONType:
         """Get all company concepts for a specified CIK. Requests data from the
@@ -135,7 +145,7 @@ class EdgarClient(BaseClient):
         """
         cik = validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping)
         api_endpoint = f"{BASE_URL_XBRL_COMPANY_FACTS}/CIK{cik}.json"
-        return self._rate_limited_get(api_endpoint)
+        return self._rate_limited_get(api_endpoint).json()
 
     def get_frames(
             self,
@@ -167,7 +177,7 @@ class EdgarClient(BaseClient):
         _instantaneous = "I" if instantaneous else ""
         period = f"CY{year}{_quarter}{_instantaneous}"
         api_endpoint = f"{BASE_URL_XBRL_FRAMES}/{taxonomy}/{tag}/{unit}/{period}.json"
-        return self._rate_limited_get(api_endpoint)
+        return self._rate_limited_get(api_endpoint).json()
 
     def download_form(
             self,
@@ -240,7 +250,7 @@ class EdgarClient(BaseClient):
 
         ticker = self.cik_to_ticker_mapping.get(cik, None)
 
-        num_downloaded = fetch_and_save_filings(
+        num_downloaded = self.fetch_and_save_filings(
             FormsDownloadMetadata(
                 self.parent_download_folder,
                 form_type,
@@ -251,9 +261,7 @@ class EdgarClient(BaseClient):
                 before_date,
                 include_amends,
                 download_details,
-            ),
-            self.user_agent,
-        )
+            ) )
 
         return num_downloaded
 
@@ -270,26 +278,25 @@ class EdgarClient(BaseClient):
                 ticker_name = self.cik_to_ticker_mapping.get(cik)
                 save_json_path = f'{root_facts_directory}/{ticker_name}-facts.json'
             except Exception as e:
-                print(e)
-                print(f"Skipping {ticker_or_cik} because it is not in the ticker to cik mapping")
+                logger.error(f"Skipping {ticker_or_cik} because of error: {e}")
                 ticker_facts_skipped.append(ticker_or_cik)
                 continue
             if skip_if_exists and os.path.exists(save_json_path):
-                print(f"Skipping {ticker_name} because it already exists")
+                logger.info(f"Skipping {ticker_name} because it already exists")
                 continue
             try:
                 values = self.get_company_facts(ticker_name)
             except Exception as e:
-                print(f"Skipping {ticker_name}  while downloading facts because of error: {e}")
+                logger.error(f"Skipping {ticker_name}  while downloading facts because of error: {e}")
                 ticker_facts_skipped.append(ticker_name)
                 continue
             try:
                 with open(save_json_path, 'w') as outfile:
                     json.dump(values, outfile)
-                print(f"Saved {ticker_name} facts")
+                logger.info(f"Saved {ticker_name} facts")
                 ticker_facts_saved.append(ticker_name)
             except Exception as e:
-                print(f"Skipping {ticker_name}  while saving facts because of error: {e}")
+                logger.error(f"Skipping {ticker_name}  while saving facts because of error: {e}")
                 ticker_facts_skipped.append(ticker_name)
                 continue
         return ticker_facts_saved, ticker_facts_skipped
@@ -311,14 +318,14 @@ class EdgarClient(BaseClient):
                 ticker_name = self.cik_to_ticker_mapping.get(
                     validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping))
 
-                print(f"Downloading forms for {ticker_name}")
+                logger.info(f"Downloading forms for {ticker_name}")
             except Exception as e:
-                print(f"Skipping {ticker_or_cik} because it is not in the ticker to cik mapping: {e}")
+                logger.error(f"Skipping {ticker_or_cik} because it is not in the ticker to cik mapping: {e}")
                 continue
 
             for filing_type in form_types:
                 if filing_type not in self.supported_forms:
-                    print(f"Skipping form {filing_type} for equity {ticker_name} because it is not supported")
+                    logger.info(f"Skipping form {filing_type} for equity {ticker_name} because it is not supported")
                     continue
                 try:
                     # todo check if already exists for given equity, form, and dates
@@ -327,78 +334,118 @@ class EdgarClient(BaseClient):
                                                          limit=limit_per_form, include_amends=include_amends,
                                                          download_details=download_details
                                                          )
-                    print(f"Saved {n_saved_filings} filings for {ticker_name}-{filing_type}")
+                    logger.info(f"Saved {n_saved_filings} filings for {ticker_name}-{filing_type}")
                     forms_saved.append(f'{ticker_name}-{filing_type}')
                 except Exception as e:
-                    print(f"Skipping form {filing_type} for ticker {ticker_name} during download because of error: {e}")
+                    logger.error(
+                        f"Skipping form {filing_type} for ticker {ticker_name} during download because of error: {e}")
                     forms_skipped.append(f'{ticker_name}-{filing_type}')
                     continue
 
+    def subscribe_to_rss_feed(self, url, interval, callback_func=None):
+        # todo if only_pass_entries_by_id is true the starting default value per id should also look back in the saved for the same id
+        # todo allow to subscribe to specific form types or companies
+        if callback_func is None:
+            def _default_process_entry(entry):
+                # Do something with the entry
+                logger.info("Processing new entry:")
+                for field, value in entry.items():
+                    logger.info(f"{field}: {value}")
+                logger.info("-------------")
 
-import feedparser
-import time
+            callback_func = _default_process_entry
+        last_entry = None
+        while True:
+            try:
 
+                # fixme this is essensially the same as in baseclient except the host
+                response = requests.get(url, headers={
+                    "User-Agent": self.user_agent,
+                    "Host": HOST_WWW_SEC,
+                    **STANDARD_HEADERS,
+                })
+                feed = feedparser.parse(response.content)
+                # fixme ^^^^
 
-def get_rss_feed_updates(feed_url):
-    while True:
-        # Fetch the RSS feed
-        feed = feedparser.parse(feed_url)
+                if not feed.entries:
+                    logger.warning("No entries found in the RSS feed.")
+                    time.sleep(interval)
+                    continue
+                new_entries = []
+                for entry in feed.entries:
+                    if last_entry is not None and entry.id == last_entry.id: break
+                    new_entries.append(entry)
+                if new_entries:
+                    last_entry = new_entries[0]
+                    for entry in new_entries:
+                        callback_func(entry)
+            except Exception as e:
+                logger.error("Error:", e)
+            finally:
+                time.sleep(interval)
 
-        if not feed.entries:
-            print("No entries found in the RSS feed.")
-        else:
-            # Display the latest update from the feed
-            latest_entry = feed.entries[0]
-            print("Latest update:")
-            print("Title:", latest_entry.title)
-            print("Published Date:", latest_entry.published)
-            print("Summary:", latest_entry.summary)
-
-        # Wait for some time before checking for updates again (e.g., every 5 minutes)
-        time.sleep(300)  # 300 seconds = 5 minutes
-
-
-if __name__ == "__main__":
-    # Replace this URL with the RSS feed URL you want to subscribe to
-    rss_feed_url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent"
-    get_rss_feed_updates(rss_feed_url)
-    exit()
 
 if __name__ == "__main__":
     DOWNLOAD_FOLDER = "/home/ruben/PycharmProjects/Genie-Trader/Data/raw_data/SEC"
 
-    TICKERS_TO_ANALYZE = ['AAPL']
+    # Create an EdgarClient instance
+    edgar_client = EdgarClient(company_name="Carbonyl LLC", email_address="ruben@carbonyl.org",
+                               download_folder=DOWNLOAD_FOLDER)
 
-    # # Create an EdgarClient instance
-    # edgar_client = EdgarClient(company_name="Carbonyl", email_address="ruben@carbonyl.org",
-    #                            download_folder=DOWNLOAD_FOLDER)
+    # # Download 1 10-K forms for Apple
+    # edgar_client.download_form(ticker_or_cik='AAPL', form_type='10-K', limit=1)
+
+    # rss_feed_url = f"https://{HOST_WWW_SEC}/cgi-bin/browse-edgar?action=getcurrent&type=&company=&dateb=&owner=include&start=0&output=atom&count=100"
+    # edgar_client.subscribe_to_rss_feed(url=rss_feed_url, interval=5, callback_func=None)
+    # exit()
+    edgar_client.get_company_facts(ticker_or_cik='AAPL')
+
+    # logger(edgar_client.get_company_concept(
+    #     ticker_or_cik='AAPL',
+    #     taxonomy='us-gaap',
+    #     tag='AccountsPayableCurrent',
+    #
+    # ))
+
+    exit()
+    TICKERS_TO_ANALYZE = ['AAPL']
 
     # get tickers from directory and filenames {ticker}-facts.json
     tickers = TICKERS_TO_ANALYZE or [f.replace('-facts.json', '') for f in
                                      os.listdir(f'{DOWNLOAD_FOLDER}/sec-edgar-facts') if
                                      f.endswith('-facts.json')]
 
+    # Initialize an empty DataFrame
+    multi_df = pd.DataFrame()
+
     for ticker in tickers:
-        # Parse the facts json for a company
-        # with open(f'{edgar_client.facts_save_folder}/{ticker}-facts.json') as f:
         with open(f'{DOWNLOAD_FOLDER}/sec-edgar-facts/{ticker}-facts.json') as f:
             company_facts = json.load(f)
 
-        # parse the company facts into a dataframe(s) for analysis
-        print(f'Parsing {company_facts["entityName"]} facts')
+        logger(f'Parsing {company_facts["entityName"]} facts')
         taxonomies = company_facts['facts']
-        #             taxonomy: str,
-        #             tag: str,
-        #             unit: str,
 
         for taxonomy_name in taxonomies.keys():
-            print(f'    Taxonomy {taxonomy_name}')
+            logger(f'    Taxonomy {taxonomy_name}')
             for tag_name in taxonomies[taxonomy_name].keys():
                 units = taxonomies[taxonomy_name][tag_name]["units"].keys()
 
-                print(f'      Tag {tag_name}')
-                print(f'        Label: {taxonomies[taxonomy_name][tag_name]["label"]}')
-                print(f'        Description: {taxonomies[taxonomy_name][tag_name]["description"]}')
-                print(f'        Units: {list(units)}')
+                logger(f'      Tag {tag_name}')
+                # logger(f'        Label: {taxonomies[taxonomy_name][tag_name]["label"]}')
+                # logger(f'        Description: {taxonomies[taxonomy_name][tag_name]["description"]}')
+                # logger(f'        Units: {list(units)}')
 
-                exit()
+                for unit in units:
+                    # Create a DataFrame from the data list
+                    events_df = pd.DataFrame(taxonomies[taxonomy_name][tag_name]["units"][unit])
+
+                    logger(f'            Keys -> {list(events_df.keys())}')
+
+                    # Add multi-index before concatenating to the main DataFrame
+                    events_df.columns = pd.MultiIndex.from_product(
+                        [[taxonomy_name], [tag_name], [unit], events_df.columns])
+
+                    # Concatenate the data to the main DataFrame
+                    multi_df = pd.concat([multi_df, events_df], axis=1)
+
+    logger(multi_df.head())
