@@ -190,10 +190,10 @@ class EdgarClient(BaseClient, DownloadFormManager):
             period=period,
         )).json()
 
-    def download_form(
+    def download_forms(  # change to plural to reflect the fact we're dealing with multiple forms
             self,
             ticker_or_cik: str,
-            form_type: str,
+            form_types: List[str],  # change to a list of forms
             *,
             limit: Optional[int] = None,
             after: Optional[str] = None,
@@ -205,7 +205,7 @@ class EdgarClient(BaseClient, DownloadFormManager):
         Fetches and saves SEC filings.
 
         Args:
-            form_type (str): The form type to download.
+            form_types (List[str]): The form types to download.
             ticker_or_cik (str): The ticker or CIK to download filings for.
             limit (Optional[int], default=None): The maximum number of filings to download. If not specified, all available filings are downloaded.
             after (Optional[str], default=None): The earliest date for filings. If not specified, downloads filings available since 1994.
@@ -217,33 +217,31 @@ class EdgarClient(BaseClient, DownloadFormManager):
             int: The number of downloaded filings.
 
         Raises:
-            ValueError: If the form is not supported, the limit is less than 1, or the after date is later than the before date.
+            ValueError: If a form is not supported, the limit is less than 1, or the after date is later than the before date.
         """
         # TODO: add validation and defaulting
         # TODO: can we rely on class default values rather than manually checking None?
         cik = validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping)
         ticker = self.cik_to_ticker_mapping.get(cik, None)
 
-        # If the amount is not specified, obtain all available filings.
-        # We simply need a large number to denote this, and the loop
-        # responsible for fetching the URLs will break appropriately.
         limit = sys.maxsize if limit is None else int(limit)
         if limit < 1: raise ValueError("Invalid amount. Please enter a number greater than 1.")
 
-        # SEC allows for filing searches from 1994 onwards
         after_date = get_valid_after_date(after, after_date=DEFAULT_AFTER_DATE)
         before_date = DEFAULT_BEFORE_DATE if before is None else validate_and_parse_date(before)
 
         if after_date > before_date: raise ValueError("After date cannot be greater than the before date.")
 
-        if form_type not in SUPPORTED_FORMS:
-            form_options = ", ".join(self.supported_forms)
-            raise ValueError(f"{form_type!r} forms aren't supported. Please choose from the following: {form_options}.")
+        unsupported_forms = [form for form in form_types if form not in SUPPORTED_FORMS]
+        if unsupported_forms:
+            form_options = ", ".join(SUPPORTED_FORMS)
+            raise ValueError(
+                f"The following forms aren't supported: {', '.join(unsupported_forms)}. Please choose from the following: {form_options}.")
 
         num_downloaded = self.fetch_and_save_filings(
             FormsDownloadMetadata(
                 self.parent_download_folder,
-                form_type,
+                form_types,  # pass the list of forms
                 cik,
                 ticker,
                 limit,
@@ -312,24 +310,25 @@ class EdgarClient(BaseClient, DownloadFormManager):
                 logger.error(f"Skipping {ticker_or_cik} because it is not in the ticker to cik mapping: {e}")
                 continue
 
-            for filing_type in form_types:
-                if filing_type not in self.supported_forms:
-                    logger.info(f"Skipping form {filing_type} for equity {ticker_name} because it is not supported")
-                    continue
-                try:
-                    # todo check if already exists for given equity, form, and dates
-                    n_saved_filings = self.download_form(ticker_name, filing_type,
-                                                         after=after, before=before,
-                                                         limit=limit_per_form, include_amends=include_amends,
-                                                         download_details=download_details
-                                                         )
-                    logger.info(f"Saved {n_saved_filings} filings for {ticker_name}-{filing_type}")
-                    forms_saved.append(f'{ticker_name}-{filing_type}')
-                except Exception as e:
-                    logger.error(
-                        f"Skipping form {filing_type} for ticker {ticker_name} during download because of error: {e}")
-                    forms_skipped.append(f'{ticker_name}-{filing_type}')
-                    continue
+            unsupported_forms = [form for form in form_types if form not in self.supported_forms]
+            if unsupported_forms:
+                logger.info(
+                    f"Skipping forms {', '.join(unsupported_forms)} for equity {ticker_name} because they are not supported")
+                continue
+            try:
+                n_saved_filings = self.download_forms(ticker_name, form_types,  # pass the list of forms
+                                                      after=after, before=before,
+                                                      limit=limit_per_form, include_amends=include_amends,
+                                                      download_details=download_details
+                                                      )
+                logger.info(f"Saved {n_saved_filings} filings for {ticker_name}-{', '.join(form_types)}")
+                forms_saved.extend([f'{ticker_name}-{form_type}' for form_type in form_types])
+            except Exception as e:
+                logger.error(
+                    f"Skipping forms {', '.join(form_types)} for ticker {ticker_name} during download because of error: {e}")
+                forms_skipped.extend([f'{ticker_name}-{form_type}' for form_type in form_types])
+                continue
+        return forms_saved, forms_skipped
 
     def subscribe_to_rss_feed(self, url, interval, callback_func=None):
         # todo if only_pass_entries_by_id is true the starting default value per id should also look back in the saved for the same id
@@ -381,12 +380,17 @@ if __name__ == "__main__":
     edgar_client = EdgarClient(company_name="Carbonyl LLC", email_address="ruben@carbonyl.org",
                                download_folder=DOWNLOAD_FOLDER)
 
-    a = edgar_client.download_form(
+    a = edgar_client.download_forms(
         ticker_or_cik="AAPL",  # str
-        form_type="10-K",  # str
-        limit=1,  # Optional[int] = sys.maxsize
-        after="2020-01-01",  # Optional[str] = date(1994, 1, 1)
-        before="2020-12-31",  # Optional[str] = date.today()
+        form_types=["10-K",
+                    "10-Q",
+                    "8-K",
+                    "4",
+                    "SC 13G",
+                    ],  # List[str]
+        # limit=1,  # Optional[int] = sys.maxsize
+        after="2019-01-01",  # Optional[str] = date(1994, 1, 1)
+        before="2022-12-31",  # Optional[str] = date.today()
         include_amends=False,  # bool = False
         download_details=True,  # bool = True
     )

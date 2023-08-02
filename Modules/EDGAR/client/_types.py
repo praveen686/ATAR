@@ -13,7 +13,7 @@ class FormsDownloadMetadata:
     """Class for representing internal download metadata."""
 
     download_folder: Path
-    form: str
+    forms: List[str]  # Change this to a list
     cik: str
     ticker: str
     limit: int = sys.maxsize
@@ -24,7 +24,8 @@ class FormsDownloadMetadata:
 
 
 @dataclass
-class FormsToDownload:
+class FormToDownload:
+    form: str
     raw_filing_uri: str
     primary_doc_uri: str
     accession_number: str
