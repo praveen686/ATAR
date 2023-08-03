@@ -92,7 +92,6 @@ class DownloadFormManager(BaseClient):
                         (not download_metadata.include_amends and form.endswith(AMENDS_SUFFIX)) or
                         not within_requested_date_range(download_metadata, f_date)):
                     continue
-                print(f'queuing {form} for {download_metadata.ticker} on {f_date}')
                 filings_to_download.append(get_to_download(download_metadata.cik, acc_num, form, doc))
 
                 fetched_count += 1

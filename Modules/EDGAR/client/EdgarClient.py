@@ -3,6 +3,7 @@ import json
 import os
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Optional, Union, List
 
@@ -15,7 +16,7 @@ from _constants import (
     SUPPORTED_FORMS, DEFAULT_AFTER_DATE, DEFAULT_BEFORE_DATE,
     ROOT_FACTS_SAVE_FOLDER_NAME, ROOT_FORMS_SAVE_FOLDER_NAME,
     HOST_WWW_SEC, STANDARD_HEADERS, URL_XBRL_COMPANY_CONCEPTS, URL_XBRL_FRAMES, URL_XBRL_COMPANY_FACTS, URL_SUBMISSIONS,
-    URL_PAGINATED_SUBMISSIONS
+    URL_PAGINATED_SUBMISSIONS, URL_XBRL_COMPANY_SUBMISSIONS_ZIP, URL_XBRL_COMPANY_FACTS_ZIP
 )
 from _types import FormsDownloadMetadata, DownloadPath, JSONType
 from _utils import merge_submission_dicts, validate_and_return_cik, validate_and_parse_date, get_valid_after_date
@@ -75,7 +76,7 @@ class EdgarClient(BaseClient, DownloadFormManager):
         self.ticker_to_cik_mapping, self.cik_to_ticker_mapping, self.cik_to_name = \
             self.get_ticker_cik_name_mapping()
 
-    def get_submissions(self, ticker_or_cik: str, *, handle_pagination: bool = True) -> JSONType:
+    def get_submissions_by_company(self, ticker_or_cik: str, *, handle_pagination: bool = True) -> JSONType:
         """Get submissions for a specified CIK. Requests data from the
         data.sec.gov/submissions API endpoint. Full API documentation:
         https://www.sec.gov/edgar/sec-api-documentation.
@@ -114,7 +115,7 @@ class EdgarClient(BaseClient, DownloadFormManager):
 
         return submissions
 
-    def get_company_concept(
+    def get_concept_by_company(
             self,
             ticker_or_cik: str,
             taxonomy: str,
@@ -141,7 +142,7 @@ class EdgarClient(BaseClient, DownloadFormManager):
             tag=tag,
         )).json()
 
-    def get_company_facts(self, ticker_or_cik: str) -> JSONType:
+    def get_facts_by_company(self, ticker_or_cik: str) -> JSONType:
         """Get all company concepts for a specified CIK. Requests data from the
         data.sec.gov/api/xbrl/companyfacts/ API endpoint. Full API documentation:
         https://www.sec.gov/edgar/sec-api-documentation.
@@ -190,7 +191,7 @@ class EdgarClient(BaseClient, DownloadFormManager):
             period=period,
         )).json()
 
-    def download_forms(  # change to plural to reflect the fact we're dealing with multiple forms
+    def download_forms_by_company(  # change to plural to reflect the fact we're dealing with multiple forms
             self,
             ticker_or_cik: str,
             form_types: List[str],  # change to a list of forms
@@ -225,7 +226,7 @@ class EdgarClient(BaseClient, DownloadFormManager):
         ticker = self.cik_to_ticker_mapping.get(cik, None)
 
         limit = sys.maxsize if limit is None else int(limit)
-        if limit < 1: raise ValueError("Invalid amount. Please enter a number greater than 1.")
+        if limit < 1: raise ValueError("Invalid limit. Please enter a number greater than 1.")
 
         after_date = get_valid_after_date(after, after_date=DEFAULT_AFTER_DATE)
         before_date = DEFAULT_BEFORE_DATE if before is None else validate_and_parse_date(before)
@@ -254,6 +255,7 @@ class EdgarClient(BaseClient, DownloadFormManager):
         return num_downloaded
 
     def download_facts_for_companies(self, tickers_or_ciks: List[str], skip_if_exists=True):
+        # todo can do this by downloading zip file and extracting them rather than looping through to download
         ticker_facts_saved = []
         ticker_facts_skipped = []
 
@@ -264,7 +266,7 @@ class EdgarClient(BaseClient, DownloadFormManager):
             try:
                 cik = validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping)
                 ticker_name = self.cik_to_ticker_mapping.get(cik)
-                save_json_path = f'{root_facts_directory}/{ticker_name}-facts.json'
+                save_json_path = f'{root_facts_directory}/{ticker_name}-facts-{datetime.now().strftime("%Y-%m-%d")}.json'
             except Exception as e:
                 logger.error(f"Skipping {ticker_or_cik} because of error: {e}")
                 ticker_facts_skipped.append(ticker_or_cik)
@@ -273,7 +275,7 @@ class EdgarClient(BaseClient, DownloadFormManager):
                 logger.info(f"Skipping {ticker_name} because it already exists")
                 continue
             try:
-                values = self.get_company_facts(ticker_name)
+                values = self.get_facts_by_company(ticker_name)
             except Exception as e:
                 logger.error(f"Skipping {ticker_name}  while downloading facts because of error: {e}")
                 ticker_facts_skipped.append(ticker_name)
@@ -330,9 +332,12 @@ class EdgarClient(BaseClient, DownloadFormManager):
                 continue
         return forms_saved, forms_skipped
 
-    def subscribe_to_rss_feed(self, url, interval, callback_func=None):
+    def subscribe_to_rss_feed(self, interval, callback_func=None):
         # todo if only_pass_entries_by_id is true the starting default value per id should also look back in the saved for the same id
         # todo allow to subscribe to specific form types or companies
+
+        sec_rss_feed_url = f"https://{HOST_WWW_SEC}/cgi-bin/browse-edgar?action=getcurrent&type=&company=&dateb=&owner=include&start=0&output=atom&count=100"
+
         if callback_func is None:
             def _default_process_entry(entry):
                 # Do something with the entry
@@ -347,7 +352,7 @@ class EdgarClient(BaseClient, DownloadFormManager):
             try:
 
                 # fixme this is essensially the same as in baseclient except the host
-                response = requests.get(url, headers={
+                response = requests.get(sec_rss_feed_url, headers={
                     "User-Agent": self.user_agent,
                     "Host": HOST_WWW_SEC,
                     **STANDARD_HEADERS,
@@ -372,6 +377,88 @@ class EdgarClient(BaseClient, DownloadFormManager):
             finally:
                 time.sleep(interval)
 
+    def subscribe_rss_feeds(self, feed_urls, callback_func=None, interval=10):
+        # todo more control over the rss endpoint filter
+        if callback_func is None:
+            def _default_process_entry(entry):
+                logger.info("Processing new entry:")
+                for field, value in entry.items():
+                    logger.info(f"{field}: {value}")
+                logger.info("-------------")
+
+            callback_func = _default_process_entry
+
+        last_entries = {url: None for url in feed_urls}  # Store last entry for each feed
+
+        while True:
+            for url in feed_urls:
+                try:
+                    response = requests.get(url, headers={
+                        "User-Agent": self.user_agent,
+                        "Host": HOST_WWW_SEC,
+                        **STANDARD_HEADERS,
+                    })
+                    feed = feedparser.parse(response.content)
+
+                    if not feed.entries:
+                        logger.warning(f"No entries found in the RSS feed: {url}")
+                        continue
+
+                    new_entries = []
+                    for entry in feed.entries:
+                        if last_entries[url] is not None and entry.id == last_entries[url].id:
+                            break
+                        new_entries.append(entry)
+                    if new_entries:
+                        last_entries[url] = new_entries[0]  # Update the last entry
+                        for entry in new_entries:
+                            callback_func(entry)
+
+                except Exception as e:
+                    logger.error("Error:", e)
+            time.sleep(interval)
+
+    def download_facts_of_all_companies_zip(self) -> str:
+        """Download all company concepts for a specified CIK. Requests data from the
+        data.sec.gov/archives/edgar/daily-index/xbrl/ API endpoint. Full API documentation:
+        https://www.sec.gov/edgar/sec-api-documentation.
+
+        :param ticker_or_cik: Ticker or CIK to obtain company concepts for.
+        :param save_path: The path to save the downloaded zip file.
+        :return: The path of the downloaded zip file.
+        """
+        response = self._rate_limited_get(URL_XBRL_COMPANY_FACTS_ZIP, host=HOST_WWW_SEC)
+        root_facts_directory = Path(self.parent_download_folder, ROOT_FACTS_SAVE_FOLDER_NAME)
+        root_facts_directory.mkdir(parents=True, exist_ok=True)
+        file_path = os.path.join(root_facts_directory,
+                                 f'all_companies_facts-{datetime.now().strftime("%Y-%m-%d")}.zip')
+
+        with open(file_path, 'wb') as f:
+            f.write(response.content)
+
+        return file_path
+
+    def download_submissions_of_all_companies_zip(self) -> str:
+        """Download all company concepts for a specified CIK. Requests data from the
+        data.sec.gov/archives/edgar/daily-index/xbrl/ API endpoint. Full API documentation:
+        https://www.sec.gov/edgar/sec-api-documentation.
+
+        :param ticker_or_cik: Ticker or CIK to obtain company concepts for.
+        :param save_path: The path to save the downloaded zip file.
+        :return: The path of the downloaded zip file.
+        """
+        response = self._rate_limited_get(URL_XBRL_COMPANY_SUBMISSIONS_ZIP, host=HOST_WWW_SEC)
+        root_facts_directory = Path(self.parent_download_folder, ROOT_FORMS_SAVE_FOLDER_NAME)
+        root_facts_directory.mkdir(parents=True, exist_ok=True)
+
+        file_path = os.path.join(root_facts_directory,
+                                 f'all_companies_submissions-{datetime.now().strftime("%Y-%m-%d")}.zip')
+
+        with open(file_path, 'wb') as f:
+            f.write(response.content)
+
+        return file_path
+
 
 if __name__ == "__main__":
     DOWNLOAD_FOLDER = "/home/ruben/PycharmProjects/Genie-Trader/Data/raw_data/SEC"
@@ -380,18 +467,18 @@ if __name__ == "__main__":
     edgar_client = EdgarClient(company_name="Carbonyl LLC", email_address="ruben@carbonyl.org",
                                download_folder=DOWNLOAD_FOLDER)
 
-    a = edgar_client.download_forms(
-        ticker_or_cik="AAPL",  # str
-        form_types=["10-K",
-                    "10-Q",
-                    "8-K",
-                    "4",
-                    "SC 13G",
-                    ],  # List[str]
-        # limit=1,  # Optional[int] = sys.maxsize
-        after="2019-01-01",  # Optional[str] = date(1994, 1, 1)
-        before="2022-12-31",  # Optional[str] = date.today()
-        include_amends=False,  # bool = False
-        download_details=True,  # bool = True
-    )
-    print(a)
+    # Provide the list of feed urls
+    feed_urls = [
+        "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=&company=&dateb=&owner=include&start=0&output=atom&count=100"
+        "https://www.sec.gov/rss/litigation/litreleases.xml",
+        "https://www.sec.gov/rss/litigation/admin.xml",
+        "http://www.sec.gov/rss/litigation/suspensions.xml",
+        "https://www.sec.gov/rss/divisions/corpfin/cfnew.xml",
+        "http://www.sec.gov/rss/divisions/investment/imnews.xml",
+        "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent",
+        # ... other feed urls
+    ]
+    edgar_client.subscribe_rss_feeds(feed_urls=feed_urls, callback_func=None, interval=2)
+
+    # # Subscribe to the RSS feed
+    # edgar_client.subscribe_to_rss_feed(interval=2)

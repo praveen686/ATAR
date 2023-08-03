@@ -31,268 +31,182 @@ download_facts_for_companies & download_forms_for_companies methods
 ```python
 # Specify user-agent string to pass to SEC to identify
 # requests for rate-limiting purposes
->> > edgar = EdgarClient(company_name="<Sample Company Name>",
-                         email_address="<Admin Contact>@<Sample Company Domain>",
-                         download_folder=None)
+>> > edgar_client = EdgarClient(company_name="<Sample Company Name>",
+                                email_address="<Admin Contact>@<Sample Company Domain>",
+                                download_folder=None,  # Defaults to current working directory
+                                )
 
 # Get submissions for Apple with the additional paginated files
 # appended to the recent filings to prevent the need for extra
 # manual pagination handling
->> > edgar.get_submissions(cik="320193")
+>> > edgar_client.get_submissions_by_company(ticker_or_cik="320193", handle_pagination: bool = True)
 {
-    "cik": "320193",
-    "entityType": "operating",
-    "sic": "3571",
-    "sicDescription": "Electronic Computers",
-    "insiderTransactionForOwnerExists": 0,
-    "insiderTransactionForIssuerExists": 1,
-    "name": "Apple Inc.",
-    "tickers": [
-        "AAPL"
-    ],
-    "exchanges": [
-        "Nasdaq"
-    ],
-    ...
-        "filings": {
-    "recent": {
-        "accessionNumber": [...],
-        "filingDate": [...],
-        "reportDate": [...],
-        "acceptanceDateTime": [...],
-        "act": [...],
-        "form": [...],
-        "fileNumber": [...],
-        "filmNumber": [...],
-        "items": [...],
-        "size": [...],
-        "isXBRL": [...],
-        "isInlineXBRL": [...],
-        "primaryDocument": [...],
-        "primaryDocDescription": [...]
-    },
-    # The extra paginated submission data has already been
-    # appended to the lists in the above "recent" key entries
-    "files": []
-}
-}
-
-# Get submissions for Apple without automatic pagination handling,
-# which requires manual handling of the paginated files (not recommended)
->> > edgar.get_submissions(cik="320193", handle_pagination=False)
-{
-    "cik": "320193",
-    "entityType": "operating",
-    "sic": "3571",
-    "sicDescription": "Electronic Computers",
-    "insiderTransactionForOwnerExists": 0,
-    "insiderTransactionForIssuerExists": 1,
-    "name": "Apple Inc.",
-    "tickers": [
-        "AAPL"
-    ],
-    "exchanges": [
-        "Nasdaq"
-    ],
-    ...
-        "filings": {
-    "recent": {
-        "accessionNumber": [...],
-        "filingDate": [...],
-        "reportDate": [...],
-        "acceptanceDateTime": [...],
-        "act": [...],
-        "form": [...],
-        "fileNumber": [...],
-        "filmNumber": [...],
-        "items": [...],
-        "size": [...],
-        "isXBRL": [...],
-        "isInlineXBRL": [...],
-        "primaryDocument": [...],
-        "primaryDocDescription": [...]
-    },
-    # Requires manual pagination handling
-    "files": [
-        {
-            "name": "CIK0000320193-submissions-001.json",
-            "filingCount": ...,
-            "filingFrom": ...,
-            "filingTo": ...
-        }
-    ]
+  "cik": "320193",
+  "entityType": "operating",
+  "sic": "3571",
+  "sicDescription": "Electronic Computers",
+  "insiderTransactionForOwnerExists": 0,
+  "insiderTransactionForIssuerExists": 1,
+  "name": "Apple Inc.",
+  "tickers": [
+    "AAPL"
+  ],
+  "exchanges": [
+    "Nasdaq"
+  ],
+  ...
+    "filings": {
+  "recent": {
+    "accessionNumber": [...],
+    "filingDate": [...],
+    "reportDate": [...],
+    "acceptanceDateTime": [...],
+    "act": [...],
+    "form": [...],
+    "fileNumber": [...],
+    "filmNumber": [...],
+    "items": [...],
+    "size": [...],
+    "isXBRL": [...],
+    "isInlineXBRL": [...],
+    "primaryDocument": [...],
+    "primaryDocDescription": [...]
+  },
+  # The extra paginated submission data has already been
+  # appended to the lists in the above "recent" key entries
+  "files": []
 }
 }
 
 # Get company concept for Apple
->> > edgar.get_company_concept(cik="320193", taxonomy="us-gaap", tag="AccountsPayableCurrent")
+>> > edgar_client.get_concept_by_company(ticker_or_cik="320193", taxonomy="us-gaap", tag="AccountsPayableCurrent")
 {
-    "cik": 320193,
-    "taxonomy": "us-gaap",
-    "tag": "AccountsPayableCurrent",
-    "label": "Accounts Payable, Current",
-    "description": ...,
-    "entityName": "Apple Inc.",
-    "units": {
-        "USD": [...]
-    }
+  "cik": 320193,
+  "taxonomy": "us-gaap",
+  "tag": "AccountsPayableCurrent",
+  "label": "Accounts Payable, Current",
+  "description": ...,
+  "entityName": "Apple Inc.",
+  "units": {
+    "USD": [...]
+  }
 }
 
 # Get company facts for Apple
->> > edgar.get_company_facts(cik="320193")
+>> > edgar_client.get_facts_by_company(ticker_or_cik="320193")
 {
-    "cik": 320193,
-    "entityName": "Apple Inc.",
-    "facts": {
-        "dei": {
-            "EntityCommonStockSharesOutstanding": {
-                "label": "Entity Common Stock, Shares Outstanding",
-                "description": ...,
-                "units": {
-                    "shares": [...]
-                }
-            },
-            "EntityPublicFloat": {
-                "label": "Entity Public Float",
-                "description": ...,
-                "units": {
-                    "USD": [...]
-                }
-            }
-        },
-        "us-gaap": {
-            "AccountsPayable": {
-                "label": "Accounts Payable (Deprecated 2009-01-31)",
-                "description": ...,
-                "units": {
-                    "USD": [...]
-                }
-            },
-            "AccountsPayableCurrent": {
-                "label": "Accounts Payable, Current",
-                "description": ...,
-                "units": {
-                    "USD": [...]
-                }
-            },
-            ...
+  "cik": 320193,
+  "entityName": "Apple Inc.",
+  "facts": {
+    "dei": {
+      "EntityCommonStockSharesOutstanding": {
+        "label": "Entity Common Stock, Shares Outstanding",
+        "description": ...,
+        "units": {
+          "shares": [...]
         }
+      },
+      "EntityPublicFloat": {
+        "label": "Entity Public Float",
+        "description": ...,
+        "units": {
+          "USD": [...]
+        }
+      }
+    },
+    "us-gaap": {
+      "AccountsPayable": {
+        "label": "Accounts Payable (Deprecated 2009-01-31)",
+        "description": ...,
+        "units": {
+          "USD": [...]
+        }
+      },
+      "AccountsPayableCurrent": {
+        "label": "Accounts Payable, Current",
+        "description": ...,
+        "units": {
+          "USD": [...]
+        }
+      },
+      ...
     }
+  }
 }
 
 # Get one fact for each reporting entity in specified
 # calendar period (Q1 2019)
->> > edgar.get_frames(taxonomy="us-gaap", tag="AccountsPayableCurrent", unit="USD", year="2019", quarter=1)
+>> > edgar_client.get_frames(taxonomy="us-gaap", tag="AccountsPayableCurrent", unit="USD", year="2019", quarter=1)
 {
-    "taxonomy": "us-gaap",
-    "tag": "AccountsPayableCurrent",
-    "ccp": "CY2019Q1I",
-    "uom": "USD",
-    "label": "Accounts Payable, Current",
-    "description": ...,
-    "pts": 3388,
-    "data": [
-        {
-            "accn": "0001555538-19-000006",
-            "cik": 1555538,
-            "entityName": "SUNCOKE ENERGY PARTNERS, L.P.",
-            "loc": "US-IL",
-            "end": "2019-03-31",
-            "val": 78300000
-        },
-        {
-            "accn": "0000011199-19-000012",
-            "cik": 11199,
-            "entityName": "BEMIS CO INC",
-            "loc": "US-WI",
-            "end": "2019-03-31",
-            "val": 465700000
-        },
-        ...
-    ]
+  "taxonomy": "us-gaap",
+  "tag": "AccountsPayableCurrent",
+  "ccp": "CY2019Q1I",
+  "uom": "USD",
+  "label": "Accounts Payable, Current",
+  "description": ...,
+  "pts": 3388,
+  "data": [
+    {
+      "accn": "0001555538-19-000006",
+      "cik": 1555538,
+      "entityName": "SUNCOKE ENERGY PARTNERS, L.P.",
+      "loc": "US-IL",
+      "end": "2019-03-31",
+      "val": 78300000
+    },
+    {
+      "accn": "0000011199-19-000012",
+      "cik": 11199,
+      "entityName": "BEMIS CO INC",
+      "loc": "US-WI",
+      "end": "2019-03-31",
+      "val": 465700000
+    },
+    ...
+  ]
 }
 ```
 
-### Get/Download Basic Usage
+### Download Usage
 
 ```python
-from sec_edgar_downloader import Downloader
+# Get all '10-K', '10-Q', '8-K', '4' filings for Apple (ticker: AAPL)
+edgar_client.download_forms_by_company(
+    ticker_or_cik='AAPL',  # str - ticker or CIK
+    form_types=['10-K', '10-Q', '8-K', '4'],  # List[str] - list of forms
+    limit=None,  # Optional[int] - limit the number of forms to download (default: sys.maxsize)
+    after=None,  # Optional[str] - only download forms after this date (default: date(1994, 1, 1))
+    before=None,  # Optional[str] - only download forms before this date (default: date.today())
+    include_amends=False,  # bool - include amended forms (default: False)
+    download_details=True,  # bool - download the form details  (default: True)
+)
 
-# Initialize a downloader instance. If no argument is passed
-# to the constructor, the package will download filings to
-# the current working directory.
-dl = Downloader("/path/to/valid/save/location")
+edgar_client.download_facts_for_companies(
+    tickers_or_ciks=['AAPL', 'MSFT'],  # List[str] - list of tickers or CIKs
+    skip_if_exists=True,  # bool - skip downloading if the file already exists (default: True)
+)
 
-# Get all 8-K filings for Apple (ticker: AAPL)
-dl.get("8-K", "AAPL")
+edgar_client.download_forms_for_companies(
+    tickers_or_ciks=['AAPL', 'MSFT'],  # List[str] - list of tickers or CIKs
+    form_types=['10-K', '10-Q', '8-K', '4'],  # List[str] - list of forms
+    limit_per_form=None,  # Optional[int] - limit the number of forms to download (default: sys.maxsize)
+    after=None,  # Optional[str] - only download forms after this date (default: date(1994, 1, 1))
+    before=None,  # Optional[str] - only download forms before this date (default: date.today())
+    include_amends=False,  # bool - include amended forms (default: False)
+    download_details=True,  # bool - download the form details  (default: True)
+)
 
-# Get all 8-K filings for Apple, including filing amends (8-K/A)
-dl.get("8-K", "AAPL", include_amends=True)
+edgar_client.download_facts_of_all_companies_zip()
 
-# Get all 8-K filings for Apple after January 1, 2017 and before March 25, 2017
-# Note: after and before strings must be in the form "YYYY-MM-DD"
-dl.get("8-K", "AAPL", after="2017-01-01", before="2017-03-25")
+edgar_client.download_submissions_of_all_companies_zip()
 
-# Get the five most recent 8-K filings for Apple
-dl.get("8-K", "AAPL", amount=5)
+edgar_client.subscribe_rss_feeds(
+    feed_urls,  # List[str] - list of RSS feed URLs
+    callback_func=None,  # Optional[Callable] - callback function to call when a new filing is found
+    interval=10
+)  # Optional[int] - interval in seconds to check for new filings (default: 10)
 
-# Get all 10-K filings for Microsoft
-dl.get("10-K", "MSFT")
-
-# Get the latest 10-K filing for Microsoft
-dl.get("10-K", "MSFT", amount=1)
-
-# Get all 10-Q filings for Visa
-dl.get("10-Q", "V")
-
-# Get all 13F-NT filings for the Vanguard Group
-dl.get("13F-NT", "0000102909")
-
-# Get all 13F-HR filings for the Vanguard Group
-dl.get("13F-HR", "0000102909")
-
-# Get all SC 13G filings for Apple
-dl.get("SC 13G", "AAPL")
-
-# Get all SD filings for Apple
-dl.get("SD", "AAPL")
 ```
-
-### Get/Download Advanced Usage
-
-```python
-from sec_edgar_downloader import Downloader
-
-# Download filings to the current working directory
-dl = Downloader()
-
-# Get all Apple proxy statements that contain the term "antitrust"
-dl.get("DEF 14A", "AAPL", query="antitrust")
-
-# Get all 10-K filings for Microsoft without the filing details
-dl.get("10-K", "MSFT", download_details=False)
-
-# Get the latest supported filings, if available, for Apple
-for filing_type in dl.supported_filings:
-    dl.get(filing_type, "AAPL", amount=1)
-
-# Get the latest supported filings, if available, for a
-# specified list of tickers and CIKs
-equity_ids = ["AAPL", "MSFT", "0000102909", "V", "FB"]
-for equity_id in equity_ids:
-    for filing_type in dl.supported_filings:
-        dl.get(filing_type, equity_id, amount=1)
-```
-
-## Wrapper Functions and Corresponding API Endpoints
-
-| Wrapper Function                                                | API Route                   | Full API URI                                                                                 |
-|-----------------------------------------------------------------|-----------------------------|----------------------------------------------------------------------------------------------|
-| `get_submissions(ticker_or_cik)`                                | `/submissions/`             | `data.sec.gov/submissions/CIK{cik}.json`                                                     |
-| `get_company_concept(ticker_or_cik, taxonomy, tag)`             | `/api/xbrl/companyconcept/` | `data.sec.gov/api/xbrl/companyconcept/CIK{cik}/{taxonomy}/{tag}.json`                        |
-| `get_company_facts(ticker_or_cik)`                              | `/api/xbrl/companyfacts/`   | `data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json`                                           |
-| `get_frames(taxonomy, tag, unit, year, quarter, instantaneous)` | `/api/xbrl/frames/`         | `data.sec.gov/api/xbrl/frames/{taxonomy}/{tag}/{unit}/CY{year}{quarter}{instantaneous}.json` |
-| `get(form, ticker_or_cik, *, limit, after, before, include)`    |                             |                                                                                              |
 
 More details on each endpoint can be found on the official SEC API
 documentation: [sec.gov/edgar/sec-api-documentation](https://www.sec.gov/edgar/sec-api-documentation).

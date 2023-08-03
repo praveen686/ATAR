@@ -38,6 +38,8 @@ URL_XBRL_FRAMES = f"{_BASE_URL_XBRL_FRAMES}/{{taxonomy}}/{{tag}}/{{unit}}/{{peri
 
 URL_CIK_MAPPING = f"https://{HOST_WWW_SEC}/files/company_tickers_exchange.json"
 URL_FILING = (f"https://{HOST_WWW_SEC}/Archives/edgar/data/{{cik}}/{{acc_num_no_dash}}/{{document}}")
+URL_XBRL_COMPANY_FACTS_ZIP = f"https://{HOST_WWW_SEC}/Archives/edgar/daily-index/xbrl/companyfacts.zip"
+URL_XBRL_COMPANY_SUBMISSIONS_ZIP = f"https://{HOST_WWW_SEC}/Archives/edgar/daily-index/xbrl/companyfacts.zip"
 
 # Save metadata
 ROOT_FORMS_SAVE_FOLDER_NAME = "sec-edgar-filings"

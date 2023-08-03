@@ -5,7 +5,7 @@ from Modules.EDGAR import EdgarClient
 
 def test_get_submissions(edgar_client: EdgarClient, apple_stock: Dict[str, str]):
     cik = apple_stock["cik"]
-    submissions_original = edgar_client.get_submissions(
+    submissions_original = edgar_client.get_submissions_by_company(
         cik=cik, handle_pagination=False
     )
 
@@ -17,7 +17,7 @@ def test_get_submissions(edgar_client: EdgarClient, apple_stock: Dict[str, str])
     )
     expected = num_recent_filings + num_older_filings
 
-    submissions_merged = edgar_client.get_submissions(cik=cik, handle_pagination=True)
+    submissions_merged = edgar_client.get_submissions_by_company(cik=cik, handle_pagination=True)
     assert expected == len(submissions_merged["filings"]["recent"]["accessionNumber"])
 
     for merged_list in submissions_merged["filings"]["recent"].values():
@@ -33,7 +33,7 @@ def test_get_company_concept(
     name = apple_stock["name"]
     taxonomy = concept_data_accounts_payable_current["taxonomy"]
     tag = concept_data_accounts_payable_current["tag"]
-    company_concepts = edgar_client.get_company_concept(
+    company_concepts = edgar_client.get_concept_by_company(
         cik=cik, taxonomy=taxonomy, tag=tag
     )
 
@@ -52,7 +52,7 @@ def test_get_company_concept(
 def test_get_company_facts(edgar_client: EdgarClient, apple_stock: Dict[str, str]):
     cik = apple_stock["cik"]
     name = apple_stock["name"]
-    company_facts = edgar_client.get_company_facts(cik=cik)
+    company_facts = edgar_client.get_facts_by_company()
 
     assert company_facts["cik"] == int(cik.strip("0"))
     assert company_facts["entityName"] == name
