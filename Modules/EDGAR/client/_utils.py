@@ -50,7 +50,13 @@ def validate_and_return_cik(
             raise ValueError("Invalid CIK. CIKs must be at most 10 digits long.")
         # SEC Edgar APIs require zero-padded CIKs, so we must pad CIK with 0s
         # to ensure that it is exactly 10 digits long
-        return ticker_or_cik.zfill(CIK_LENGTH)
+        cik = ticker_or_cik.zfill(CIK_LENGTH)
+        # make sure it exists in the mapping
+        if cik not in ticker_to_cik_mapping.values():
+            raise ValueError(
+                "Invalid CIK. Not present in the CIK to ticker mapping."
+            )
+        return cik
 
     cik = ticker_to_cik_mapping.get(ticker_or_cik)
 

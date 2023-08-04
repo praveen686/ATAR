@@ -1,13 +1,17 @@
 """Unofficial SEC EDGAR API wrapper."""
 import json
 import os
+import re
 import sys
 import time
+import zipfile
 from datetime import datetime
+from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from typing import Optional, Union, List
 
 import feedparser
+import pandas as pd
 import requests
 
 from Modules.EDGAR.client._DownloadFormManager import DownloadFormManager
@@ -259,14 +263,13 @@ class EdgarClient(BaseClient, DownloadFormManager):
         ticker_facts_saved = []
         ticker_facts_skipped = []
 
-        root_facts_directory = Path(self.parent_download_folder, ROOT_FACTS_SAVE_FOLDER_NAME)
-        root_facts_directory.mkdir(parents=True, exist_ok=True)
+        self.facts_save_folder.mkdir(parents=True, exist_ok=True)
 
         for ticker_or_cik in tickers_or_ciks:
             try:
                 cik = validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping)
                 ticker_name = self.cik_to_ticker_mapping.get(cik)
-                save_json_path = f'{root_facts_directory}/{ticker_name}-facts-{datetime.now().strftime("%Y-%m-%d")}.json'
+                save_json_path = f'{self.facts_save_folder}/{ticker_name}-facts-{datetime.now().strftime("%Y-%m-%d")}.json'
             except Exception as e:
                 logger.error(f"Skipping {ticker_or_cik} because of error: {e}")
                 ticker_facts_skipped.append(ticker_or_cik)
@@ -428,9 +431,8 @@ class EdgarClient(BaseClient, DownloadFormManager):
         :return: The path of the downloaded zip file.
         """
         response = self._rate_limited_get(URL_XBRL_COMPANY_FACTS_ZIP, host=HOST_WWW_SEC)
-        root_facts_directory = Path(self.parent_download_folder, ROOT_FACTS_SAVE_FOLDER_NAME)
-        root_facts_directory.mkdir(parents=True, exist_ok=True)
-        file_path = os.path.join(root_facts_directory,
+        self.facts_save_folder.mkdir(parents=True, exist_ok=True)
+        file_path = os.path.join(self.facts_save_folder,
                                  f'all_companies_facts-{datetime.now().strftime("%Y-%m-%d")}.zip')
 
         with open(file_path, 'wb') as f:
@@ -448,16 +450,66 @@ class EdgarClient(BaseClient, DownloadFormManager):
         :return: The path of the downloaded zip file.
         """
         response = self._rate_limited_get(URL_XBRL_COMPANY_SUBMISSIONS_ZIP, host=HOST_WWW_SEC)
-        root_facts_directory = Path(self.parent_download_folder, ROOT_FORMS_SAVE_FOLDER_NAME)
-        root_facts_directory.mkdir(parents=True, exist_ok=True)
+        self.facts_save_folder.mkdir(parents=True, exist_ok=True)
 
-        file_path = os.path.join(root_facts_directory,
+        file_path = os.path.join(self.facts_save_folder,
                                  f'all_companies_submissions-{datetime.now().strftime("%Y-%m-%d")}.zip')
 
         with open(file_path, 'wb') as f:
             f.write(response.content)
 
         return file_path
+
+    @staticmethod
+    def _parse_open_json(args):
+        filename, file_path_to_latest_zip, ticker_to_cik_mapping, cik_to_ticker_mapping, facts_save_folder = args
+        dataframes = []
+
+        with zipfile.ZipFile(file_path_to_latest_zip, 'r') as z:
+            with z.open(filename) as f:
+                try:
+                    data = json.load(f)
+                    cik = validate_and_return_cik(data['cik'], ticker_to_cik_mapping)
+                    ticker = cik_to_ticker_mapping[cik]
+                    date = re.search(r'\d{4}-\d{2}-\d{2}', file_path_to_latest_zip.name).group(0)
+                    output_file_path = f'{facts_save_folder}/{ticker}_facts-{date}.pkl'
+                    if os.path.exists(output_file_path):
+                        logger.info(f'File already exists: {output_file_path}')
+                        return
+                    logger.info(f'Parsing {data["entityName"]} facts')
+                    taxonomies = data['facts']
+
+                    for taxonomy_name in taxonomies.keys():
+                        logger.info(f'    Taxonomy {taxonomy_name}')
+                        for tag_name in taxonomies[taxonomy_name].keys():
+                            units = taxonomies[taxonomy_name][tag_name]["units"].keys()
+                            logger.info(f'      Tag {tag_name}')
+                            for unit in units:
+                                # Create a DataFrame from the data list
+                                events_df = pd.DataFrame(taxonomies[taxonomy_name][tag_name]["units"][unit])
+                                logger.info(f'            Keys -> {list(events_df.keys())}')
+                                # Add multi-index before concatenating to the main DataFrame
+                                events_df.columns = pd.MultiIndex.from_product(
+                                    [[taxonomy_name], [unit], [tag_name], events_df.columns])
+                                # Append the data to the dataframes list
+                                dataframes.append(events_df)
+
+                    # Concatenate all dataframes together
+                    multi_df = pd.concat(dataframes, axis=1)
+                    multi_df.to_pickle(output_file_path)
+                except Exception as e:
+                    logger.error(f'Error parsing {filename}: {e}')
+                    return
+
+    def parse_all_facts_in_latest_zip(self):
+        """Parse all facts from the downloaded zip file and store them in a database."""
+        file_path_to_latest_zip = max(self.facts_save_folder.glob('*.zip'), key=os.path.getctime)
+        number_of_cores = cpu_count() - 6
+        with zipfile.ZipFile(file_path_to_latest_zip, 'r') as z:
+            json_files = [(filename, file_path_to_latest_zip, self.ticker_to_cik_mapping, self.cik_to_ticker_mapping,
+                           self.facts_save_folder) for filename in z.namelist() if filename.endswith('.json')]
+            with Pool(number_of_cores) as p:
+                p.map(self._parse_open_json, json_files)
 
 
 if __name__ == "__main__":
@@ -466,7 +518,17 @@ if __name__ == "__main__":
     # Create an EdgarClient instance
     edgar_client = EdgarClient(company_name="Carbonyl LLC", email_address="ruben@carbonyl.org",
                                download_folder=DOWNLOAD_FOLDER)
+    edgar_client.parse_all_facts_in_latest_zip()
+    exit()
+    # Load pickle AAR CORP.pkl
+    df = pd.read_pickle(f'{DOWNLOAD_FOLDER}/sec-edgar-facts/ABCP_facts-2023-08-02.pkl')
 
+    # print all rows and columns
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', None)
+    print(df['dei']["shares"]["EntityCommonStockSharesOutstanding"].dropna())
+
+    exit()
     # Provide the list of feed urls
     feed_urls = [
         "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=&company=&dateb=&owner=include&start=0&output=atom&count=100"
