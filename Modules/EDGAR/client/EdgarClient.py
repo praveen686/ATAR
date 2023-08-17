@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Optional, Union, List
 
 import feedparser
+import numpy as np
 import pandas as pd
 import requests
 
@@ -501,15 +502,96 @@ class EdgarClient(BaseClient, DownloadFormManager):
                     logger.error(f'Error parsing {filename}: {e}')
                     return
 
-    def parse_all_facts_in_latest_zip(self):
+    @property
+    def get_path_to_latest_facts_zip(self):
+        return max(self.facts_save_folder.glob('*.zip'), key=os.path.getctime)
+
+    def parse_all_facts_in_latest_zip(self, number_of_cores=cpu_count() - 6):
         """Parse all facts from the downloaded zip file and store them in a database."""
-        file_path_to_latest_zip = max(self.facts_save_folder.glob('*.zip'), key=os.path.getctime)
-        number_of_cores = cpu_count() - 6
+        file_path_to_latest_zip = self.get_path_to_latest_facts_zip
         with zipfile.ZipFile(file_path_to_latest_zip, 'r') as z:
             json_files = [(filename, file_path_to_latest_zip, self.ticker_to_cik_mapping, self.cik_to_ticker_mapping,
                            self.facts_save_folder) for filename in z.namelist() if filename.endswith('.json')]
             with Pool(number_of_cores) as p:
                 p.map(self._parse_open_json, json_files)
+
+    def parse_facts_json(self, json_dict):
+        dataframes = []
+
+        logger.info(f'Parsing {json_dict["entityName"]} facts')
+        taxonomies = json_dict['facts']
+        ALLOWED_DATA_COLUMNS = ['start', 'end', 'val', 'accn', 'fy', 'fp', 'form', 'filed', 'frame']
+        for taxonomy_name in taxonomies.keys():
+            for tag_name in taxonomies[taxonomy_name].keys():
+                units = taxonomies[taxonomy_name][tag_name]["units"].keys()
+
+                for unit in units:
+                    # Create a DataFrame from the data list
+                    events_df = pd.DataFrame(taxonomies[taxonomy_name][tag_name]["units"][unit])
+                    # events_df = events_df.dropna(axis=1, how='all')
+                    if not set(ALLOWED_DATA_COLUMNS).issubset(set(events_df.columns)):
+                        # Which columns are missing?
+                        missing_columns = set(ALLOWED_DATA_COLUMNS) - set(events_df.columns)
+
+                        # Make sure missing columns are only start and frame nothing else, else raise critical error
+                        # . missing_columns can be {'start'} or {'frame'} or {'start', 'frame'} or set()
+                        if not missing_columns.issubset({'start', 'frame'}):
+                            logger.critical(f'Columns {missing_columns} are missing from {tag_name}')
+                            exit()
+                        # Add the missing columns as missing nan columns
+                        for missing_column in missing_columns:
+                            events_df[missing_column] = np.nan
+
+                    # Add multi-index before concatenating to the main DataFrame
+                    events_df.columns = pd.MultiIndex.from_product(
+                        [[taxonomy_name], [tag_name], [unit], events_df.columns])
+
+                    # Append the data to the dataframes list
+                    dataframes.append(events_df)
+
+        # Concatenate all dataframes together
+        multi_df = pd.concat(dataframes, axis=1)
+        return multi_df.sort_index()
+
+    def query_fact_from_zip(self, ticker_or_cik: str,
+                            # tag: str = None, dates: List[str] = None,
+                            return_raw_json=False):
+
+        # Validate the ticker or CIK to CIK
+        cik = validate_and_return_cik(ticker_or_cik, self.ticker_to_cik_mapping)
+        ticker_name = self.cik_to_ticker_mapping.get(cik)
+
+        # Construct the filename of the json file
+        filename = f'CIK{cik}.json'
+
+        # Get the path to the latest zip file downloaded
+        file_path_to_latest_zip = self.get_path_to_latest_facts_zip
+        updated_date = re.search(r'\d{4}-\d{2}-\d{2}', file_path_to_latest_zip.name).group(0)
+        logger.info(f'Latest zip file found: {file_path_to_latest_zip.name} with updated date {updated_date}')
+
+        # Go inside the zip file
+        with zipfile.ZipFile(file_path_to_latest_zip, 'r') as z:
+            # Checking if the file exists in the zip file
+            if filename not in z.namelist():
+                logger.error(f'File {filename} not found in the zip file')
+                return
+
+            # Get the list of files in the zip file
+            with z.open(filename) as f:
+                json_dict = json.load(f)
+                if return_raw_json:
+                    return json_dict
+                multiindex_df = self.parse_facts_json(json_dict)
+
+
+            print(multiindex_df[('us-gaap', 'NetIncomeLoss', 'USD')])
+
+            exit()
+
+            # TODO Lets query the data
+            # logger.info(f'Querying {ticker_name} facts in {filename}')
+
+            return multiindex_df
 
 
 if __name__ == "__main__":
@@ -518,16 +600,13 @@ if __name__ == "__main__":
     # Create an EdgarClient instance
     edgar_client = EdgarClient(company_name="Carbonyl LLC", email_address="ruben@carbonyl.org",
                                download_folder=DOWNLOAD_FOLDER)
-    edgar_client.parse_all_facts_in_latest_zip()
-    exit()
-    # Load pickle AAR CORP.pkl
-    df = pd.read_pickle(f'{DOWNLOAD_FOLDER}/sec-edgar-facts/ABCP_facts-2023-08-02.pkl')
-
-    # print all rows and columns
+    # edgar_client.download_facts_of_all_companies_zip()
+    # edgar_client.parse_all_facts_in_latest_zip()
+    df = edgar_client.query_fact_from_zip(ticker_or_cik="AAPL",
+                                          return_raw_json=False
+                                          )
     pd.set_option('display.max_columns', None)
-    pd.set_option('display.max_rows', None)
-    print(df['dei']["shares"]["EntityCommonStockSharesOutstanding"].dropna())
-
+    print(df["us-gaap"]["AccountsPayable"])
     exit()
     # Provide the list of feed urls
     feed_urls = [

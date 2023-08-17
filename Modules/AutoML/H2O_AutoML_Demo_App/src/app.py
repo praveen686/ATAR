@@ -16,8 +16,9 @@ from h2o_wave import Q, ui, app, main, data, copy_expando, on, handle_on, expand
 
 from .config import *
 
+
 h2o.init(
-    nthreads=1,
+    nthreads=28,
     port=54321,
     max_mem_size='10G',
 
@@ -1011,7 +1012,17 @@ async def picker_example(q: Q, arg=False, warning: str = ''):
         ])
 
 
-@app('/')
+
+def on_startup():
+    print('App started!')
+
+
+def on_shutdown():
+    h2o.cluster().shutdown()
+    print('App stopped!')
+
+
+@app('/', on_startup=on_startup, on_shutdown=on_shutdown, mode="broadcast")
 async def serve(q: Q):
     cur_dir = os.getcwd()
     q.app.tmp_dir = cur_dir + app_config.tmp_dir

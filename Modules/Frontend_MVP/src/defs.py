@@ -2,6 +2,7 @@ import asyncio
 import base64
 import concurrent.futures
 import concurrent.futures
+import io
 import os
 import time
 from collections import defaultdict  # noqa F401
@@ -27,30 +28,30 @@ load_dot_env(env_file="/home/ruben/PycharmProjects/Genie-Trader/.env")
 
 # REDIS_URL=redis://$REDIS_HOST:$REDIS_PORT/$REDIS_DB
 
-redis_host = os.getenv('REDIS_HOST', 'localhost')
-redis_port = os.getenv('REDIS_PORT', '6379')
-redis_db = os.getenv('REDIS_DB', '0')
-redis_url = f'redis://{redis_host}:{redis_port}/{redis_db}'
-
-print(f'Connecting to Redis at {redis_url}')
-r = redis.from_url(redis_url)
-
-for key in r.scan_iter():
-    print(key)
-    print(r.get(str(key)))
+# redis_host = os.getenv('REDIS_HOST', 'localhost')
+# redis_port = os.getenv('REDIS_PORT', '6379')
+# redis_db = os.getenv('REDIS_DB', '0')
+# redis_url = f'redis://{redis_host}:{redis_port}/{redis_db}'
+#
+# print(f'Connecting to Redis at {redis_url}')
+# r = redis.from_url(redis_url)
+#
+# for key in r.scan_iter():
+#     print(key)
+#     print(r.get(str(key)))
 
 try:
     from src.config import uploaded_files_dict
 except ImportError:
     try:
-        from config import uploaded_files_dict
+        from config import uploaded_files_dict, FIGSIZE
     except ImportError:
         from .defs import uploaded_files_dict
 
 # GLOBAL CONFIG
 DATA_DIRECTORY = "data"
 
-from h2o_wave import Q, ui, on  # noqa F401
+from h2o_wave import Q, ui, on, expando_to_dict  # noqa F401
 
 
 @on('import')
