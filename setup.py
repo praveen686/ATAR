@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='FinML-ab', # todo lol trying a different name. ab for ab initio
+    name='TradeFlow', # todo lol trying a different name. ab for ab initio
     version='0.0.1',  # Semantic Versioning
     packages=["Modules"],
     author='Ruben Fernandez',
