@@ -5,7 +5,6 @@ from decimal import ROUND_DOWN
 from typing import Optional
 from typing import Union
 
-from nautilus_trader.adapters.binance.futures.types import BinanceFuturesMarkPriceUpdate
 from nautilus_trader.common.enums import LogColor
 from nautilus_trader.common.timer import TimeEvent
 from nautilus_trader.config import StrategyConfig
@@ -15,7 +14,6 @@ from nautilus_trader.core.data import Data
 from nautilus_trader.core.message import Event
 from nautilus_trader.execution.algorithm import ExecAlgorithm
 from nautilus_trader.indicators.atr import AverageTrueRange
-from nautilus_trader.model.data import DataType
 from nautilus_trader.model.data.bar import Bar
 from nautilus_trader.model.data.bar import BarType
 from nautilus_trader.model.data.book import OrderBookDelta
@@ -27,7 +25,7 @@ from nautilus_trader.model.enums import OrderType
 from nautilus_trader.model.enums import TimeInForce
 from nautilus_trader.model.enums import TriggerType
 from nautilus_trader.model.events.order import OrderFilled
-from nautilus_trader.model.identifiers import ClientOrderId, ClientId
+from nautilus_trader.model.identifiers import ClientOrderId
 from nautilus_trader.model.identifiers import InstrumentId
 from nautilus_trader.model.instruments import Instrument
 from nautilus_trader.model.objects import Quantity
@@ -95,6 +93,10 @@ class MarketVolatilityCatcher(Strategy):
         self.atr_multiple = config.atr_multiple
         self.trade_size = Decimal(config.trade_size)
         self.emulation_trigger = TriggerType[config.emulation_trigger]
+
+        # NEW initializations # Dynamic TP and SL based on ATR
+        self.atr_multiplier_tp = 2.0  # Multiplier for ATR to set take-profit, adjust as needed
+        self.atr_multiplier_sl = 1.5  # Multiplier for ATR to set stop-loss, adjust as needed
 
         # Create the indicators for the strategy
         self.atr = AverageTrueRange(config.atr_period)
@@ -267,6 +269,18 @@ class MarketVolatilityCatcher(Strategy):
             self.cancel_order(self.sell_order)
         self.create_sell_order(last)
 
+    def calculate_trade_levels(self, entry_price: float, is_long: bool):
+        atr_value = self.atr.value  # Assuming you have an ATR indicator with a 'value' attribute
+
+        if is_long:
+            take_profit = entry_price + (atr_value * self.atr_multiplier_tp)
+            stop_loss = entry_price - (atr_value * self.atr_multiplier_sl)
+        else:
+            take_profit = entry_price - (atr_value * self.atr_multiplier_tp)
+            stop_loss = entry_price + (atr_value * self.atr_multiplier_sl)
+
+        return take_profit, stop_loss
+
     def create_buy_order(self, last: QuoteTick) -> None:
         """
         Market maker simple buy limit method (example).
@@ -275,7 +289,7 @@ class MarketVolatilityCatcher(Strategy):
             self.log.error("No instrument loaded.")
             return
 
-        price: Decimal = last.bid - (self.atr.value * self.atr_multiple)
+        price: Decimal = last.bid_price - (self.atr.value * self.atr_multiple)
         order: LimitOrder = self.order_factory.limit(
             instrument_id=self.instrument_id,
             order_side=OrderSide.BUY,
@@ -286,9 +300,23 @@ class MarketVolatilityCatcher(Strategy):
             # display_qty=self.instrument.make_qty(self.trade_size / 2),  # iceberg
             emulation_trigger=self.emulation_trigger,
         )
-
         self.buy_order = order
         self.submit_order(order)
+
+        # Lets add the TP and SL orders
+        # take_profit, stop_loss = self.calculate_trade_levels(price, is_long=True)
+        # tp_order: LimitOrder = self.order_factory.limit(
+        #     instrument_id=self.instrument_id,
+        #     order_side=OrderSide.SELL,
+        #     quantity=self.instrument.make_qty(self.trade_size),
+        #     price=self.instrument.make_price(take_profit),
+        #     time_in_force=TimeInForce.GTC,
+        #     post_only=False,  # default value is True
+        #     # display_qty=self.instrument.make_qty(self.trade_size / 2),  # iceberg
+        #     emulation_trigger=self.emulation_trigger,
+        # )
+        #
+        # self.submit_order(tp_order)
 
     def create_sell_order(self, last: QuoteTick) -> None:
         """
@@ -298,7 +326,7 @@ class MarketVolatilityCatcher(Strategy):
             self.log.error("No instrument loaded.")
             return
 
-        price: Decimal = last.ask + (self.atr.value * self.atr_multiple)
+        price: Decimal = last.ask_price + (self.atr.value * self.atr_multiple)
         order: LimitOrder = self.order_factory.limit(
             instrument_id=self.instrument_id,
             order_side=OrderSide.SELL,
@@ -312,6 +340,21 @@ class MarketVolatilityCatcher(Strategy):
 
         self.sell_order = order
         self.submit_order(order)
+
+        # # Lets add the TP and SL orders
+        # take_profit, stop_loss = self.calculate_trade_levels(price, is_long=False)
+        # tp_order: LimitOrder = self.order_factory.limit(
+        #     instrument_id=self.instrument_id,
+        #     order_side=OrderSide.BUY,
+        #     quantity=self.instrument.make_qty(self.trade_size),
+        #     price=self.instrument.make_price(take_profit),
+        #     time_in_force=TimeInForce.GTC,
+        #     post_only=False,  # default value is True
+        #     # display_qty=self.instrument.make_qty(self.trade_size / 2),  # iceberg
+        #     emulation_trigger=self.emulation_trigger,
+        # )
+        #
+        # self.submit_order(tp_order)
 
     def on_event(self, event: Event) -> None:
         """

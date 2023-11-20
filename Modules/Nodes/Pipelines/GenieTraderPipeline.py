@@ -1,7 +1,13 @@
 import pandas as pd
-from nautilus_trader.adapters.binance.common.enums import BinanceAccountType
-from nautilus_trader.adapters.binance.config import BinanceDataClientConfig
-from nautilus_trader.adapters.binance.config import BinanceExecClientConfig
+
+# from nautilus_trader.adapters.binance.common.enums import BinanceAccountType
+# from nautilus_trader.adapters.binance.config import BinanceDataClientConfig
+# from nautilus_trader.adapters.binance.config import BinanceExecClientConfig
+
+from Modules.Nodes.Integrations.mexc.common.enums import BinanceAccountType
+from Modules.Nodes.Integrations.mexc.config import BinanceDataClientConfig
+from Modules.Nodes.Integrations.mexc.config import BinanceExecClientConfig
+
 from nautilus_trader.backtest.engine import BacktestEngine, Decimal, Environment, DataEngineConfig, RiskEngineConfig, \
     ExecEngineConfig
 from nautilus_trader.backtest.engine import BacktestEngineConfig
@@ -18,12 +24,12 @@ from nautilus_trader.model.data import QuoteTick
 from nautilus_trader.model.identifiers import Venue
 from nautilus_trader.model.objects import Money
 
-from Modules.Strategies.MarketVolatilityCatcher import MarketVolatilityCatcherConfig, MarketVolatilityCatcher, \
+from Modules.Nodes.Strategies.MarketVolatilityCatcher import MarketVolatilityCatcherConfig, MarketVolatilityCatcher, \
     TWAPExecAlgorithm
 
 
 def get_instruments_in_catalog(catalog_path, instrument_ids=None, as_nautilus=True, return_catalog=False):
-    from nautilus_trader.data.engine import ParquetDataCatalog
+    from nautilus_trader.persistence.catalog import ParquetDataCatalog
     catalog = ParquetDataCatalog(catalog_path)
     if instrument_ids is not None:
         instruments = catalog.instruments(as_nautilus=as_nautilus, instrument_ids=instrument_ids)
@@ -128,7 +134,6 @@ class GenieBacktestNode(PipeLine):
                 exec_engine=ExecEngineConfig(
                     load_cache=True,
                     allow_cash_positions=True,
-                    filter_unclaimed_external_orders=False,
                     debug=False
                 ),
                 streaming=None,
@@ -190,7 +195,7 @@ class GenieBacktestNode(PipeLine):
             # latency_model ( LatencyModel , optional ) – The latency model for the exchange.
             latency_model=None,
             # book_type (BookType, default BookType.L1_TBBO ) – The default order book type for fill modelling.
-            book_type=BookType.L1_TBBO,
+            # book_type=BookType.L1_TBBO,
             # routing ( bool , default False ) – If multi-venue routing should be enabled for the execution client.
             routing=False,
             # frozen_account ( bool , default False ) – If the account for this exchange is frozen (balances will not change).
@@ -205,48 +210,66 @@ class GenieBacktestNode(PipeLine):
             use_random_ids=False,
         )
 
-    def set_up_data(self, **kwargs):
+    def set_up_data(self,instruments_config, **kwargs):
         catalog_path = self.get_value_from_kwargs(kwargs, "catalog_path")
-        instrument_ids = self.get_value_from_kwargs(kwargs, "instrument_ids")
+        # instrument_ids = self.get_value_from_kwargs(kwargs, "instrument_ids")
         start_time = self.get_value_from_kwargs(kwargs, "start_time")
         end_time = self.get_value_from_kwargs(kwargs, "end_time")
         #
         assert catalog_path is not None, "Catalog path must be provided"
-        assert instrument_ids is not None, "Instrument IDs must be provided"
+        instruments_ids = list(instruments_config.keys())
+        assert instruments_ids is not None, "Instrument IDs must be provided"
 
-        # instruments = get_instruments_in_catalog(
-        #     # This is more convinient but due to the Catalog V2 changes coming soon i decided to refrain from
-        #     # using this custom function
-        #     catalog_path=catalog_path, instrument_ids=instrument_ids, as_nautilus=True, return_catalog=False)
         from nautilus_trader.data.engine import ParquetDataCatalog
         catalog = ParquetDataCatalog(catalog_path)
-        instruments = catalog.instruments(as_nautilus=True, instrument_ids=instrument_ids) \
-            if instrument_ids is not None else catalog.instruments(as_nautilus=True)
+        instruments = catalog.instruments(as_nautilus=True, instrument_ids=instruments_ids) \
+            if instruments_ids is not None else catalog.instruments(as_nautilus=True)
+
+
+        if len(instruments) == 0:
+            print("No selected instruments found in catalog")
+            exit()
+
+        if len(instruments) != len(instruments_ids):
+            print("Instruments not found in catalog:")
+            print(set(instruments_ids) - set([instrument.id.value for instrument in instruments]))
+
+        # Lets assure all instruments required are added to the catalog and contain the required data based on the
+        # start and end time provided
+
+
+
+
+
+        print(instruments)
+        exit()
         #
-        for instrument in instruments:
+        for instrument, trade_size, bar_type in instruments_config.values():
+            # assert instruments in instrument_ids, f"{instrument} not in {instrument_ids}"
             # Add instruments
             self.node.add_instrument(instrument)  # adds an instrument to engine and venue and cache
 
             data_config = BacktestDataConfig(  # TODO: this can be a list of BacktestDataConfigs instead of just one
                 catalog_path=catalog_path,
                 data_cls=QuoteTick,
-                instrument_id=str(instrument.id),
+                # instrument_id=str(instrument.id),
+                instrument_id=instrument,
                 start_time=dt_to_unix_nanos(start_time),
                 end_time=dt_to_unix_nanos(end_time),
             )
 
             # # TODO refactor to handle ImportableStrategyConfig
+            # Configure your strategy
             strategy_config = MarketVolatilityCatcherConfig(
-                # strategy_id=f"{str(instrument.id)}-VolatilityMarketMaker",
-                instrument_id=str(instrument.id),
-                external_order_claims=[str(instrument.id)],
-                bar_type=f"{instrument.id}-1-MINUTE-MID-INTERNAL",
+                strategy_id=instrument,
+                instrument_id=instrument,
+                external_order_claims=[instrument],
+                bar_type=f"{instrument}-{bar_type}",
                 atr_period=7,
                 atr_multiple=0.5,
-                # trade_size=Decimal(0.001),
-                trade_size=Decimal(10000),
-
+                trade_size=trade_size,
             )
+
             # VolatilityMarketMaker(config=VolatilityMarketMakerConfig(
             #     strategy_id=instrument.id.value,
             #     instrument_id=instrument.id.value,
@@ -297,7 +320,7 @@ class GenieBacktestNode(PipeLine):
         exec_algorithm = kwargs.get("exec_algorithm", self.exec_algorithm or self._defaults["exec_algorithm"])
 
         # Add execution algorithm
-        engine.add_exec_algorithm(exec_algorithm)
+        self.node.add_exec_algorithm(exec_algorithm)
 
     def run(self):
         # Stop and dispose of the node with SIGINT/CTRL+C
@@ -326,6 +349,12 @@ class GenieLiveNode(PipeLine):
     def __init__(self, **kwargs):
         self.node = None
 
+        # Get Environmental Variables
+        from Modules.Misc.misc import load_dot_env
+
+        # Loads BINANCE_FUTURES_TESTNET_API_SECRET and BINANCE_FUTURES_TESTNET_API_KEY among other values
+        load_dot_env(env_file="/home/ruben/PycharmProjects/Genie-Trader/.env")
+
     def configure_node(self):
         """
         Environment contexts
@@ -334,30 +363,37 @@ class GenieLiveNode(PipeLine):
             Live - Real-time data with live venues (paper trading or real accounts)
         """
         '''Fill Component Configurations'''
+
+        from os import environ
+
+        api_key = environ.get("BINANCE_FUTURES_TESTNET_API_KEY") or environ.get("BINANCE_API_KEY")
+        api_secret = environ.get("BINANCE_FUTURES_TESTNET_API_SECRET") or environ.get("BINANCE_API_SECRET")
+
         # Data
         data_clients = {
             "BINANCE": BinanceDataClientConfig(
-                # api_key=None,  # "YOUR_BINANCE_TESTNET_API_KEY"
-                # api_secret=None,  # "YOUR_BINANCE_TESTNET_API_SECRET"
-                # account_type=BinanceAccountType.USDT_FUTURE,
-                account_type=BinanceAccountType.SPOT,
+                api_key=api_key,
+                api_secret=api_secret,
+                account_type=BinanceAccountType.USDT_FUTURE,
+                # account_type=BinanceAccountType.SPOT,
                 base_url_http=None,  # Override with custom endpoint
                 base_url_ws=None,  # Override with custom endpoint
-                us=True,  # If client is for Binance US
-                testnet=False,  # If client uses the testnet
+                us=False,  # If client is for Binance US
+                testnet=True,  # If client uses the testnet
                 instrument_provider=InstrumentProviderConfig(load_all=True),
             ),
         }
         # Execution
         exec_clients = {
             "BINANCE": BinanceExecClientConfig(
-                # api_key=None,  # "YOUR_BINANCE_TESTNET_API_KEY"
-                # api_secret=None,  # "YOUR_BINANCE_TESTNET_API_SECRET"
-                account_type=BinanceAccountType.SPOT,
+                api_key=api_key,
+                api_secret=api_secret,
+                # account_type=BinanceAccountType.SPOT,
+                account_type=BinanceAccountType.USDT_FUTURE,
                 base_url_http=None,  # Override with custom endpoint
                 base_url_ws=None,  # Override with custom endpoint
-                us=True,  # If client is for Binance US
-                testnet=False,  # If client uses the testnet
+                us=False,  # If client is for Binance US
+                testnet=True,  # If client uses the testnet
                 instrument_provider=InstrumentProviderConfig(load_all=True),
             ),
         }
@@ -368,6 +404,7 @@ class GenieLiveNode(PipeLine):
             instance_id=None,
             cache=None,
             cache_database=CacheDatabaseConfig(type="in-memory"),
+            # cache_database=CacheDatabaseConfig(type="redis", host="localhost", port=6378,flush_on_start=False),
             data_engine=LiveDataEngineConfig(
                 time_bars_build_with_no_updates=True,
                 time_bars_timestamp_on_close=True,
@@ -386,7 +423,6 @@ class GenieLiveNode(PipeLine):
             exec_engine=LiveExecEngineConfig(
                 load_cache=True,
                 allow_cash_positions=True,
-                filter_unclaimed_external_orders=False,
                 debug=False,
                 reconciliation=True,
                 reconciliation_lookback_mins=None,
@@ -419,24 +455,15 @@ class GenieLiveNode(PipeLine):
         assert self.node is not None, "Node must be built first"
 
         # Register your client factories with the node (can take user defined factories)
-        from nautilus_trader.adapters.binance.factories import BinanceLiveDataClientFactory
+        from Modules.Nodes.Integrations.mexc.factories import BinanceLiveDataClientFactory
         self.node.add_data_client_factory("BINANCE", BinanceLiveDataClientFactory)
-        from nautilus_trader.adapters.binance.factories import BinanceLiveExecClientFactory
+        from Modules.Nodes.Integrations.mexc.factories import BinanceLiveExecClientFactory
         self.node.add_exec_client_factory("BINANCE", BinanceLiveExecClientFactory)
 
-    def set_up_data(self, **kwargs):
-        # Instruments to trade
-        INSTRUMENTS_TEMP_DICT = dict(
-            # BTCUSDT_PERP_BINANCE=["BTCUSDT-PERP.BINANCE", Decimal(str(0.001 * 5)), "1-MINUTE-LAST-EXTERNAL"],
-            # BTCUSDT_PERP_BINANCE=["BTCUSDT.BINANCE", Decimal(str(0.002)), "1-MINUTE-LAST-EXTERNAL"],
-            # BTCUSDT_PERP_BINANCE=["BTCUSDT-PERP.BINANCE", Decimal(str(0.001 * 5)), "5-SECOND-MID-INTERNAL"],
-            # ETHUSDT_PERP_BINANCE=["ETHUSDT-PERP.BINANCE", Decimal(str(0.003 * 5)), "5-SECOND-MID-INTERNAL"],
-            # BCHUSDT_PERP_BINANCE=["BCHUSDT-PERP.BINANCE", Decimal(str(0.053 * 3)), "5-TICK-LAST-INTERNAL"],
-            # LTCUSDT_PERP_BINANCE=["LTCUSDT-PERP.BINANCE", Decimal(str(0.068 * 3)), "5-TICK-LAST-INTERNAL"],
-        )
+    def set_up_data(self, instruments_config, **kwargs):
 
         # Add your strategies to the node
-        for instrument, trade_size, bar_type in INSTRUMENTS_TEMP_DICT.values():
+        for instrument, trade_size, bar_type in instruments_config.values():
             # Configure your strategy
             strat_config = MarketVolatilityCatcherConfig(
                 strategy_id=instrument,
@@ -457,7 +484,8 @@ class GenieLiveNode(PipeLine):
         exec_algorithm = TWAPExecAlgorithm()
 
         # Add execution algorithm
-        engine.add_exec_algorithm(exec_algorithm)
+        # engine.add_exec_algorithm(exec_algorithm)
+        self.node.trader.add_exec_algorithm(exec_algorithm)
 
     def run(self):
         try:
@@ -501,21 +529,11 @@ if __name__ == "__main__":
 
     # FIXME This is a very hard coded example, need to make it more flexible. The goal of this script is to work on the Genie Trader project
     VENUE_NAME = "SIM"
-    INSTRUMENT_IDS = [
-        # "AUDUSD.SIM",
-                      # "EURUSD.SIM",
-                      # "GBPUSD.SIM",
-                      # "NZDUSD.SIM",
-                      # "USDCAD.SIM",
-                      "USDCHF.SIM",
-                      # "USDJPY.SIM",
-
-                      ]  # only for backtesting right now. todos already on their way
     START_TIME = pd.Timestamp("2021-01-07-00:00:00", tz="UTC")
     END_TIME = pd.Timestamp("2021-01-07-09:00:00", tz="UTC")
     CATALOG_PATH = "/home/ruben/PycharmProjects/Genie-Trader/Data/tick_data_catalog"
-    NODE_TYPE = "BACKTESTING"
-    # NODE_TYPE = "TRADING"
+    # NODE_TYPE = "BACKTESTING"
+    NODE_TYPE = "TRADING"
 
     # Set Environment Variables
     # Loads BINANCE_FUTURES_TESTNET_API_SECRET and BINANCE_FUTURES_TESTNET_API_KEY among other values
@@ -536,7 +554,7 @@ if __name__ == "__main__":
                                    modules=None,
                                    fill_model=None,
                                    latency_model=None,
-                                   book_type=BookType.L1_TBBO,
+                                   # book_type=BookType.L1_TBBO,
                                    routing=False,
                                    frozen_account=False,
                                    bar_execution=True,
@@ -546,7 +564,7 @@ if __name__ == "__main__":
 
                                    # TODO: '''Data Settings'''
                                    catalog_path=CATALOG_PATH,
-                                   instrument_ids=INSTRUMENT_IDS,
+                                   # instrument_ids=INSTRUMENT_IDS,
                                    start_time=START_TIME,
                                    end_time=END_TIME,
 
@@ -562,9 +580,22 @@ if __name__ == "__main__":
     # TODO: should be able to use live data in paper trading, should be able to download data or use the catalog
     #  data or of course download and insert data
     #  in catalog
-    pipe.set_up_data()
+    pipe.set_up_data(
+        instruments_config=dict(
+            # Instruments to trade
+            BTCUSDT_PERP_BINANCE=["BTCUSDT-PERP.BINANCE", Decimal(str(0.001 * 5)), "1-MINUTE-LAST-EXTERNAL"],
+            ETHUSDT_PERP_BINANCE=["ETHUSDT-PERP.BINANCE", Decimal(str(0.003 * 10)), "1-MINUTE-LAST-EXTERNAL"],
+            BCHUSDT_PERP_BINANCE=["BCHUSDT-PERP.BINANCE", Decimal(str(0.053 * 6)), "1-MINUTE-LAST-EXTERNAL"],
+            LTCUSDT_PERP_BINANCE=["LTCUSDT-PERP.BINANCE", Decimal(str(0.068 * 6)), "1-MINUTE-LAST-EXTERNAL"],
+        #
+            # BTCUSDT_PERP_BINANCE=["BTCUSDT-PERP.BINANCE", Decimal(str(0.001 * 5)), "1-SECOND-MID-INTERNAL"],
+            # ETHUSDT_PERP_BINANCE=["ETHUSDT-PERP.BINANCE", Decimal(str(0.003 * 10)), "1-SECOND-MID-INTERNAL"],
+            # BCHUSDT_PERP_BINANCE=["BCHUSDT-PERP.BINANCE", Decimal(str(0.053 * 6)), "1-SECOND-MID-INTERNAL"],
+            # LTCUSDT_PERP_BINANCE=["LTCUSDT-PERP.BINANCE", Decimal(str(0.068 * 6)), "1-SECOND-MID-INTERNAL"],
+        ))
+
     "Configure your execution algorithm"
-    # pipe.set_up_execution_engine()
+    pipe.set_up_execution_engine()
 
     """Run Node"""  # TODO: please remember we still need to figure out the node vs engine handling and abilities
     pipe.run()

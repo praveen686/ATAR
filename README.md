@@ -2,7 +2,7 @@
 
 # Genie-Trader
 
-(In Progress - Not all features are available, these are targets and guides for contributors. To be updated as the project develops)
+(In Progress - Personal Project Not all features are available, these are targets and guides for contributors. To be updated as the project develops)
 
 
 Welcome to the Genie Trader GitHub repository! Here you'll discover our innovative algorithmic and statistical modeling
