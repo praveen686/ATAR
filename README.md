@@ -9,7 +9,7 @@ Welcome to the Genie Trader GitHub repository! Here you'll discover our innovati
 platform designed for traders. Genie Trader is a microservice system that expertly manages intricate processes, creating
 a seamless and self-consistent environment.
 
-In its early stages, our platform is currently focused on providing modular code that allows experienced developers and
+😂In all seriousness, in its early stages, our platform is focusing on providing modular code that allows experienced developers and
 traders to create customized pipelines. As the project evolves, we plan to expand and incorporate scalable cloud-based
 solutions and end-to-end integration with various APIs.
 
