@@ -1,12 +1,12 @@
 ![RubenTheCuban_Genie-Trader_Algorythm_88b23a91-05f8-4a3f-bbfa-65e9681c87f8_2_20.png](static%2FRubenTheCuban_Genie-Trader_Algorythm_88b23a91-05f8-4a3f-bbfa-65e9681c87f8_2_20.png)
 
-# Genie-Trader
+# Advanced Trading Analytics Research Program (ATAR)  
 
 (In Progress - Personal Project Not all features are available, these are targets and guides for contributors. To be updated as the project develops)
 
 
-Welcome to the Genie Trader GitHub repository! Here you'll discover our innovative algorithmic and statistical modeling
-platform designed for traders. Genie Trader is a microservice system that expertly manages intricate processes, creating
+Welcome to the ATAR GitHub repository! Here you'll discover our innovative algorithmic and statistical modeling
+platform designed for traders. ATAR is a microservice system that expertly manages intricate processes, creating
 a seamless and self-consistent environment.
 
 😂In all seriousness, in its early stages, our platform is focusing on providing modular code that allows experienced developers and
@@ -32,7 +32,7 @@ the pip installation in [all] and [**DEP] format* Some will not be directly used
 
 ## [Microservices](MICROSERVICES_BEST_PRACTICES.md)
 
-We are working in transitioning the current codebase into a microservice architecture, thus keep modularity in mind even
+We are working on transitioning the current codebase into a microservice architecture, thus keeping modularity in mind even
 if not directly contributing to the microservices. The microservices maintenance will be the primary focus of the repo
 in the future. The current codebase is a bit of a mess and will be cleaned up as the microservices are developed. By no means am I referring to only the current definition of microservices (lambdas/cloud-run/etc...); just old-fashioned modular environments with loosely coupled components and a message bus or CLI will suffice.
 
@@ -44,7 +44,7 @@ in the future. The current codebase is a bit of a mess and will be cleaned up as
 
 [Dockerize_and_Deploy_Python.md](..%2FAIOrg%2FPrompts%2FDockerize_and_Deploy_Python.md)
 
-### CodeGens, Clients and API's Creation
+### CodeGens, Clients, and API's Creation
 
 #### [SAM CLI](https://aws.amazon.com/serverless/sam/)
 
