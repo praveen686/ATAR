@@ -34,7 +34,7 @@ the pip installation in [all] and [**DEP] format* Some will not be directly used
 
 We are working in transitioning the current codebase into a microservice architecture, thus keep modularity in mind even
 if not directly contributing to the microservices. The microservices maintenance will be the primary focus of the repo
-in the future. The current codebase is a bit of a mess and will be cleaned up as the microservices are developed.
+in the future. The current codebase is a bit of a mess and will be cleaned up as the microservices are developed. By no means am I referring to only the current definition of microservices (lambdas/cloud-run/etc...); just old-fashioned modular environments with loosely coupled components and a message bus or CLI will suffice.
 
 ![ezgif.com-video-to-gif.gif](static%2Fezgif.com-video-to-gif.gif)
 
@@ -57,8 +57,8 @@ SAM CLI provides a Lambda-like execution environment that lets you locally build
 
 #### [OpenAPI Specification Initiative](https://github.com/OAI/OpenAPI-Specification.git)
 
-[OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator.git) allows generation of API client libraries (
-SDK generation), server stubs, documentation and configuration automatically given
+[OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator.git) allows the generation of API client libraries (
+SDK generation), server stubs, documentation, and configuration automatically given
 an [OpenAPI Spec](https://github.com/OAI/OpenAPI-Specification) (both 2.0 and 3.0 are supported). Currently, the
 following languages/frameworks are supported:
 
