@@ -2,7 +2,7 @@
 
 # Advanced Trading Analytics Research Program (ATAR)  
 
-(In Progress - Personal Project and Notes! Not all features are available, these are targets and guides for contributors. To be updated as the project develops based on interests and other client work)
+(In Progress - Personal Project and Notes! Not all features are available, these are targets and guides for contributors. To be updated as the project develops based on interests and other client work. Come back later if this is too early of a stage, clear expectations create great partnerships! )
 
 
 Welcome to the ATAR GitHub repository! Here you'll discover our innovative algorithmic and statistical modeling
@@ -23,7 +23,7 @@ lot of code has been written, it is a soup of concepts and the modules that exis
 codebase for a large event-driven program; through the continuous expansion of loosely coupled components/microservices/modules while incorporating good CI/CD practices and automating most tasks along
 the way. Including deployment, maintenance, corrections, and security. The topic is trading but only because it is a complex system to study (check), can help us fund this and other projects (check), my last 3 years of paid development 
 hours have consisted of mostly FX, Commodities, and Crypto and thus through this project I am able to expand beyond the simple client requests while reusing the none licenced components (check - this is why is so broken up, I only started from the test scripts
-and documentation saved over the years ...  you try looking back at code you wrote while learning a domain 😂)
+and documentation saved over the years ...  you try looking back at code you wrote while learning a domain 😂) Come back later if this is too early of a stage, clear expectations is what makes for a great partnerships! 
 
 [TEMPORARY_GUIDE_TO_EARLY_STAGE_CONTRIBUTIONS.md](TEMPORARY_GUIDE_TO_EARLY_STAGE_CONTRIBUTIONS.md)
 
