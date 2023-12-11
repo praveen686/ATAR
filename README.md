@@ -25,12 +25,61 @@ the way. Including deployment, maintenance, corrections, and security. The topic
 hours have consisted of mostly FX, Commodities, and Crypto and thus through this project I am able to expand beyond the simple client requests while reusing the none licenced components (check - this is why is so broken up, I only started from the test scripts
 and documentation saved over the years ...  you try looking back at code you wrote while learning a domain 😂) Come back later if this is too early of a stage, clear expectations is what makes for a great partnerships! 
 
+1. Consolidate all scattered code from different branches and repositories.
+2. Ensure consistent coding standards and practices across the entire codebase.
+3. Design and implement a microservices architecture that enables modularity, flexibility, and scalability.
+4. Identify and address potential security vulnerabilities within each service.
+
 [TEMPORARY_GUIDE_TO_EARLY_STAGE_CONTRIBUTIONS.md](TEMPORARY_GUIDE_TO_EARLY_STAGE_CONTRIBUTIONS.md)
 
 [USED_LIBRARIES_EXPLAINED.md](USED_LIBRARIES_EXPLAINED.md) (In Progress)
 
 *note: Links to submodules are currently being displayed in the [USED_LIBRARIES_EXPLAINED.md](USED_LIBRARIES_EXPLAINED.md) and will soon be included in
 the pip installation in [all] and [**DEP] format* Some will not be directly used in this codebase and might be part of a submodule that is used e.g. OpenAI, HuggingFace, etc. are used in ContentAdvisor; and may be moved to their respective repos as the codebase is converted into microservices.
+
+## [Control Theory in Algorithmic Trading]()
+
+### Introduction to Control Theory in Trading Systems
+
+Control theory, a fundamental aspect of designing autonomous systems, is increasingly relevant in the development of sophisticated algorithmic trading strategies. In the context of trading, control theory provides a mathematical framework for managing the dynamic nature of financial markets, optimizing trade execution, and mitigating risks. It enhances the ability to adapt to market changes, manage risks, and improve the overall efficiency of trading operations. As the ATAR project evolves, integrating control theory principles can significantly contribute to the development of robust, adaptive, and high-performing trading algorithms.
+
+### Dynamical Systems in Trading
+
+In trading, a dynamical system can be understood as the financial market, influenced by various external inputs. These inputs include:
+
+- **Control Inputs (U):** Intentional actions such as buy or sell orders.
+- **Disturbances (D):** Unintentional factors like market news, sudden economic changes, or geopolitical events.
+
+The state of the market (X) is constantly evolving due to these inputs and the internal dynamics of the market.
+
+### Open-Loop Control: Feedforward in Trading
+
+In an open-loop or feedforward control system within trading, strategies are executed based on predictive models without real-time feedback. This approach requires a deep understanding of market dynamics and often involves historical data analysis and predictive modeling. However, its effectiveness is limited in rapidly changing market conditions where real-time adjustments are crucial.
+
+### Closed-Loop Control: Feedback in Trading
+
+Feedback or closed-loop control is vital in trading systems to adapt to real-time market changes. This approach involves:
+
+- **Monitoring Market State:** Continuously tracking market conditions and the performance of the trading strategy.
+- **Adjusting Strategies:** Modifying trading actions based on the deviation between the desired outcome (e.g., profit targets) and the actual market performance.
+
+### Control Strategies in Trading
+
+Various control strategies can be applied in algorithmic trading, such as:
+
+- **PID Controllers:** Adjusting trade positions based on proportional, integral, and derivative terms of the market state error.
+- **Adaptive Control:** Dynamically adjusting strategies based on changing market conditions.
+- **Robust Control:** Ensuring strategy performance under uncertain and volatile market conditions.
+- **Predictive Control:** Using predictive models to anticipate market movements and adjust strategies accordingly.
+
+### Planning and State Estimation
+
+- **Planning:** In trading, this involves setting up trading goals, risk management rules, and identifying potential market opportunities.
+- **State Estimation:** Utilizing techniques like statistical analysis and machine learning to estimate and predict market states.
+
+### System Analysis and Testing
+
+Before deployment, trading strategies developed using control theory principles must undergo rigorous backtesting, simulation, and analysis. Tools like statistical analysis software, backtesting platforms, and risk assessment models are crucial in this phase.
 
 ## [Microservices](MICROSERVICES_BEST_PRACTICES.md)
 
@@ -48,15 +97,6 @@ in the future. The current codebase is a bit of a mess and will be cleaned up as
 
 ### CodeGens, Clients, and API's Creation
 
-#### [SAM CLI](https://aws.amazon.com/serverless/sam/)
-
-The AWS Serverless Application Model (SAM) is an open-source framework for building serverless applications. It provides
-shorthand syntax to express functions, APIs, databases, and event source mappings. With just a few lines per resource,
-you can define the application you want and model it using YAML. During deployment, SAM transforms and expands the SAM
-syntax into AWS CloudFormation syntax, enabling you to build serverless applications faster.
-
-SAM CLI provides a Lambda-like execution environment that lets you locally build, test, and debug applications defined by SAM templates or through the AWS Cloud Development Kit (CDK). You can also use the SAM CLI to deploy your applications to AWS, or create secure continuous integration and deployment (CI/CD) pipelines that follow best practices and integrate with AWS' native and third party CI/CD systems.
-
 #### [OpenAPI Specification Initiative](https://github.com/OAI/OpenAPI-Specification.git)
 
 [OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator.git) allows the generation of API client libraries (
@@ -72,52 +112,35 @@ following languages/frameworks are supported:
 | **App_Configuration files**          | [**Apache2**](https://httpd.apache.org/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | **Others**                       | **GraphQL**, **JMeter**, **Ktorm**, **MySQL Schema**, **Protocol Buffer**, **WSDL**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
-## [Data](https://drive.google.com/drive/folders/1ygWAEfmfqn2sWLKxw7ahPg0XzTZXVtVK?usp=share_link)
 
-The data is currently stored in the data folder but will move towards database storage.
-
-The data outside the subdirectories contain example data with 1 minute periods to get you started. However, the
-subdirectories contain typically tick data, which is the most accurate data for backtesting; whether it will serve you
-during your training process will depend heavily on your target labeled feature and resources available. The data is
-stored in the following format:
-
-## Project Focus: Code Integration, Review, and Optimization with Microservices Architecture
-
-### Integration and Review
-
-In the early stages of the project, our primary focus is to integrate and review the existing codebase to create a
-cutting-edge algorithmic trading platform using a microservices' architecture. We will:
-
-1. Consolidate all scattered code from different branches and repositories.
-2. Ensure consistent coding standards and practices across the entire codebase.
-3. Design and implement a microservices architecture that enables modularity, flexibility, and scalability.
-4. Identify and address potential security vulnerabilities within each service.
-
-### Optimization with Microservices
-
-Identify the different functionalities and services provided by your code.
-Group related functionalities into separate microservices, keeping in mind the principles of loose coupling and high
-cohesion.
-
-#### Design your microservices:
+#### AWS Example
 
 Define clear interfaces and APgenI contracts for each service.
 Determine the data storage requirements for each service and decide whether to use a shared database or a separate
-database per service.
+database per service. 
 
-#### Choose AWS services for deployment and management:
+##### [SAM CLI](https://aws.amazon.com/serverless/sam/)
+
+The AWS Serverless Application Model (SAM) is an open-source framework for building serverless applications. It provides
+shorthand syntax to express functions, APIs, databases, and event source mappings. With just a few lines per resource,
+you can define the application you want and model it using YAML. During deployment, SAM transforms and expands the SAM
+syntax into AWS CloudFormation syntax, enabling you to build serverless applications faster.
+
+SAM CLI provides a Lambda-like execution environment that lets you locally build, test, and debug applications defined by SAM templates or through the AWS Cloud Development Kit (CDK). You can also use the SAM CLI to deploy your applications to AWS, or create secure continuous integration and deployment (CI/CD) pipelines that follow best practices and integrate with AWS' native and third party CI/CD systems.
+
+##### Choose AWS services for deployment and management:
 
 AWS Elastic Container Service (ECS) or Elastic Kubernetes Service (EKS) for container orchestration.
 AWS Lambda for serverless, event-driven functions.
 API Gateway to manage and expose your APIs securely.
 Amazon RDS, DynamoDB, or other AWS database services for data storage.
 
-#### Set up CI/CD pipelines:
+##### Set up CI/CD pipelines:
 
 AWS CodePipeline, CodeBuild, and CodeDeploy to automate the build, test, and deployment process for each
 microservice.
 
-#### Implement monitoring and logging:
+##### Implement monitoring and logging:
 
 Amazon CloudWatch for monitoring and logging.
 Set up alarms and notifications to alert you when there are issues with your services.
@@ -127,15 +150,17 @@ Set up alarms and notifications to alert you when there are issues with your ser
 Secure your microservices with proper authentication and authorization using Amazon Cognito or a custom solution.
 Use AWS Identity and Access Management (IAM)
 
-### Collaboration and Communication
 
-We encourage active collaboration among team members through:
 
-1. Shared communication channels. (In Progress)
-2. Regular virtual meetings to discuss progress, challenges, and opportunities for improvement.
-3. Utilizing a project management tools for task tracking and prioritization.
-4. Creating and maintaining comprehensive documentation to support onboarding and knowledge sharing, including
-   documentation for each microservice. 
+## [Data](https://drive.google.com/drive/folders/1ygWAEfmfqn2sWLKxw7ahPg0XzTZXVtVK?usp=share_link)
+
+The data is currently stored in the data folder but will move towards database storage.
+
+The data outside the subdirectories contain example data with 1 minute periods to get you started. However, the
+subdirectories contain typically tick data, which is the most accurate data for backtesting; whether it will serve you
+during your training process will depend heavily on your target labeled feature and resources available. The data is
+stored in the following format:
+
 
 [CONTRIBUTING.md](CONTRIBUTING.md) (Set Up In Progress)\
 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)\
