@@ -1,0 +1,13 @@
+"""
+Classes derived from Portfolio Optimisation module
+"""
+from Modules.research_tools.portfolio_optimization.clustering.herc import HierarchicalEqualRiskContribution
+from Modules.research_tools.portfolio_optimization.clustering.hrp import HierarchicalRiskParity
+from Modules.research_tools.portfolio_optimization.clustering.nco import NestedClusteredOptimization
+from Modules.research_tools.portfolio_optimization.estimators.returns_estimators import ReturnsEstimators
+from Modules.research_tools.portfolio_optimization.estimators.risk_estimators import RiskEstimators
+from Modules.research_tools.portfolio_optimization.estimators.tic import TheoryImpliedCorrelation
+from Modules.research_tools.portfolio_optimization.modern_portfolio_theory.cla import CriticalLineAlgorithm
+from Modules.research_tools.portfolio_optimization.modern_portfolio_theory.mean_variance import \
+    MeanVarianceOptimisation
+from Modules.research_tools.portfolio_optimization.utils.risk_metrics import RiskMetrics
