@@ -215,7 +215,7 @@ if __name__ == "__main__":
     )
 
     LOAD_DATA_PARAMS = dict(
-        csv_file_path="../../Data/sample_triple_barrier_labeled_data.csv",
+        csv_file_path="/home/ruben/PycharmProjects/Genie-Trader/dev_studies_workdir/tbml_output/AAPL_1min_sample_tbml_data.csv",
         # csv_file_path="../../Data/example_triple_barrier_labeled_data_short_duration.csv",
     )
     genie_loader = Genie_Loader()

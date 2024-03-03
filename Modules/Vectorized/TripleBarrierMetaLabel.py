@@ -52,8 +52,13 @@ from Modules.research_tools.labeling_algorythms import labeling
 from Modules.research_tools.labeling_algorythms.filters import cusum_filter
 from Modules.research_tools.labeling_algorythms.trend_scanning import trend_scanning_labels
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+print(f'{vbt.__version__ = }')
+logger.info(f'logger{vbt.__version__ = }')
 
 def dataframe_to_series_list(input_dataframe: pd.DataFrame):
     return [s for _, s in input_dataframe.items()]
@@ -104,7 +109,9 @@ def volatility_triple_barrier_label_example(
 
     '''Primary Model'''
     # Combine the side series with the close series
-    side_labeled_ohlcv_data = pd.concat([close_series, side_series], axis=1, keys=['close', 'side'])
+    side_labeled_ohlcv_data = pd.concat(
+        [open_series, high_series, low_series, close_series, volume_series, side_series],
+        axis=1, keys=['open', 'high', 'low', 'close', 'volume', 'side'])
 
     assert side_labeled_ohlcv_data.index.equals(close_series.index)
 
@@ -158,6 +165,8 @@ def volatility_triple_barrier_label_example(
     raw_data.dropna(axis=0, how='any', inplace=True)
     raw_data['side'] = raw_data['side'].astype(int)
 
+    # Nicely/properly introduce back the open,high,low, volume
+
     # Change raw_data side name to direction
     raw_data.rename(columns={'side': 'direction'}, inplace=True)
 
@@ -166,8 +175,11 @@ def volatility_triple_barrier_label_example(
     returning_df = pd.concat([raw_data, labels], axis=1).fillna(0)
 
     # Add the first row since they were removed in the beginning after the lagging. Include dates
-    first_row = {'close': close_series[0], 'direction': side_series[0], 'ret': 0, 'target_ret': 0, 'meta_target': 0,
-                 'prim_target': 0}
+    first_row = {
+        'open': open_series.iloc[0], 'high': high_series.iloc[0], 'low': low_series.iloc[0],
+        'close': close_series.iloc[0],
+        'volume': volume_series.iloc[0], 'direction': side_series.iloc[0], 'ret': 0, 'target_ret': 0, 'meta_target': 0,
+        'prim_target': 0}
     first_row = pd.DataFrame(first_row, index=[close_series.index[0]])
     returning_df = pd.concat([first_row, returning_df], axis=0)  # if memory is an issue switch to dask or loop-append
 
@@ -182,17 +194,22 @@ def volatility_triple_barrier_label_example(
     unique_values = returning_df[["direction", "prim_target", "meta_target"]].apply(lambda x: x.unique())
     logger.info("Unique Values")
     logger.info(unique_values)
+    # Lets show the counts of the unique values
+    unique_values = returning_df[["direction", "prim_target", "meta_target"]].apply(lambda x: x.value_counts())
+    logger.info("Value Counts")
+    logger.info(unique_values)
+
 
     return returning_df
 
 
-def save_output_data(output_data, output_file_dir, output_file_name, output_file_type):
+def save_output_data(output_data, output_file_dir, output_file_name, output_file_type, index=True):
     if isinstance(output_file_type, list):
         # This will be a self recursive function
         # assert all the elements in the list are strings
         assert all([isinstance(file_type, str) for file_type in output_file_type])
         for file_type in output_file_type:
-            save_output_data(output_data, output_file_dir, output_file_name, file_type)
+            save_output_data(output_data, output_file_dir, output_file_name, file_type, index)
         return
 
     # If output_file_dir does not exist, create it
@@ -202,7 +219,7 @@ def save_output_data(output_data, output_file_dir, output_file_name, output_file
         os.makedirs(output_file_dir)
 
     if "csv" in output_file_type:
-        output_data.to_csv(f"{output_file_dir}/{output_file_name}.csv")
+        output_data.to_csv(f"{output_file_dir}/{output_file_name}.csv", index=index)
     if "pkl" in output_file_type:
         output_data.to_pickle(f"{output_file_dir}/{output_file_name}.pkl")
     if "vbt" in output_file_type:
@@ -232,18 +249,6 @@ def compute_features_from_vbt_data(vbt_data):
     return features
 
 
-# @vbt.parameterized(
-#     # merge_func="column_stack",
-#     # n_chunks=np.floor(param_combinations.shape[pd.Series0]/4).astype(int),
-#     chunk_len='auto',
-#     show_progress=True,
-#
-#     # engine='ray', init_kwargs={
-#     #     # 'address': 'auto',
-#     #     'num_cpus': cpu_count() - 2,
-#     # },
-#     # i dont want the product of the paramets, i want [i], [i], [i]
-# )
 def flexible_tbm_labeling(
         open_series: pd.Series or vbt.Param,
         high_series: pd.Series or vbt.Param,
@@ -251,6 +256,7 @@ def flexible_tbm_labeling(
         close_series: pd.Series or vbt.Param,
         volume_series: pd.Series or vbt.Param,
         instrument_name: str or vbt.Param, **tbl_kwargs: dict):
+    print(f'{close_series = }')
     side_series = trend_scanning_labels(price_series=close_series, t_events=close_series.index,
                                         look_forward_window=20,
                                         min_sample_length=5, step=1)["bin"]
@@ -264,21 +270,26 @@ def flexible_tbm_labeling(
         close_series=close_series,
         volume_series=volume_series,
         side_series=side_series, **tbl_kwargs)
-    print(f'{triple_barrier_labeled_data = }')
+
 
     if triple_barrier_labeled_data is None:
         logging.warning("flexible_tbm_labeling returning a None value, most likely no CUSUM events were found")
         return None
 
+    triple_barrier_labeled_data.reset_index(inplace=True)
+    triple_barrier_labeled_data.rename(columns={"index": "datetime"}, inplace=True)
+    print(f'{triple_barrier_labeled_data = }')
+
     if tbl_kwargs.get('save_output', False):
         # Save individual data
-        instrument_output_file_dir = f'{instrument_name}_{tbl_kwargs.get("output_file_name", None)}'
+        instrument_output_file_dir = f'{instrument_name}_{tbl_kwargs.get("output_file_name_tail", None)}'
         logging.info(f"Saving {instrument_name} data individually to {instrument_output_file_dir}")
         save_output_data(triple_barrier_labeled_data,
                          output_file_dir=tbl_kwargs.get('output_file_dir', None),
                          # output_file_name=tbl_kwargs.get('output_file_name', None),
                          output_file_name=instrument_output_file_dir,
-                         output_file_type=tbl_kwargs.get('output_file_type', None))
+                         output_file_type=tbl_kwargs.get('output_file_type', None),
+                         index=False)
 
     return triple_barrier_labeled_data
 
@@ -352,6 +363,12 @@ def TBM_labeling(
     # todo refactor to a function
     import itertools
 
+    open_data  =pd.DataFrame(symbols_data_obj.open).dropna()
+    high_data  =pd.DataFrame(symbols_data_obj.high).dropna()
+    low_data  =pd.DataFrame(symbols_data_obj.low).dropna()
+    close_data  =pd.DataFrame(symbols_data_obj.close).dropna()
+    volume_data  =pd.DataFrame(symbols_data_obj.volume).dropna()
+
     # add open high low volume
     param_configs = list(itertools.starmap(
         lambda o, h, l, c, v, i: {'open_series': o,
@@ -361,11 +378,18 @@ def TBM_labeling(
                                   'volume_series': v,
                                   'instrument_name': i},
         itertools.zip_longest(
-            dataframe_to_series_list(pd.DataFrame(symbols_data_obj.open)),
-            dataframe_to_series_list(pd.DataFrame(symbols_data_obj.high)),
-            dataframe_to_series_list(pd.DataFrame(symbols_data_obj.low)),
-            dataframe_to_series_list(pd.DataFrame(symbols_data_obj.close)),
-            dataframe_to_series_list(pd.DataFrame(symbols_data_obj.volume)),
+            # dataframe_to_series_list(pd.DataFrame(symbols_data_obj.open)),
+            # dataframe_to_series_list(pd.DataFrame(symbols_data_obj.high)),
+            # dataframe_to_series_list(pd.DataFrame(symbols_data_obj.low)),
+            # dataframe_to_series_list(pd.DataFrame(symbols_data_obj.close)),
+            # dataframe_to_series_list(pd.DataFrame(symbols_data_obj.volume)),
+
+            dataframe_to_series_list(pd.DataFrame(open_data)),
+            dataframe_to_series_list(pd.DataFrame(high_data)),
+            dataframe_to_series_list(pd.DataFrame(low_data)),
+            dataframe_to_series_list(pd.DataFrame(close_data)),
+            dataframe_to_series_list(pd.DataFrame(volume_data)),
+
             symbols_data_obj.symbols)
     ))
 
@@ -432,19 +456,28 @@ if __name__ == "__main__":
     #   Change to working with dask or vectorbt dataframes for better execution with larger datasets and more assets
 
     # TODO: I need to integrate into data labeling pipeline, both Vectorized/Distributed and for real-time execution
-    WORKING_DIRECTORY = '/home/ruben/PycharmProjects/Genie-Trader'
-    ROOT_DATA_DIR = f"{WORKING_DIRECTORY}/Data/raw_data/Forex/Majors/Minute"
+    WORKING_DIRECTORY = '/home/ruben/PycharmProjects/Genie-Trader/dev_studies_workdir'
+    # ROOT_DATA_DIR = f"{WORKING_DIRECTORY}/Data/raw_data/Forex/Majors/Minute"
+    ROOT_DATA_DIR = f"{WORKING_DIRECTORY}/../Data/raw_data/"
     # gET ALL DIRECTORIES RECURSIVELY
     DATA_FILE_DIRS = glob.glob(f"{ROOT_DATA_DIR}/**", recursive=True)
     print(DATA_FILE_DIRS)
 
     DATA_FILE_NAMES = [
-        "XAUUSD_GMT+0_NO-DST_M1.csv",
+        # "XAUUSD_GMT+0_NO-DST_M1.csv",
         # "US_Brent_Crude_Oil_GMT+0_NO-DST_M1.csv",
+        'AAPL_1min_sample.csv',
+        'BTC_1min_sample.csv',
+        'ES_1min_sample.csv',
+        'MSFT_1min_sample.csv',
+        'QQQ_1min_sample.csv',
+        'SPY_1min_sample.csv'
     ]
-    OUTPUT_FILE_DIR = f"{WORKING_DIRECTORY}/dev_studies_workdir"
-    OUTPUT_FILE_NAME = "tbml_data"
+    OUTPUT_FILE_DIR = f"{WORKING_DIRECTORY}/tbml_output"
+    OUTPUT_FILE_NAME_TAIL = "tbml_data"
 
+    N_ROWS = 10000
+    DATA_IDENTIFIER = 'M1_SampleData'
     INPUT_DATA_PARAMS = dict(
         # todo this will be changed as needed for the endpoint to save the data e.g. S3-bucket
         # todo maybe i would like to also allow for data to be loaded from an exchange api
@@ -453,24 +486,25 @@ if __name__ == "__main__":
         rename_columns={"Open": "open", "High": "high", "Low": "low", "Close": "close", "Tick volume": "volume"},
         scheduler='threads',
         first_or_last='first',
-        # n_rows=10000,
-        pickle_file_path=f"{WORKING_DIRECTORY}/data_temp.pkl",  # if exists, then load from pickle file instead, else will create it
+        n_rows=N_ROWS,
+        pickle_file_path=f"{WORKING_DIRECTORY}/{DATA_IDENTIFIER}_{N_ROWS}_data_temp.pkl",
+        # if exists, then load from pickle file instead, else will create it
     )
     TBL_PARAMS = dict(
         pt_sl=[1, 1],
-        min_ret=0.0001,  # todo allow user to pass a str of a function to be applied to the data to calculate this
+        min_ret=0.00001,  # todo allow user to pass a str of a function to be applied to the data to calculate this
         num_threads=28,
         #
         #  Number of D/H/m/s to add for vertical barrier
         vertical_barrier_num_days=0,
         vertical_barrier_num_hours=0,
-        vertical_barrier_num_minutes=5,
+        vertical_barrier_num_minutes=0,
         vertical_barrier_num_seconds=0,
     )
     OUTPUT_DATA_PARAMS = dict(
         # todo this will be changed as needed for the endpoint to save the data e.g. S3-bucket
         output_file_dir=OUTPUT_FILE_DIR,
-        output_file_name=OUTPUT_FILE_NAME,
+        output_file_name_tail=OUTPUT_FILE_NAME_TAIL,
         save_output=True,
         output_file_type=[
             "csv",
